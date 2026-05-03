@@ -111,7 +111,7 @@ export default async function BienesPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {properties.map((property) => (
+                  {properties.map((property: any) => (
                     <tr key={property.id} className="border-b border-gray-50 dark:border-slate-700/50 hover:bg-gray-50 dark:hover:bg-slate-700/30">
                       <td className="py-4">
                         <p className="font-medium text-black dark:text-white">{property.name}</p>
