@@ -117,8 +117,19 @@ export default function ComprasPage() {
       const result = reader.result as string
       // Remover el prefijo data URL
       const base64 = result.split(',')[1]
+      console.log('Base64 length:', base64?.length)
+      console.log('MimeType:', file.type)
       setImagePreview(result)
-      processImage(base64, file.type)
+      if (base64) {
+        processImage(base64, file.type)
+      } else {
+        setError('Error al procesar la imagen')
+        setStep('upload')
+      }
+    }
+    reader.onerror = () => {
+      setError('Error al leer el archivo')
+      setStep('upload')
     }
     reader.readAsDataURL(file)
   }
