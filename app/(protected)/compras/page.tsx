@@ -70,6 +70,13 @@ export default function ComprasPage() {
         video: { facingMode: 'environment' } 
       })
       console.log('Camera stream obtained:', mediaStream.id)
+      
+      // Assign stream to video
+      if (videoRef.current) {
+        videoRef.current.srcObject = mediaStream
+        console.log('Stream assigned to video')
+      }
+      
       setStream(mediaStream)
       setCameraActive(true)
       setError(null)
