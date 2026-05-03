@@ -19,7 +19,7 @@ export default async function ClientesPage() {
 
       {/* Stats */}
       <div className="grid gap-6 md:grid-cols-2">
-        <Card className="rounded-lg border-none bg-gradient-to-br from-primary/10 to-primary/5 shadow-sm overflow-hidden relative group">
+        <Card className="rounded-lg border-none bg-linear-to-br from-primary/10 to-primary/5 shadow-sm overflow-hidden relative group">
           <div className="absolute -right-4 -top-4 w-24 h-24 bg-primary/10 rounded-full blur-2xl group-hover:bg-primary/20 transition-all" />
           <CardContent className="p-8">
             <div className="flex items-center gap-4">
@@ -34,7 +34,7 @@ export default async function ClientesPage() {
           </CardContent>
         </Card>
 
-        <Card className="rounded-lg border-none bg-gradient-to-br from-emerald-500/10 to-emerald-500/5 shadow-sm overflow-hidden relative group">
+        <Card className="rounded-lg border-none bg-linear-to-br from-emerald-500/10 to-emerald-500/5 shadow-sm overflow-hidden relative group">
           <div className="absolute -right-4 -top-4 w-24 h-24 bg-emerald-500/10 rounded-full blur-2xl group-hover:bg-emerald-500/20 transition-all" />
           <CardContent className="p-8">
             <div className="flex items-center gap-4">

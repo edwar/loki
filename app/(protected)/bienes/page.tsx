@@ -1,18 +1,10 @@
 import { prisma } from '@/lib/prisma'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
-} from '@/components/ui/select'
 import { formatCurrency } from '@/lib/utils'
-import { Building2, Plus, X } from 'lucide-react'
+import { Building2 } from 'lucide-react'
 import { DeleteButton } from './delete-button'
 import { ModalWrapper } from './modal-wrapper'
+import { NewPropertySection } from '@/components/new-property-section'
 
 export const dynamic = 'force-dynamic'
 
@@ -31,7 +23,7 @@ async function getProperties() {
     where: { deletedAt: null },
     orderBy: { createdAt: 'desc' }
   })
-  
+
   // Serialize properties to avoid "Decimal objects are not supported" error
   return properties.map(p => ({
     ...p,
@@ -45,7 +37,7 @@ async function getProperties() {
 
 export default async function BienesPage() {
   const properties = await getProperties()
-  
+
   const totalValue = properties.reduce((sum, p) => sum + p.currentValue, 0)
   const propertyCount = properties.length
 
@@ -57,96 +49,96 @@ export default async function BienesPage() {
         <h1 className="text-3xl font-bold text-black dark:text-white tracking-tight">Bienes</h1>
         <p className="text-gray-500 dark:text-slate-400">Gestiona los activos de tu empresa</p>
       </div>
-
       {/* Stats */}
-      <div className="grid gap-4 md:grid-cols-3">
-        <Card className="bg-white dark:bg-slate-800 rounded-md p-6">
-          <CardContent className="p-0">
-            <div className="flex items-center justify-between">
+      <div className="grid gap-6 md:grid-cols-2">
+        <Card className="rounded-lg border-none bg-linear-to-br from-primary/10 to-primary/5 shadow-sm overflow-hidden relative group">
+          <div className="absolute -right-4 -top-4 w-24 h-24 bg-primary/10 rounded-full blur-2xl group-hover:bg-primary/20 transition-all" />
+          <CardContent className="p-8">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-lg bg-primary flex items-center justify-center shadow-lg shadow-primary/20">
+                <Building2 className="w-6 h-6 text-white" />
+              </div>
               <div>
-                <p className="text-xs font-medium text-gray-400 dark:text-slate-500 uppercase">Total Bienes</p>
-                <p className="text-3xl font-bold text-black dark:text-white mt-1">{propertyCount}</p>
-              </div>
-              <div className="w-12 h-12 rounded-md bg-gray-100 dark:bg-slate-700 flex items-center justify-center">
-                <Building2 className="w-6 h-6 text-gray-500 dark:text-slate-400" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card className="bg-white dark:bg-slate-800 rounded-md p-6">
-          <CardContent className="p-0">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs font-medium text-gray-400 dark:text-slate-500 uppercase">Valor Total</p>
-                <p className="text-3xl font-bold text-black dark:text-white mt-1">{formatCurrency(totalValue)}</p>
-              </div>
-              <div className="w-12 h-12 rounded-md bg-emerald-50 dark:bg-emerald-900/20 flex items-center justify-center">
-                <span className="text-2xl">$</span>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-primary">Total Bienes</p>
+                <p className="text-3xl font-extrabold">{propertyCount}</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-white dark:bg-slate-800 rounded-md p-6">
-          <CardContent className="p-0 flex items-center justify-center h-full">
-            <ModalWrapper />
+        <Card className="rounded-lg border-none bg-linear-to-br from-emerald-500/10 to-emerald-500/5 shadow-sm overflow-hidden relative group">
+          <div className="absolute -right-4 -top-4 w-24 h-24 bg-emerald-500/10 rounded-full blur-2xl group-hover:bg-emerald-500/20 transition-all" />
+          <CardContent className="p-8">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-lg bg-emerald-300 flex items-center justify-center shadow-lg shadow-emerald-500/20">
+                <span className="text-2xl text-white">$</span>
+              </div>
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-600">Valor Total</p>
+                <p className="text-3xl font-extrabold">{formatCurrency(totalValue)}</p>
+              </div>
+            </div>
           </CardContent>
         </Card>
       </div>
 
+      {/* New Property Section */}
+      <NewPropertySection />
+
       {/* Properties Table */}
-      <Card className="bg-white dark:bg-slate-800 rounded-md p-6">
-        <CardHeader className="px-0 pt-0">
-          <CardTitle className="text-lg font-semibold text-black dark:text-white">Lista de Bienes</CardTitle>
+      <Card className="rounded-lg border-border/40 bg-card/30 backdrop-blur-md overflow-hidden p-0">
+        <CardHeader className="px-8 py-6 mb-0 flex flex-row items-center justify-between border-b border-border/30 bg-primary/5">
+          <CardTitle className="text-xl">Lista de Bienes</CardTitle>
         </CardHeader>
-        <CardContent className="px-0">
+        <CardContent className="p-0 overflow-x-auto">
           {properties.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12 text-center">
-              <Building2 className="w-12 h-12 text-gray-300 dark:text-slate-600 mb-3" />
-              <p className="text-gray-400 dark:text-slate-500">No hay bienes registrados</p>
+            <div className="flex flex-col items-center justify-center py-20 text-center">
+              <Building2 className="w-16 h-16 text-gray-300 dark:text-slate-600 mb-4 opacity-50" />
+              <p className="text-muted-foreground font-medium">No hay bienes registrados</p>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-gray-100 dark:border-slate-700">
-                    <th className="text-left text-xs font-semibold text-gray-400 dark:text-slate-500 uppercase py-3">Nombre</th>
-                    <th className="text-left text-xs font-semibold text-gray-400 dark:text-slate-500 uppercase py-3">Tipo</th>
-                    <th className="text-left text-xs font-semibold text-gray-400 dark:text-slate-500 uppercase py-3">Dirección</th>
-                    <th className="text-right text-xs font-semibold text-gray-400 dark:text-slate-500 uppercase py-3">Valor Compra</th>
-                    <th className="text-right text-xs font-semibold text-gray-400 dark:text-slate-500 uppercase py-3">Valor Actual</th>
-                    <th className="text-center text-xs font-semibold text-gray-400 dark:text-slate-500 uppercase py-3">Acciones</th>
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-border/30 bg-accent/5">
+                  <th className="text-left text-[10px] font-bold text-muted-foreground uppercase tracking-widest px-8 py-4">Nombre</th>
+                  <th className="text-left text-[10px] font-bold text-muted-foreground uppercase tracking-widest px-4 py-4">Tipo</th>
+                  <th className="text-left text-[10px] font-bold text-muted-foreground uppercase tracking-widest px-4 py-4">Dirección</th>
+                  <th className="text-right text-[10px] font-bold text-muted-foreground uppercase tracking-widest px-4 py-4">Valor Compra</th>
+                  <th className="text-right text-[10px] font-bold text-muted-foreground uppercase tracking-widest px-4 py-4">Valor Actual</th>
+                  <th className="text-right text-[10px] font-bold text-muted-foreground uppercase tracking-widest px-8 py-4">Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                {properties.map((property: any) => (
+                  <tr key={property.id} className="border-b border-border/10 hover:bg-accent/30 transition-colors group">
+                    <td className="px-8 py-4">
+                      <p className="font-bold text-lg text-foreground">{property.name}</p>
+                      {property.description && (
+                        <p className="text-xs text-muted-foreground mt-0.5 truncate max-w-[200px]">{property.description}</p>
+                      )}
+                    </td>
+                    <td className="px-4 py-4">
+                      <span className="inline-flex items-center px-3 py-1 bg-accent/50 text-muted-foreground rounded-lg text-xs font-bold uppercase tracking-tighter">
+                        {typeLabel(property.type)}
+                      </span>
+                    </td>
+                    <td className="px-4 py-4 text-sm text-muted-foreground">{property.address || '-'}</td>
+                    <td className="px-4 py-4 text-right text-sm text-muted-foreground">{formatCurrency(Number(property.purchaseValue))}</td>
+                    <td className="px-4 py-4 text-right">
+                      <span className="text-lg font-bold text-primary">
+                        {formatCurrency(Number(property.currentValue))}
+                      </span>
+                    </td>
+                    <td className="px-8 py-4">
+                      <div className="flex items-center justify-end gap-2">
+                        <ModalWrapper property={property} />
+                        <DeleteButton id={property.id} />
+                      </div>
+                    </td>
                   </tr>
-                </thead>
-                <tbody>
-                  {properties.map((property: any) => (
-                    <tr key={property.id} className="border-b border-gray-50 dark:border-slate-700/50 hover:bg-gray-50 dark:hover:bg-slate-700/30">
-                      <td className="py-4">
-                        <p className="font-medium text-black dark:text-white">{property.name}</p>
-                        {property.description && (
-                          <p className="text-xs text-gray-400 dark:text-slate-500 mt-0.5">{property.description}</p>
-                        )}
-                      </td>
-                      <td className="py-4">
-                        <span className="inline-flex items-center px-2.5 py-1 rounded-md-full text-xs font-medium bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-slate-300">
-                          {typeLabel(property.type)}
-                        </span>
-                      </td>
-                      <td className="py-4 text-gray-600 dark:text-slate-300">{property.address || '-'}</td>
-                      <td className="py-4 text-right text-gray-600 dark:text-slate-300">{formatCurrency(Number(property.purchaseValue))}</td>
-                      <td className="py-4 text-right font-medium text-black dark:text-white">{formatCurrency(Number(property.currentValue))}</td>
-                      <td className="py-4">
-                        <div className="flex items-center justify-center gap-2">
-                          <ModalWrapper property={property} />
-                          <DeleteButton id={property.id} />
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                ))}
+              </tbody>
+            </table>
           )}
         </CardContent>
       </Card>

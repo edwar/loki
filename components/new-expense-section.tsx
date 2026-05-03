@@ -10,8 +10,8 @@ export function NewExpenseSection() {
   const [isOpen, setIsOpen] = useState(false)
 
   return (
-    <Card className="rounded-lg border-rose-500/20 bg-rose-500/[0.02] overflow-hidden transition-all duration-500 group p-0">
-      <CardHeader 
+    <Card className="rounded-lg border-rose-500/20 bg-rose-500/2 overflow-hidden transition-all duration-500 group p-0">
+      <CardHeader
         className={`px-4 py-4 mb-0 cursor-pointer hover:bg-rose-500/5 transition-colors ${isOpen ? 'border-b border-rose-500/10' : ''}`}
         onClick={() => setIsOpen(!isOpen)}
       >
@@ -33,7 +33,7 @@ export function NewExpenseSection() {
           </Button>
         </div>
       </CardHeader>
-      
+
       {isOpen && (
         <CardContent className="px-4 py-6 animate-in fade-in slide-in-from-top-1 duration-300">
           <ExpenseForm expense={null} onSuccess={() => setIsOpen(false)} />

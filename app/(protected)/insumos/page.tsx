@@ -2,7 +2,7 @@ import { getSupplies } from '@/lib/actions/supplies'
 import { getSuppliers } from '@/lib/actions/suppliers'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { formatCurrency, cn } from '@/lib/utils'
-import { Package, Plus, Search, TrendingUp, AlertCircle } from 'lucide-react'
+import { Package, TrendingUp, AlertCircle } from 'lucide-react'
 import { NewSupplySection } from '@/components/new-supply-section'
 import { SupplyTable } from '@/components/supply-table'
 
@@ -35,7 +35,7 @@ export default async function InsumosPage() {
 
       {/* Stats */}
       <div className="grid gap-6 md:grid-cols-3">
-        <Card className="rounded-lg border-none bg-gradient-to-br from-primary/10 to-primary/5 shadow-sm overflow-hidden relative group">
+        <Card className="rounded-lg border-none bg-linear-to-br from-primary/10 to-primary/5 shadow-sm overflow-hidden relative group">
           <div className="absolute -right-4 -top-4 w-24 h-24 bg-primary/10 rounded-full blur-2xl group-hover:bg-primary/20 transition-all" />
           <CardContent className="p-8">
             <div className="flex items-center gap-4">
@@ -50,7 +50,7 @@ export default async function InsumosPage() {
           </CardContent>
         </Card>
 
-        <Card className="rounded-lg border-none bg-gradient-to-br from-violet-500/10 to-violet-500/5 shadow-sm overflow-hidden relative group">
+        <Card className="rounded-lg border-none bg-linear-to-br from-violet-500/10 to-violet-500/5 shadow-sm overflow-hidden relative group">
           <div className="absolute -right-4 -top-4 w-24 h-24 bg-violet-500/10 rounded-full blur-2xl group-hover:bg-violet-500/20 transition-all" />
           <CardContent className="p-8">
             <div className="flex items-center gap-4">

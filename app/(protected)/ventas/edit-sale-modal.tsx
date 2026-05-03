@@ -40,16 +40,16 @@ export function EditSaleModal({ sale, products, customers }: EditSaleModalProps)
       </Button>
 
       {createPortal(
-        <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4">
-          <div 
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300" 
-            onClick={() => setIsOpen(false)} 
+        <div className="fixed inset-0 z-10000 flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300"
+            onClick={() => setIsOpen(false)}
           />
-          
-          <div className="relative w-full max-w-2xl bg-white dark:bg-slate-900 rounded-[2.5rem] shadow-2xl overflow-hidden border border-border/10 animate-in zoom-in-95 duration-200">
-            <div className="p-10">
+
+          <div className="relative w-full max-w-2xl bg-card rounded-lg shadow-2xl overflow-hidden border border-border/10 animate-in zoom-in-95 duration-200">
+            <div className="p-8">
               <div className="flex items-center gap-4 mb-8">
-                <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary">
+                <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
                   <Edit2 size={24} />
                 </div>
                 <div>
@@ -58,17 +58,17 @@ export function EditSaleModal({ sale, products, customers }: EditSaleModalProps)
                 </div>
               </div>
 
-              <SaleForm 
-                products={products} 
-                customers={customers} 
-                sale={sale} 
+              <SaleForm
+                products={products}
+                customers={customers}
+                sale={sale}
                 onSuccess={() => setIsOpen(false)}
               />
             </div>
 
             <button
               onClick={() => setIsOpen(false)}
-              className="absolute top-8 right-8 p-3 rounded-2xl bg-muted/50 hover:bg-muted transition-colors"
+              className="absolute top-6 right-6 p-2 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
             >
               <X className="w-5 h-5 text-muted-foreground" />
             </button>

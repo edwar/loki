@@ -64,9 +64,9 @@ export function ConfirmationModal({
         onClick={onClose} 
       />
       
-      <div className="relative w-full max-w-sm bg-white dark:bg-slate-900 rounded-[2rem] shadow-2xl overflow-hidden border border-border/10 animate-in zoom-in-95 duration-200">
+      <div className="relative w-full max-w-sm bg-card rounded-lg shadow-2xl overflow-hidden border border-border/10 animate-in zoom-in-95 duration-200">
         <div className="p-8 flex flex-col items-center text-center">
-          <div className={cn("w-20 h-20 rounded-2xl flex items-center justify-center mb-6 shadow-inner", iconStyles[variant])}>
+          <div className={cn("w-16 h-16 rounded-lg flex items-center justify-center mb-6 shadow-inner", iconStyles[variant])}>
             <AlertTriangle className="w-10 h-10" />
           </div>
           
@@ -79,7 +79,7 @@ export function ConfirmationModal({
             <Button
               onClick={onConfirm}
               disabled={loading}
-              className={cn("h-14 font-bold rounded-2xl shadow-lg transition-all active:scale-95", variantStyles[variant])}
+              className={cn("h-12 font-bold rounded-lg shadow-lg transition-all active:scale-95", variantStyles[variant])}
             >
               {loading ? 'Procesando...' : confirmText}
             </Button>
@@ -87,7 +87,7 @@ export function ConfirmationModal({
               variant="ghost"
               onClick={onClose}
               disabled={loading}
-              className="h-14 font-bold rounded-2xl text-muted-foreground hover:bg-muted"
+              className="h-12 font-bold rounded-lg text-muted-foreground hover:bg-muted"
             >
               {cancelText}
             </Button>
@@ -96,7 +96,7 @@ export function ConfirmationModal({
 
         <button
           onClick={onClose}
-          className="absolute top-6 right-6 p-2 rounded-xl bg-muted/50 hover:bg-muted transition-colors"
+          className="absolute top-4 right-4 p-2 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
         >
           <X className="w-4 h-4 text-muted-foreground" />
         </button>

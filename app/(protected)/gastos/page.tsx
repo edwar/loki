@@ -1,7 +1,7 @@
 import { getExpenses } from '@/lib/actions/expenses'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { formatCurrency } from '@/lib/utils'
-import { Plus, Wallet, TrendingDown, Calendar, Receipt } from 'lucide-react'
+import { TrendingDown, Receipt } from 'lucide-react'
 import { NewExpenseSection } from '@/components/new-expense-section'
 import { ExpenseTable } from '@/components/expense-table'
 
@@ -29,7 +29,7 @@ export default async function GastosPage() {
 
       {/* Stats */}
       <div className="grid gap-6 md:grid-cols-2">
-        <Card className="rounded-lg border-none bg-gradient-to-br from-rose-500/10 to-rose-500/5 shadow-sm overflow-hidden relative group">
+        <Card className="rounded-lg border-none bg-linear-to-br from-rose-500/10 to-rose-500/5 shadow-sm overflow-hidden relative group">
           <div className="absolute -right-4 -top-4 w-24 h-24 bg-rose-500/10 rounded-full blur-2xl group-hover:bg-rose-500/20 transition-all" />
           <CardContent className="p-8">
             <div className="flex items-center gap-4">
@@ -44,7 +44,7 @@ export default async function GastosPage() {
           </CardContent>
         </Card>
 
-        <Card className="rounded-lg border-none bg-gradient-to-br from-blue-500/10 to-blue-500/5 shadow-sm overflow-hidden relative group">
+        <Card className="rounded-lg border-none bg-linear-to-br from-blue-500/10 to-blue-500/5 shadow-sm overflow-hidden relative group">
           <div className="absolute -right-4 -top-4 w-24 h-24 bg-blue-500/10 rounded-full blur-2xl group-hover:bg-blue-500/20 transition-all" />
           <CardContent className="p-8">
             <div className="flex items-center gap-4">
