@@ -47,7 +47,7 @@ Reglas:
         'X-Title': 'Loki'
       },
       body: JSON.stringify({
-        model: 'google/gemini-2.0-flash-exp',
+        model: 'meta-llama/llama-3.2-11b-vision-instruct',
         messages: [
           {
             role: 'user',
