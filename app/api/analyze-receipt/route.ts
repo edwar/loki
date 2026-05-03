@@ -50,6 +50,10 @@ Reglas:
         model: 'meta-llama/llama-3.2-11b-vision-instruct',
         messages: [
           {
+            role: 'system',
+            content: 'Respondes ÚNICAMENTE con JSON válido. Sin texto adicional.'
+          },
+          {
             role: 'user',
             content: [
               { type: 'text', text: prompt },
@@ -73,19 +77,25 @@ Reglas:
     }
 
     const data = await response.json()
+    console.log('OpenRouter response:', JSON.stringify(data, null, 2))
     
     if (!data.choices || !data.choices[0]?.message?.content) {
       throw new Error('No se pudo procesar la imagen')
     }
 
     const jsonText = data.choices[0].message.content
+    console.log('Content:', jsonText)
     
-    const jsonMatch = jsonText.match(/\{[\s\S]*\}/)
-    if (!jsonMatch) {
-      throw new Error('No se encontró JSON en la respuesta')
+    let parsed
+    try {
+      parsed = JSON.parse(jsonText)
+    } catch {
+      const jsonMatch = jsonText.match(/\{[\s\S]*\}/)
+      if (!jsonMatch) {
+        throw new Error('No se encontró JSON en la respuesta: ' + jsonText.substring(0, 200))
+      }
+      parsed = JSON.parse(jsonMatch[0])
     }
-
-    const parsed = JSON.parse(jsonMatch[0])
     
     return NextResponse.json({
       nombreProveedor: parsed.nombreProveedor || 'Proveedor desconocido',
