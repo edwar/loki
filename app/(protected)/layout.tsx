@@ -17,7 +17,8 @@ import {
   ChefHat,
   LogOut,
   User,
-  Building2
+  Building2,
+  ShoppingCart
 } from 'lucide-react'
 import { useState } from 'react'
 import { ThemeToggle } from '@/components/theme-toggle'
@@ -28,6 +29,7 @@ const navigation = [
   { name: 'Productos', href: '/productos', icon: ShoppingBag },
   { name: 'Ventas', href: '/ventas', icon: TrendingUp },
   { name: 'Gastos', href: '/gastos', icon: Receipt },
+  { name: 'Compras', href: '/compras', icon: ShoppingCart },
   { name: 'Proveedores', href: '/proveedores', icon: Truck },
   { name: 'Clientes', href: '/clientes', icon: Users },
   { name: 'Bienes', href: '/bienes', icon: Building2 },
