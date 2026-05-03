@@ -66,12 +66,36 @@ export default function ComprasPage() {
   const startCamera = async () => {
     try {
       console.log('Starting camera...')
-      const mediaStream = await navigator.mediaDevices.getUserMedia({ 
-        video: { facingMode: 'environment' } 
-      })
+      
+      // Try different camera configurations
+      const configs = [
+        { facingMode: 'environment' },
+        { facingMode: 'user' },
+        { facingMode: { ideal: 'environment' } },
+        {}
+      ]
+      
+      let mediaStream = null
+      for (const config of configs) {
+        try {
+          mediaStream = await navigator.mediaDevices.getUserMedia({ 
+            video: config,
+            audio: false
+          })
+          console.log('Camera found with config:', config)
+          break
+        } catch (e) {
+          console.log('Config failed:', config, e)
+        }
+      }
+      
+      if (!mediaStream) {
+        // Last attempt - any video
+        mediaStream = await navigator.mediaDevices.getUserMedia({ video: true })
+      }
+      
       console.log('Camera stream obtained:', mediaStream.id)
       
-      // Assign stream to video
       if (videoRef.current) {
         videoRef.current.srcObject = mediaStream
         console.log('Stream assigned to video')
@@ -82,7 +106,7 @@ export default function ComprasPage() {
       setError(null)
     } catch (err) {
       console.error('Camera error:', err)
-      setError('No se pudo acceder a la cámara: ' + (err instanceof Error ? err.message : 'Unknown error'))
+      setError('No se pudo acceder a la cámara. Asegurate de estar usando HTTPS y tener permisos.')
     }
   }
 
