@@ -32,7 +32,7 @@ interface ExtractedItem {
   subtotal: number
 }
 
-const UNIDADES = ['unidad', 'gramo', 'kilogramo', 'litro', 'mililitro', 'libra', 'onza', 'pack', 'caja', 'bolsa']
+import { UNIDADES } from '@/lib/constants'
 
 interface ExtractedData {
   nombreProveedor: string
@@ -334,23 +334,23 @@ export default function ComprasPage() {
       {/* Step indicator */}
       <div className="flex w-full justify-center">
         <div className="flex w-full max-w-3xl justify-center items-center">
-          {(isManual 
+          {(isManual
             ? [
-                { step: 'review', num: '1', label: 'Registrar' },
-                { step: 'success', num: '2', label: 'Guardado' }
-              ]
+              { step: 'review', num: '1', label: 'Registrar' },
+              { step: 'success', num: '2', label: 'Guardado' }
+            ]
             : [
-                { step: 'upload', num: '1', label: 'Subir' },
-                { step: 'processing', num: '2', label: 'Procesando' },
-                { step: 'review', num: '3', label: 'Revisar' },
-                { step: 'success', num: '4', label: 'Guardado' }
-              ]
+              { step: 'upload', num: '1', label: 'Subir' },
+              { step: 'processing', num: '2', label: 'Procesando' },
+              { step: 'review', num: '3', label: 'Revisar' },
+              { step: 'success', num: '4', label: 'Guardado' }
+            ]
           ).map(({ step: s, num, label }, i, arr) => {
-            const isPast = isManual 
+            const isPast = isManual
               ? (s === 'review' && step === 'success')
               : ((s === 'upload' && ['processing', 'review', 'success'].includes(step)) ||
-                 (s === 'processing' && ['review', 'success'].includes(step)) ||
-                 (s === 'review' && step === 'success'))
+                (s === 'processing' && ['review', 'success'].includes(step)) ||
+                (s === 'review' && step === 'success'))
             const isCurrent = step === s
 
             const getBgColor = () => {
@@ -370,11 +370,10 @@ export default function ComprasPage() {
                   </span>
                 </div>
                 {i < arr.length - 1 && (
-                  <div className={`flex-1 h-0.5 mx-2 ${
-                    isManual
-                    ? (step === 'success' ? 'bg-emerald-500' : 'bg-gray-200 dark:bg-slate-700')
-                    : (['processing', 'review', 'success'].includes(step) && i < (step === 'processing' ? 0 : step === 'review' ? 1 : step === 'success' ? 2 : -1) ? 'bg-emerald-500' : 'bg-gray-200 dark:bg-slate-700')
-                  }`} />
+                  <div className={`flex-1 h-0.5 mx-2 ${isManual
+                      ? (step === 'success' ? 'bg-emerald-500' : 'bg-gray-200 dark:bg-slate-700')
+                      : (['processing', 'review', 'success'].includes(step) && i < (step === 'processing' ? 0 : step === 'review' ? 1 : step === 'success' ? 2 : -1) ? 'bg-emerald-500' : 'bg-gray-200 dark:bg-slate-700')
+                    }`} />
                 )}
               </div>
             )
@@ -678,7 +677,7 @@ export default function ComprasPage() {
                 <div className="flex justify-between items-center">
                   <div className="flex items-center gap-2">
                     <span className="text-gray-600 dark:text-slate-400">Descuento</span>
-                    <div className="flex items-center bg-gray-100 dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-0.5">
+                    <div className="flex items-center bg-gray-100 dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-0.5">
                       <button
                         onClick={() => handleDiscountChange(Math.max(0, extractedData.descuentoPorcentaje - 1))}
                         className="w-7 h-7 flex items-center justify-center hover:bg-white dark:hover:bg-slate-700 rounded-lg transition-all active:scale-90 disabled:opacity-30"
@@ -710,7 +709,7 @@ export default function ComprasPage() {
                 <div className="flex justify-between items-center">
                   <div className="flex items-center gap-2">
                     <span className="text-gray-600 dark:text-slate-400">Impuesto/IVA</span>
-                    <div className="flex items-center bg-gray-100 dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-0.5">
+                    <div className="flex items-center bg-gray-100 dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-0.5">
                       <button
                         onClick={() => handleTaxChange(Math.max(0, extractedData.impuestoPorcentaje - 1))}
                         className="w-7 h-7 flex items-center justify-center hover:bg-white dark:hover:bg-slate-700 rounded-lg transition-all active:scale-90 disabled:opacity-30"

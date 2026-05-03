@@ -8,7 +8,7 @@ export function DeleteButton({ id }: { id: string }) {
 
   const handleDelete = async () => {
     if (!confirm('¿Estás seguro de eliminar este bien?')) return
-    
+
     try {
       await fetch(`/api/properties?id=${id}`, { method: 'DELETE' })
       router.refresh()
@@ -18,9 +18,9 @@ export function DeleteButton({ id }: { id: string }) {
   }
 
   return (
-    <button 
+    <button
       onClick={handleDelete}
-      className="p-2 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-xl transition-colors"
+      className="p-2 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-lg transition-colors"
     >
       <Trash2 className="w-4 h-4 text-rose-500" />
     </button>

@@ -1,116 +1,77 @@
-import { getCustomers, deleteCustomer } from '@/lib/actions/customers'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
+import { getCustomers } from '@/lib/actions/customers'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { createCustomer } from '@/lib/actions/customers'
-import { formatCurrency } from '@/lib/utils'
-import { Trash2, Phone, Mail, MapPin } from 'lucide-react'
+import { Plus, Users, UserPlus, Target } from 'lucide-react'
+import { CustomerForm } from '@/components/customer-forms'
+import { CustomerTable } from '@/components/customer-table'
 
 export const dynamic = 'force-dynamic'
-
-function CustomerForm() {
-  return (
-    <form action={createCustomer} className="space-y-4">
-      <div className="grid gap-4 md:grid-cols-2">
-        <div>
-          <label className="text-sm font-medium">Nombre</label>
-          <Input name="name" required className="mt-1" placeholder="Nombre del cliente" />
-        </div>
-        <div>
-          <label className="text-sm font-medium">Teléfono</label>
-          <Input name="phone" className="mt-1" placeholder="3001234567" />
-        </div>
-        <div>
-          <label className="text-sm font-medium">Email</label>
-          <Input name="email" type="email" className="mt-1" placeholder="cliente@email.com" />
-        </div>
-        <div>
-          <label className="text-sm font-medium">Dirección</label>
-          <Input name="address" className="mt-1" placeholder="Dirección" />
-        </div>
-      </div>
-      <Button type="submit">Crear Cliente</Button>
-    </form>
-  )
-}
 
 export default async function ClientesPage() {
   const customers = await getCustomers()
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-10 animate-fade-in">
+      {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-black dark:text-white tracking-tight">Clientes</h1>
-        <p className="text-gray-500 dark:text-slate-400">Gestiona tu base de clientes</p>
-        <p className="text-zinc-500">Gestiona tus clientes</p>
+        <h1 className="text-4xl font-extrabold tracking-tight font-display">Directorio de Clientes</h1>
+        <p className="text-muted-foreground font-medium mt-1">Administra tu base de datos y fideliza a tus compradores.</p>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Nuevo Cliente</CardTitle>
+      {/* Stats */}
+      <div className="grid gap-6 md:grid-cols-2">
+        <Card className="rounded-3xl border-none bg-gradient-to-br from-primary/10 to-primary/5 shadow-sm overflow-hidden relative group">
+          <div className="absolute -right-4 -top-4 w-24 h-24 bg-primary/10 rounded-full blur-2xl group-hover:bg-primary/20 transition-all" />
+          <CardContent className="p-8">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-2xl bg-primary flex items-center justify-center shadow-lg shadow-primary/20">
+                <Users className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-primary">Clientes Registrados</p>
+                <p className="text-3xl font-extrabold">{customers.length}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="rounded-3xl border-none bg-gradient-to-br from-emerald-500/10 to-emerald-500/5 shadow-sm overflow-hidden relative group">
+          <div className="absolute -right-4 -top-4 w-24 h-24 bg-emerald-500/10 rounded-full blur-2xl group-hover:bg-emerald-500/20 transition-all" />
+          <CardContent className="p-8">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-2xl bg-emerald-500 flex items-center justify-center shadow-lg shadow-emerald-500/20">
+                <Target className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-600">Clientes Activos</p>
+                <p className="text-3xl font-extrabold">{customers.filter(c => c._count.sales > 0).length}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* New Customer Form */}
+      <Card className="rounded-lg border-primary/20 bg-primary/[0.02]">
+        <CardHeader className="p-8 pb-0">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/20">
+              <UserPlus size={20} className="text-white" />
+            </div>
+            <CardTitle>Registrar Nuevo Cliente</CardTitle>
+          </div>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-8">
           <CustomerForm />
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Lista de Clientes</CardTitle>
+      {/* Table Section */}
+      <Card className="rounded-lg border-border/40 bg-card/30 backdrop-blur-md overflow-hidden">
+        <CardHeader className="p-8 pb-0 flex flex-row items-center justify-between">
+          <CardTitle className="text-2xl">Base de Clientes</CardTitle>
         </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Nombre</TableHead>
-                <TableHead>Contacto</TableHead>
-                <TableHead>Total Compras</TableHead>
-                <TableHead>Ventas</TableHead>
-                <TableHead>Acciones</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {customers.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={5} className="text-center text-zinc-500">
-                    No hay clientes registrados
-                  </TableCell>
-                </TableRow>
-              ) : (
-                customers.map((customer: any) => (
-                  <TableRow key={customer.id}>
-                    <TableCell className="font-medium">{customer.name}</TableCell>
-                    <TableCell>
-                      <div className="space-y-1">
-                        {customer.phone && (
-                          <div className="flex items-center gap-1 text-sm">
-                            <Phone size={14} className="text-zinc-400" />
-                            {customer.phone}
-                          </div>
-                        )}
-                        {customer.email && (
-                          <div className="flex items-center gap-1 text-sm">
-                            <Mail size={14} className="text-zinc-400" />
-                            {customer.email}
-                          </div>
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell>{formatCurrency(Number(customer.totalPurchases))}</TableCell>
-                    <TableCell>{customer._count.sales}</TableCell>
-                    <TableCell>
-                      <form action={deleteCustomer.bind(null, customer.id)}>
-                        <Button type="submit" variant="ghost" size="sm" className="text-red-600 hover:text-red-700">
-                          <Trash2 size={16} />
-                        </Button>
-                      </form>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
+        <CardContent className="p-8">
+          <CustomerTable customers={customers} />
         </CardContent>
       </Card>
     </div>

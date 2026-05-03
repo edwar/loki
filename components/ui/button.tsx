@@ -3,7 +3,7 @@ import { cn } from '@/lib/utils'
 
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'secondary' | 'ghost' | 'outline' | 'pill' | 'destructive'
-  size?: 'sm' | 'md' | 'lg'
+  size?: 'sm' | 'md' | 'lg' | 'icon'
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
@@ -16,7 +16,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       destructive: 'bg-destructive text-destructive-foreground shadow-lg shadow-destructive/20 hover:bg-destructive/90',
       pill: 'rounded-full font-bold uppercase tracking-widest text-[10px]',
     }
-    
+
     const sizes = {
       sm: 'h-9 px-4 text-xs',
       md: 'h-11 px-6 text-sm',
@@ -26,7 +26,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     return (
       <button
         className={cn(
-          'inline-flex items-center justify-center transition-all duration-300 font-bold active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed rounded-2xl',
+          'inline-flex items-center justify-center transition-all duration-300 font-bold active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg',
           variant === 'pill' ? 'rounded-full px-6' : '',
           variants[variant as keyof typeof variants],
           sizes[size as keyof typeof sizes],

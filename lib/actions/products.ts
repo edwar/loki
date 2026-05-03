@@ -38,8 +38,19 @@ export async function addRecipeItem(formData: FormData) {
   const quantityRequired = parseFloat(formData.get('quantityRequired') as string) || 0
   const unit = formData.get('unit') as string
 
-  await prisma.recipeItem.create({
-    data: {
+  await prisma.recipeItem.upsert({
+    where: {
+      productId_supplyId: {
+        productId,
+        supplyId,
+      }
+    },
+    update: {
+      quantityRequired,
+      unit,
+      deletedAt: null // In case it was previously deleted
+    },
+    create: {
       productId,
       supplyId,
       quantityRequired,

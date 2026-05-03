@@ -18,7 +18,7 @@
 ## Responsive User Card
 
 ```html
-<div class="max-w-sm mx-auto bg-white rounded-xl shadow-lg overflow-hidden sm:flex sm:max-w-2xl">
+<div class="max-w-sm mx-auto bg-white rounded-lg shadow-lg overflow-hidden sm:flex sm:max-w-2xl">
   <img class="h-48 w-full object-cover sm:h-auto sm:w-48"
        src="profile.jpg"
        alt="Profile" />

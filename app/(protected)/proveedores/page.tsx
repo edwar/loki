@@ -1,119 +1,77 @@
-import { getSuppliers, deleteSupplier } from '@/lib/actions/suppliers'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
+import { getSuppliers } from '@/lib/actions/suppliers'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { createSupplier } from '@/lib/actions/suppliers'
-import { Trash2, Phone, Mail, MapPin } from 'lucide-react'
+import { Plus, Building2, Truck, Handshake } from 'lucide-react'
+import { SupplierForm } from '@/components/supplier-forms'
+import { SupplierTable } from '@/components/supplier-table'
 
 export const dynamic = 'force-dynamic'
-
-function SupplierForm() {
-  return (
-    <form action={createSupplier} className="space-y-4">
-      <div className="grid gap-4 md:grid-cols-2">
-        <div>
-          <label className="text-sm font-medium">Nombre</label>
-          <Input name="name" required className="mt-1" placeholder="Nombre del proveedor" />
-        </div>
-        <div>
-          <label className="text-sm font-medium">Teléfono</label>
-          <Input name="phone" className="mt-1" placeholder="3001234567" />
-        </div>
-        <div>
-          <label className="text-sm font-medium">Email</label>
-          <Input name="email" type="email" className="mt-1" placeholder="proveedor@email.com" />
-        </div>
-        <div>
-          <label className="text-sm font-medium">Dirección</label>
-          <Input name="address" className="mt-1" placeholder="Dirección" />
-        </div>
-      </div>
-      <Button type="submit">Crear Proveedor</Button>
-    </form>
-  )
-}
 
 export default async function ProveedoresPage() {
   const suppliers = await getSuppliers()
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-10 animate-fade-in">
+      {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-black dark:text-white tracking-tight">Proveedores</h1>
-        <p className="text-gray-500 dark:text-slate-400">Administra tus proveedores</p>
-        <p className="text-zinc-500">Gestiona tus proveedores</p>
+        <h1 className="text-4xl font-extrabold tracking-tight font-display">Red de Proveedores</h1>
+        <p className="text-muted-foreground font-medium mt-1">Gestiona tus fuentes de abastecimiento y relaciones comerciales.</p>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Nuevo Proveedor</CardTitle>
+      {/* Stats */}
+      <div className="grid gap-6 md:grid-cols-2">
+        <Card className="rounded-3xl border-none bg-gradient-to-br from-primary/10 to-primary/5 shadow-sm overflow-hidden relative group">
+          <div className="absolute -right-4 -top-4 w-24 h-24 bg-primary/10 rounded-full blur-2xl group-hover:bg-primary/20 transition-all" />
+          <CardContent className="p-8">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-2xl bg-primary flex items-center justify-center shadow-lg shadow-primary/20">
+                <Building2 className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-primary">Proveedores Registrados</p>
+                <p className="text-3xl font-extrabold">{suppliers.length}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="rounded-3xl border-none bg-gradient-to-br from-amber-500/10 to-amber-500/5 shadow-sm overflow-hidden relative group">
+          <div className="absolute -right-4 -top-4 w-24 h-24 bg-amber-500/10 rounded-full blur-2xl group-hover:bg-amber-500/20 transition-all" />
+          <CardContent className="p-8">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-2xl bg-amber-500 flex items-center justify-center shadow-lg shadow-amber-500/20">
+                <Handshake className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-amber-600">Aliados Comerciales</p>
+                <p className="text-3xl font-extrabold">{suppliers.filter(s => s._count.purchases > 0).length}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* New Supplier Form */}
+      <Card className="rounded-lg border-primary/20 bg-primary/[0.02]">
+        <CardHeader className="p-8 pb-0">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/20">
+              <Plus size={20} className="text-white" />
+            </div>
+            <CardTitle>Vincular Nuevo Proveedor</CardTitle>
+          </div>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-8">
           <SupplierForm />
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Lista de Proveedores</CardTitle>
+      {/* Table Section */}
+      <Card className="rounded-lg border-border/40 bg-card/30 backdrop-blur-md overflow-hidden">
+        <CardHeader className="p-8 pb-0 flex flex-row items-center justify-between">
+          <CardTitle className="text-2xl">Lista de Proveedores</CardTitle>
         </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Nombre</TableHead>
-                <TableHead>Contacto</TableHead>
-                <TableHead>Compras</TableHead>
-                <TableHead>Acciones</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {suppliers.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={4} className="text-center text-zinc-500">
-                    No hay proveedores registrados
-                  </TableCell>
-                </TableRow>
-              ) : (
-                suppliers.map((supplier: any) => (
-                  <TableRow key={supplier.id}>
-                    <TableCell className="font-medium">{supplier.name}</TableCell>
-                    <TableCell>
-                      <div className="space-y-1">
-                        {supplier.phone && (
-                          <div className="flex items-center gap-1 text-sm">
-                            <Phone size={14} className="text-zinc-400" />
-                            {supplier.phone}
-                          </div>
-                        )}
-                        {supplier.email && (
-                          <div className="flex items-center gap-1 text-sm">
-                            <Mail size={14} className="text-zinc-400" />
-                            {supplier.email}
-                          </div>
-                        )}
-                        {supplier.address && (
-                          <div className="flex items-center gap-1 text-sm">
-                            <MapPin size={14} className="text-zinc-400" />
-                            {supplier.address}
-                          </div>
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell>{supplier._count.purchases}</TableCell>
-                    <TableCell>
-                      <form action={deleteSupplier.bind(null, supplier.id)}>
-                        <Button type="submit" variant="ghost" size="sm" className="text-red-600 hover:text-red-700">
-                          <Trash2 size={16} />
-                        </Button>
-                      </form>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
+        <CardContent className="p-8">
+          <SupplierTable suppliers={suppliers} />
         </CardContent>
       </Card>
     </div>

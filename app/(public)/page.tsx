@@ -1,13 +1,13 @@
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { 
-  ChefHat, 
-  TrendingUp, 
-  Package, 
-  Receipt, 
-  Users, 
-  Truck, 
+import {
+  ChefHat,
+  TrendingUp,
+  Package,
+  Receipt,
+  Users,
+  Truck,
   BarChart3,
   Smartphone,
   Shield,
@@ -18,6 +18,7 @@ import {
 } from 'lucide-react'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
+import { ThemeToggle } from '@/components/theme-toggle'
 
 const features = [
   {
@@ -79,40 +80,44 @@ export default async function LandingPage() {
       <header className="fixed top-0 left-0 right-0 z-50 border-b border-border/50 bg-background/60 backdrop-blur-xl">
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
           <div className="flex items-center gap-3 group cursor-pointer">
-            <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/20 group-hover:scale-110 transition-transform">
+            <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center shadow-lg shadow-primary/20 group-hover:scale-110 transition-transform">
               <ChefHat size={22} className="text-primary-foreground" />
             </div>
-            <span className="text-2xl font-bold tracking-tight text-foreground">Loki</span>
+            <span className="text-2xl font-bold tracking-tight text-foreground font-display">Loki</span>
           </div>
-          
+
           <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-muted-foreground">
             <a href="#features" className="hover:text-foreground transition-colors">Funciones</a>
             <a href="#benefits" className="hover:text-foreground transition-colors">Beneficios</a>
             <a href="#pricing" className="hover:text-foreground transition-colors">Precios</a>
           </nav>
 
-          <div className="flex items-center gap-3">
-            {session ? (
-              <Link href="/dashboard">
-                <Button className="rounded-full px-6 shadow-md hover:shadow-lg transition-all active:scale-95">
-                  Ir al Dashboard
-                  <ChevronRight size={16} className="ml-1" />
-                </Button>
-              </Link>
-            ) : (
-              <>
-                <Link href="/login" className="hidden sm:block">
-                  <Button variant="ghost" className="rounded-full px-6 hover:bg-accent/50">
-                    Iniciar Sesión
-                  </Button>
-                </Link>
-                <Link href="/register">
+          <div className="flex items-center gap-6">
+            <div className="flex items-center gap-3">
+              <ThemeToggle />
+              <div className="h-6 w-px bg-border/50 hidden sm:block" />
+              {session ? (
+                <Link href="/dashboard">
                   <Button className="rounded-full px-6 shadow-md hover:shadow-lg transition-all active:scale-95">
-                    Comenzar Gratis
+                    Ir al Dashboard
+                    <ChevronRight size={16} className="ml-1" />
                   </Button>
                 </Link>
-              </>
-            )}
+              ) : (
+                <>
+                  <Link href="/login" className="hidden sm:block">
+                    <Button variant="ghost" className="rounded-full px-6 hover:bg-accent/50">
+                      Iniciar Sesión
+                    </Button>
+                  </Link>
+                  <Link href="/register">
+                    <Button className="rounded-full px-6 shadow-md hover:shadow-lg transition-all active:scale-95">
+                      Comenzar Gratis
+                    </Button>
+                  </Link>
+                </>
+              )}
+            </div>
           </div>
         </div>
       </header>
@@ -125,16 +130,16 @@ export default async function LandingPage() {
               <Zap size={14} className="fill-primary" />
               <span>Nueva versión 2.0 ya disponible</span>
             </div>
-            
+
             <h1 className="text-6xl md:text-8xl font-bold tracking-tight text-foreground animate-fade-in [animation-delay:200ms] font-display">
               Controla tu negocio
               <span className="block bg-gradient-to-r from-primary to-violet-500 bg-clip-text text-transparent pb-2">
                 con inteligencia real
               </span>
             </h1>
-            
+
             <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed animate-fade-in [animation-delay:400ms]">
-              La plataforma definitiva para emprendedores modernos. 
+              La plataforma definitiva para emprendedores modernos.
               Sincroniza ventas, inventario y finanzas en una interfaz diseñada para la eficiencia.
             </p>
 
@@ -166,9 +171,9 @@ export default async function LandingPage() {
               <div className="flex -space-x-3">
                 {[1, 2, 3, 4, 5].map((i) => (
                   <div key={i} className="w-10 h-10 rounded-full border-2 border-background bg-accent flex items-center justify-center overflow-hidden">
-                    <img 
-                      src={`https://i.pravatar.cc/100?u=${i}`} 
-                      alt="User" 
+                    <img
+                      src={`https://i.pravatar.cc/100?u=${i}`}
+                      alt="User"
                       className="w-full h-full object-cover"
                     />
                   </div>
@@ -193,13 +198,13 @@ export default async function LandingPage() {
 
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
               {features.map((feature, index) => (
-                <Card 
-                  key={feature.title} 
-                  className="group relative overflow-hidden border-border/50 bg-card/50 backdrop-blur-sm hover:border-primary/50 transition-all duration-500 hover:-translate-y-2 rounded-2xl"
+                <Card
+                  key={feature.title}
+                  className="group relative overflow-hidden border-border/50 bg-card/50 backdrop-blur-sm hover:border-primary/50 transition-all duration-500 hover:-translate-y-2 rounded-lg"
                 >
                   <div className={`absolute top-0 right-0 w-32 h-32 blur-3xl opacity-0 group-hover:opacity-20 transition-opacity ${feature.bg}`} />
                   <CardContent className="p-8 space-y-4">
-                    <div className={`w-14 h-14 rounded-2xl ${feature.bg} flex items-center justify-center group-hover:scale-110 transition-transform duration-500`}>
+                    <div className={`w-14 h-14 rounded-lg ${feature.bg} flex items-center justify-center group-hover:scale-110 transition-transform duration-500`}>
                       <feature.icon className={`h-7 w-7 ${feature.color}`} />
                     </div>
                     <h4 className="text-xl font-bold text-foreground group-hover:text-primary transition-colors">
@@ -222,7 +227,7 @@ export default async function LandingPage() {
         <section id="benefits" className="py-24 px-6 bg-accent/30 relative">
           <div className="max-w-7xl mx-auto">
             <div className="grid lg:grid-cols-12 gap-8 items-stretch">
-              <div className="lg:col-span-7 p-8 md:p-12 rounded-3xl bg-primary text-primary-foreground overflow-hidden relative group">
+              <div className="lg:col-span-7 p-8 md:p-12 rounded-lg bg-primary text-primary-foreground overflow-hidden relative group">
                 <div className="absolute top-0 right-0 p-12 opacity-10 group-hover:scale-150 transition-transform duration-1000">
                   <Zap size={300} />
                 </div>
@@ -232,7 +237,7 @@ export default async function LandingPage() {
                     Velocidad inigualable para tu operación diaria
                   </h3>
                   <p className="text-lg opacity-90 leading-relaxed">
-                    Hemos optimizado cada milisegundo de la interfaz para que el registro de una venta 
+                    Hemos optimizado cada milisegundo de la interfaz para que el registro de una venta
                     tome menos tiempo que decir su nombre. Loki se adapta a tu ritmo, no al revés.
                   </p>
                   <Button variant="secondary" className="rounded-full px-8 h-12 font-bold group-hover:px-10 transition-all">
@@ -242,8 +247,8 @@ export default async function LandingPage() {
               </div>
 
               <div className="lg:col-span-5 grid gap-8">
-                <div className="p-8 rounded-3xl bg-card border border-border/50 space-y-4 hover:shadow-xl transition-all">
-                  <div className="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center">
+                <div className="p-8 rounded-lg bg-card border border-border/50 space-y-4 hover:shadow-xl transition-all">
+                  <div className="w-12 h-12 rounded-lg bg-emerald-500/10 flex items-center justify-center">
                     <Shield className="text-emerald-500" />
                   </div>
                   <h4 className="text-xl font-bold">Seguridad de Nivel Bancario</h4>
@@ -251,8 +256,8 @@ export default async function LandingPage() {
                     Tus datos están encriptados y respaldados en la nube de Neon las 24 horas.
                   </p>
                 </div>
-                <div className="p-8 rounded-3xl bg-card border border-border/50 space-y-4 hover:shadow-xl transition-all">
-                  <div className="w-12 h-12 rounded-xl bg-indigo-500/10 flex items-center justify-center">
+                <div className="p-8 rounded-lg bg-card border border-border/50 space-y-4 hover:shadow-xl transition-all">
+                  <div className="w-12 h-12 rounded-lg bg-indigo-500/10 flex items-center justify-center">
                     <Smartphone className="text-indigo-500" />
                   </div>
                   <h4 className="text-xl font-bold">Experiencia Multi-dispositivo</h4>
@@ -270,14 +275,14 @@ export default async function LandingPage() {
           <div className="absolute inset-0 -z-10">
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-primary/5 rounded-full blur-[100px]" />
           </div>
-          
+
           <div className="max-w-3xl mx-auto space-y-8 relative">
             <h2 className="text-5xl md:text-6xl font-bold tracking-tight font-display">
               Lleva tu negocio al <br />
               <span className="text-primary italic">siguiente nivel</span> hoy.
             </h2>
             <p className="text-xl text-muted-foreground max-w-xl mx-auto">
-              Únete a cientos de emprendedores que ya transformaron su gestión. 
+              Únete a cientos de emprendedores que ya transformaron su gestión.
               Sin tarjetas de crédito, empieza gratis en segundos.
             </p>
             <div className="pt-8">
@@ -312,7 +317,7 @@ export default async function LandingPage() {
             <span className="text-xl font-bold tracking-tight">Loki</span>
             <span className="text-sm text-muted-foreground ml-2">v2.0.4</span>
           </div>
-          
+
           <div className="flex gap-8 text-sm font-medium text-muted-foreground">
             <a href="#" className="hover:text-foreground transition-colors">Privacidad</a>
             <a href="#" className="hover:text-foreground transition-colors">Términos</a>

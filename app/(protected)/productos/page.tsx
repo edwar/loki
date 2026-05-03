@@ -1,166 +1,88 @@
-import { getProducts, createProduct, updateProduct, deleteProduct, addRecipeItem, deleteRecipeItem } from '@/lib/actions/products'
+import { getProducts } from '@/lib/actions/products'
 import { getSupplies } from '@/lib/actions/supplies'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { formatCurrency } from '@/lib/utils'
-import { Trash2, X } from 'lucide-react'
-import { prisma } from '@/lib/prisma'
+import { Package, Plus } from 'lucide-react'
+import { ProductForm } from '@/components/product-forms'
+import { ProductCard } from '@/components/product-card'
 
 export const dynamic = 'force-dynamic'
 
-function ProductForm({ 
-  product, 
-  categories 
-}: { 
-  product?: { id: string; name: string; category: string | null; salePrice: number } | null
-  categories: string[]
-}) {
-  const action = product ? updateProduct.bind(null, product.id) : createProduct
-  
-  return (
-    <form action={action} className="space-y-4">
-      <div className="grid gap-4 md:grid-cols-3">
-        <div>
-          <label className="text-sm font-medium">Nombre</label>
-          <Input name="name" defaultValue={product?.name} required className="mt-1" placeholder="Ej: Empanada de Carne" />
-        </div>
-        <div>
-          <label className="text-sm font-medium">Categoría</label>
-          <Input 
-            name="category" 
-            defaultValue={product?.category ?? ''} 
-            list="categories"
-            className="mt-1" 
-            placeholder="Ej: Empanadas"
-          />
-          <datalist id="categories">
-            {categories.map(c => <option key={c} value={c} />)}
-          </datalist>
-        </div>
-        <div>
-          <label className="text-sm font-medium">Precio Venta</label>
-          <Input name="salePrice" type="number" step="100" defaultValue={product?.salePrice ?? 0} required className="mt-1" />
-        </div>
-      </div>
-      <Button type="submit">{product ? 'Actualizar' : 'Crear'}</Button>
-    </form>
-  )
-}
-
-function RecipeForm({ productId, supplies }: { productId: string, supplies: { id: string; name: string; unit: string }[] }) {
-  return (
-    <form action={addRecipeItem} className="flex gap-2 items-end mt-2 p-2 bg-[var(--accent)] rounded-lg">
-      <input type="hidden" name="productId" value={productId} />
-      <div className="flex-1">
-        <label className="text-xs font-medium">Insumo</label>
-        <Select 
-          name="supplyId" 
-          required
-        >
-          <SelectTrigger className="h-8 text-sm">
-            <SelectValue placeholder="Seleccionar" />
-          </SelectTrigger>
-          <SelectContent>
-            {supplies.map(s => (
-              <SelectItem key={s.id} value={s.id}>{s.name} ({s.unit})</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-      <div className="w-20">
-        <label className="text-xs font-medium">Cantidad</label>
-        <Input name="quantityRequired" type="number" step="0.01" required className="h-8" placeholder="0" />
-      </div>
-      <div className="w-16">
-        <label className="text-xs font-medium">Unidad</label>
-        <Input name="unit" required className="h-8" placeholder="g" />
-      </div>
-      <Button type="submit" size="sm">Agregar</Button>
-    </form>
-  )
-}
-
 export default async function ProductosPage() {
-  const [products, supplies] = await Promise.all([
+  const [productsRaw, suppliesRaw] = await Promise.all([
     getProducts(),
     getSupplies()
   ])
+
+  // Serialize Decimals for Client Components
+  const products = productsRaw.map((p: any) => ({
+    ...p,
+    salePrice: Number(p.salePrice),
+    recipeItems: p.recipeItems?.map((ri: any) => ({
+      ...ri,
+      quantityRequired: Number(ri.quantityRequired),
+      supply: ri.supply ? {
+        ...ri.supply,
+        currentStock: Number(ri.supply.currentStock),
+        minStock: Number(ri.supply.minStock),
+        purchasePrice: Number(ri.supply.purchasePrice)
+      } : null
+    })) || []
+  }))
+
+  const supplies = suppliesRaw.map((s: any) => ({
+    ...s,
+    currentStock: Number(s.currentStock),
+    minStock: Number(s.minStock),
+    purchasePrice: Number(s.purchasePrice)
+  }))
 
   const categories = [...new Set(products.map((p: any) => p.category).filter(Boolean) as string[])]
   const allSupplies = supplies.map((s: any) => ({ id: s.id, name: s.name, unit: s.unit }))
 
   return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold text-black dark:text-white tracking-tight">Productos</h1>
-        <p className="text-gray-500 dark:text-slate-400">Administra tu catálogo de productos</p>
-        <p className="text-zinc-500">Crea productos y define sus recetas</p>
+    <div className="space-y-10 animate-fade-in">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <div>
+          <h1 className="text-4xl font-extrabold tracking-tight font-display">Catálogo de Productos</h1>
+          <p className="text-muted-foreground font-medium mt-1">Define tus productos y sus recetas para un control automático de inventario.</p>
+        </div>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Nuevo Producto</CardTitle>
+      {/* Product Creator */}
+      <Card className="rounded-lg border-primary/20 bg-primary/2">
+        <CardHeader className="px-2 py-4 pb-0">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/20">
+              <Plus size={20} className="text-white" />
+            </div>
+            <CardTitle>Nuevo Producto</CardTitle>
+          </div>
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-2 py-4">
           <ProductForm product={null} categories={categories} />
         </CardContent>
       </Card>
 
-      <div className="space-y-4">
-        {products.map((product: any) => (
-          <Card key={product.id}>
-            <CardHeader className="flex flex-row items-center justify-between">
-              <div>
-                <CardTitle>{product.name}</CardTitle>
-                <p className="text-sm text-zinc-500">
-                  {product.category || 'Sin categoría'} • {formatCurrency(Number(product.salePrice) ?? 0)}
-                </p>
-              </div>
-              <div className="flex gap-2">
-                <form action={deleteProduct.bind(null, product.id)}>
-                  <Button type="submit" variant="ghost" size="sm" className="text-red-600">
-                    <Trash2 size={16} />
-                  </Button>
-                </form>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm font-medium mb-2">Receta:</p>
-              {product.recipeItems.length === 0 ? (
-                <p className="text-sm text-zinc-400">Sin insumos definidos</p>
-              ) : (
-                <Table>
-                  <TableBody>
-                    {product.recipeItems.map((item: any) => (
-                      <TableRow key={item.id} className="h-8">
-                        <TableCell className="py-1">{item.supply.name}</TableCell>
-                        <TableCell className="py-1">{Number(item.quantityRequired)} {item.unit}</TableCell>
-                        <TableCell className="py-1">
-                          <form action={deleteRecipeItem.bind(null, item.id)}>
-                            <Button type="submit" variant="ghost" size="sm" className="h-6 text-red-600">
-                              <X size={14} />
-                            </Button>
-                          </form>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              )}
-              {allSupplies.length > 0 && (
-                <RecipeForm productId={product.id} supplies={allSupplies} />
-              )}
-            </CardContent>
-          </Card>
+      {/* Product List */}
+      <div className="grid gap-8">
+        {products.map((product: any, index: number) => (
+          <ProductCard
+            key={product.id}
+            product={product}
+            categories={categories}
+            allSupplies={allSupplies}
+            index={index}
+          />
         ))}
 
         {products.length === 0 && (
-          <Card>
-            <CardContent className="py-8 text-center text-zinc-500">
-              No hay productos registrados
+          <Card className="rounded-lg border-dashed border-2 py-20 bg-accent/5">
+            <CardContent className="text-center space-y-4">
+              <div className="w-16 h-16 rounded-3xl bg-accent/50 flex items-center justify-center mx-auto">
+                <Package size={32} className="text-muted-foreground/30" />
+              </div>
+              <p className="text-muted-foreground font-medium">Empieza creando tu primer producto arriba.</p>
             </CardContent>
           </Card>
         )}

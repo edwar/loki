@@ -94,7 +94,7 @@ export default function RegisterPage() {
     <div className="min-h-screen flex items-center justify-center bg-[var(--background)] p-4">
       <div className="w-full max-w-md space-y-8 animate-fade-in">
         <div className="flex flex-col items-center">
-          <div className="w-16 h-16 rounded-2xl bg-[var(--primary)] flex items-center justify-center mb-4 shadow-lg">
+          <div className="w-16 h-16 rounded-lg bg-[var(--primary)] flex items-center justify-center mb-4 shadow-lg">
             <ChefHat size={32} className="text-[var(--primary-foreground)]" />
           </div>
           <h1 className="text-2xl font-bold text-[var(--foreground)]">Loki</h1>
@@ -115,43 +115,43 @@ export default function RegisterPage() {
               )}
               <div>
                 <label className="text-sm font-medium">Nombre</label>
-                <Input 
-                  name="name" 
-                  required 
-                  className="mt-1" 
+                <Input
+                  name="name"
+                  required
+                  className="mt-1"
                   placeholder="Tu nombre"
                 />
               </div>
               <div>
                 <label className="text-sm font-medium">Email</label>
-                <Input 
-                  name="email" 
-                  type="email" 
-                  required 
-                  className="mt-1" 
+                <Input
+                  name="email"
+                  type="email"
+                  required
+                  className="mt-1"
                   placeholder="tu@email.com"
                 />
               </div>
               <div>
                 <label className="text-sm font-medium">Contraseña</label>
-                <PasswordInput 
+                <PasswordInput
                   name="password"
                   value={password}
                   onChange={handlePasswordChange}
-                  required 
-                  className="mt-1" 
+                  required
+                  className="mt-1"
                   placeholder="••••••••"
                   showRequirements
                 />
               </div>
               <div>
                 <label className="text-sm font-medium">Confirmar Contraseña</label>
-                <PasswordInput 
+                <PasswordInput
                   name="confirmPassword"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  required 
-                  className="mt-1" 
+                  required
+                  className="mt-1"
                   placeholder="••••••••"
                 />
                 {confirmPassword.length > 0 && !passwordsMatch && (

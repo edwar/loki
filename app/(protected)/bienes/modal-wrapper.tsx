@@ -138,11 +138,11 @@ export function ModalWrapper() {
     <div className="fixed inset-0 z-100 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowForm(false)} />
 
-      <div className="relative w-full max-w-md bg-white dark:bg-slate-800 rounded-3xl shadow-2xl overflow-hidden max-h-[90vh] overflow-y-auto">
+      <div className="relative w-full max-w-md bg-white dark:bg-slate-800 rounded-lg shadow-2xl overflow-hidden max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="p-6 sticky top-0 z-10">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-white/10 dark:bg-black/10 rounded-2xl flex items-center justify-center">
+            <div className="w-12 h-12 bg-white/10 dark:bg-black/10 rounded-lg flex items-center justify-center">
               <Building2 className="w-6 h-6" />
             </div>
             <div>
@@ -252,7 +252,7 @@ export function ModalWrapper() {
 
             {/* Valor calculado */}
             {formData.purchaseValue && formData.purchaseDate && (
-              <div className="bg-gray-50 dark:bg-slate-700/50 rounded-2xl p-4 space-y-3">
+              <div className="bg-gray-50 dark:bg-slate-700/50 rounded-lg p-4 space-y-3">
                 <div className="flex items-center gap-2 text-gray-500 dark:text-slate-400">
                   <Calculator size={18} />
                   <span className="text-sm font-medium">Cálculo de Depreciación</span>
@@ -284,7 +284,7 @@ export function ModalWrapper() {
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 placeholder="Detalles adicionales..."
-                className="flex w-full px-4 py-3 text-sm bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-600 rounded-2xl transition-all duration-200 resize-none"
+                className="flex w-full px-4 py-3 text-sm bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-600 rounded-lg transition-all duration-200 resize-none"
                 rows={2}
               />
             </div>
@@ -293,7 +293,7 @@ export function ModalWrapper() {
               <Button
                 type="submit"
                 disabled={loading}
-                className="flex-1 h-12 bg-black dark:bg-white text-white dark:text-black font-semibold rounded-2xl hover:bg-gray-800 dark:hover:bg-gray-200"
+                className="flex-1 h-12 bg-black dark:bg-white text-white dark:text-black font-semibold rounded-lg hover:bg-gray-800 dark:hover:bg-gray-200"
               >
                 {loading ? 'Guardando...' : 'Agregar Bien'}
               </Button>
@@ -301,7 +301,7 @@ export function ModalWrapper() {
                 type="button"
                 variant="secondary"
                 onClick={() => setShowForm(false)}
-                className="h-12 px-6 bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-slate-300 font-medium rounded-2xl hover:bg-gray-200 dark:hover:bg-slate-600"
+                className="h-12 px-6 bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-slate-300 font-medium rounded-lg hover:bg-gray-200 dark:hover:bg-slate-600"
               >
                 Cancelar
               </Button>

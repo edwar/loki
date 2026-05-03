@@ -39,21 +39,21 @@ export function Sidebar({ children }: { children: React.ReactNode }) {
       {/* Narrow Black Sidebar */}
       <aside className="w-[72px] min-h-screen bg-black flex flex-col items-center py-6 fixed">
         {/* Logo */}
-        <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center mb-8">
+        <div className="w-10 h-10 rounded-lg bg-white flex items-center justify-center mb-8">
           <ChefHat size={20} className="text-black" />
         </div>
 
         {/* Navigation */}
         <nav className="flex-1 flex flex-col items-center gap-1">
           {navigation.map((item) => {
-            const isActive = pathname === item.href || 
+            const isActive = pathname === item.href ||
               (item.href !== '/' && pathname.startsWith(item.href))
             return (
               <Link
                 key={item.name}
                 href={item.href}
                 className={cn(
-                  'w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-200',
+                  'w-12 h-12 rounded-lg flex items-center justify-center transition-all duration-200',
                   isActive
                     ? 'bg-white text-black'
                     : 'text-gray-500 hover:bg-gray-800 hover:text-white'
@@ -69,7 +69,7 @@ export function Sidebar({ children }: { children: React.ReactNode }) {
         {/* Sign Out */}
         <button
           onClick={handleSignOut}
-          className="w-12 h-12 rounded-xl flex items-center justify-center text-gray-500 hover:bg-gray-800 hover:text-white transition-all duration-200"
+          className="w-12 h-12 rounded-lg flex items-center justify-center text-gray-500 hover:bg-gray-800 hover:text-white transition-all duration-200"
           title="Cerrar Sesión"
         >
           <LogOut size={20} />

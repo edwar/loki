@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Moon, Sun } from 'lucide-react'
+import { cn } from '@/lib/utils'
 
 export function ThemeToggle() {
   const [theme, setTheme] = useState<'light' | 'dark'>('light')
@@ -17,12 +17,8 @@ export function ThemeToggle() {
     document.documentElement.classList.add(initialTheme)
   }, [])
 
-  const toggleTheme = (e: React.MouseEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    
+  const toggleTheme = () => {
     const newTheme = theme === 'light' ? 'dark' : 'light'
-    
     setTheme(newTheme)
     localStorage.setItem('theme', newTheme)
     document.documentElement.classList.remove('light', 'dark')
@@ -30,32 +26,110 @@ export function ThemeToggle() {
   }
 
   if (!mounted) {
-    return <div className="w-10 h-10 rounded-2xl bg-gray-100" />
+    return <div className="w-[70px] h-[35px] rounded-full bg-muted animate-pulse" />
   }
 
+  const isDark = theme === 'dark'
+
   return (
-    <button
-      onClick={toggleTheme}
-      className="relative w-10 h-10 rounded-2xl bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-slate-700 transition-all duration-200"
-      aria-label={`Cambiar a modo ${theme === 'light' ? 'oscuro' : 'claro'}`}
-      type="button"
+    <label 
+      className="relative inline-block w-[70px] cursor-pointer active:scale-95 transition-transform duration-200" 
+      id="theme-toggle-button"
     >
-      <div className="relative w-5 h-5">
-        <Sun 
-          className={`w-5 h-5 absolute inset-0 transition-all duration-300 ${
-            theme === 'dark' 
-              ? 'opacity-0 rotate-90 scale-50 text-amber-500' 
-              : 'opacity-100 rotate-0 scale-100 text-amber-600'
-          }`} 
-        />
-        <Moon 
-          className={`w-5 h-5 absolute inset-0 transition-all duration-300 ${
-            theme === 'light' 
-              ? 'opacity-0 -rotate-90 scale-50 text-blue-400' 
-              : 'opacity-100 rotate-0 scale-100 text-blue-400'
-          }`}
-        />
-      </div>
-    </button>
+      <input 
+        type="checkbox" 
+        id="toggle" 
+        className="sr-only" 
+        checked={isDark}
+        onChange={toggleTheme}
+      />
+      <svg 
+        viewBox="0 0 69.667 44" 
+        xmlns="http://www.w3.org/1999/xlink" 
+        xmlns="http://www.w3.org/2000/svg"
+        className="w-full h-auto drop-shadow-md"
+      >
+        <defs>
+          <filter id="container-shadow" x="-5" y="-5" width="80" height="54">
+            <feGaussianBlur in="SourceAlpha" stdDeviation="2" />
+            <feOffset dx="0" dy="2" result="offsetblur" />
+            <feComponentTransfer>
+              <feFuncA type="linear" slope="0.2" />
+            </feComponentTransfer>
+            <feMerge>
+              <feMergeNode />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+        </defs>
+        
+        <g transform="translate(3.5 3.5)">
+          {/* Main Container */}
+          <rect 
+            className={cn(
+              "transition-colors duration-500 ease-in-out",
+              isDark ? "fill-[#2b4360]" : "fill-[#83cbd8]"
+            )}
+            rx="17.5" 
+            height="35" 
+            width="60.667" 
+          />
+          
+          {/* Moving Button Part */}
+          <g 
+            className={cn(
+              "transition-transform duration-500 ease-[cubic-bezier(0.4,0,0.2,1)]",
+              isDark ? "translate-x-[28px]" : "translate-x-0"
+            )}
+            transform="translate(2.333 2.333)"
+          >
+            {/* Sun Group */}
+            <g className={cn("transition-opacity duration-500", isDark ? "opacity-0" : "opacity-100")}>
+              <circle fill="#f8e664" r="15.167" cy="15.167" cx="15.167" />
+              <path fill="rgba(246,254,247,0.29)" transform="translate(3.5 3.5)" d="M11.667,0A11.667,11.667,0,1,1,0,11.667,11.667,11.667,0,0,1,11.667,0Z" />
+              <circle fill="#fcf4b9" transform="translate(8.167 8.167)" r="7" cy="7" cx="7" />
+            </g>
+            
+            {/* Moon Group */}
+            <g className={cn("transition-opacity duration-500", isDark ? "opacity-100" : "opacity-0")}>
+              <circle fill="#cce6ee" r="15.167" cy="15.167" cx="15.167" />
+              <g fill="#a6cad0" transform="translate(7.085 4.821)">
+                <circle transform="translate(11.5 0)" r="2" cy="2" cx="2" />
+                <circle transform="translate(7.857 13.456)" r="2" cy="2" cx="2" />
+                <circle transform="translate(1.507 3.548)" r="1" cy="1" cx="1" />
+                <circle transform="translate(19.572 14.392)" r="1" cy="1" cx="1" />
+                <circle transform="translate(1.507 18.007)" r="1" cy="1" cx="1" />
+                <circle transform="translate(18.572 6.034)" r="1.5" cy="1.5" cx="1.5" />
+              </g>
+            </g>
+          </g>
+          
+          {/* Cloud (Light Mode Only) */}
+          <g className={cn("transition-opacity duration-500", isDark ? "opacity-0" : "opacity-100")}>
+            <path 
+              fill="#fff" 
+              transform="translate(-3466.47 -160.94)" 
+              d="M3512.81,173.815a4.463,4.463,0,0,1,2.243.62.95.95,0,0,1,.72-1.281,4.852,4.852,0,0,1,2.623.519c.034.02-.5-1.968.281-2.716a2.117,2.117,0,0,1,2.829-.274,1.821,1.821,0,0,1,.854,1.858c.063.037,2.594-.049,3.285,1.273s-.865,2.544-.807,2.626a12.192,12.192,0,0,1,2.278.892c.553.448,1.106,1.992-1.62,2.927a7.742,7.742,0,0,1-3.762-.3c-1.28-.49-1.181-2.65-1.137-2.624s-1.417,2.2-2.623,2.2a4.172,4.172,0,0,1-2.394-1.206,3.825,3.825,0,0,1-2.771.774c-3.429-.46-2.333-3.267-2.2-3.55A3.721,3.721,0,0,1,3512.81,173.815Z" 
+            />
+          </g>
+
+          {/* Stars (Dark Mode Only) */}
+          <g 
+            fill="#def8ff" 
+            transform="translate(3.585 1.325)"
+            className={cn("transition-opacity duration-500", isDark ? "opacity-100" : "opacity-0")}
+          >
+            <path transform="matrix(-1, 0.017, -0.017, -1, 24.231, 3.055)" d="M.774,0,.566.559,0,.539.458.933.25,1.492l.485-.361.458.394L1.024.953,1.509.592.943.572Z"></path>
+            <path transform="matrix(-0.777, 0.629, -0.629, -0.777, 23.185, 12.358)" d="M1.341.529.836.472.736,0,.505.46,0,.4.4.729l-.231.46L.605.932l.4.326L.9.786Z"></path>
+            <path transform="matrix(0.438, 0.899, -0.899, 0.438, 23.177, 29.735)" d="M.015,1.065.475.9l.285.365L.766.772l.46-.164L.745.494.751,0,.481.407,0,.293.285.658Z"></path>
+            <path transform="translate(12.677 0.388) rotate(104)" d="M1.161,1.6,1.059,1,1.574.722.962.607.86,0,.613.572,0,.457.446.881.2,1.454l.516-.274Z"></path>
+            <path transform="matrix(-0.07, 0.998, -0.998, -0.07, 11.066, 15.457)" d="M.873,1.648l.114-.62L1.579.945,1.03.62,1.144,0,.706.464.157.139.438.7,0,1.167l.592-.083Z"></path>
+            <path transform="translate(8.326 28.061) rotate(11)" d="M.593,0,.638.724,0,.982l.7.211.045.724.36-.64.7.211L1.342.935,1.7.294,1.063.552Z"></path>
+            <path transform="translate(5.012 5.962) rotate(172)" d="M.816,0,.5.455,0,.311.323.767l-.312.455.516-.215.323.456L.827.911,1.343.7.839.552Z"></path>
+            <path transform="translate(2.218 14.616) rotate(169)" d="M1.261,0,.774.571.114.3.487.967,0,1.538.728,1.32l.372.662.047-.749.728-.218L1.215.749Z"></path>
+          </g>
+        </g>
+      </svg>
+    </label>
   )
 }

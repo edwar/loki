@@ -19,7 +19,7 @@ export function PasswordRequirements({ password }: { password: string }) {
   const allValid = requirements.every(r => r.valid)
 
   return (
-    <div className="space-y-3 mt-3 p-4 bg-[var(--accent)] rounded-xl border border-[var(--border)]">
+    <div className="space-y-3 mt-3 p-4 bg-[var(--accent)] rounded-lg border border-[var(--border)]">
       <p className="text-xs font-semibold text-[var(--accent-foreground)] uppercase tracking-wide">La contraseña debe tener:</p>
       <div className="grid grid-cols-2 gap-2">
         {requirements.map((req) => (

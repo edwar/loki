@@ -1,153 +1,87 @@
-import { getExpenses, deleteExpense } from '@/lib/actions/expenses'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { getExpenses } from '@/lib/actions/expenses'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { createExpense } from '@/lib/actions/expenses'
-import { formatCurrency, formatDate } from '@/lib/utils'
-import { Trash2 } from 'lucide-react'
+import { formatCurrency } from '@/lib/utils'
+import { Plus, Wallet, TrendingDown, Calendar, Receipt } from 'lucide-react'
+import { ExpenseForm } from '@/components/expense-forms'
+import { ExpenseTable } from '@/components/expense-table'
 
 export const dynamic = 'force-dynamic'
 
-const expenseTypes = [
-  'Transporte',
-  'Nómina',
-  'Servicios',
-  'Mantenimiento',
-  'Impuestos',
-  'Arriendo',
-  'Otros'
-]
-
-function ExpenseForm() {
-  return (
-    <form action={createExpense} className="space-y-4">
-      <div className="grid gap-4 md:grid-cols-4">
-        <div>
-          <label className="text-sm font-medium">Tipo</label>
-          <Select name="type" required>
-            <SelectTrigger>
-              <SelectValue placeholder="Seleccionar tipo" />
-            </SelectTrigger>
-            <SelectContent>
-              {expenseTypes.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}
-            </SelectContent>
-          </Select>
-        </div>
-        <div>
-          <label className="text-sm font-medium">Monto</label>
-          <Input name="amount" type="number" step="100" required className="mt-1" />
-        </div>
-        <div>
-          <label className="text-sm font-medium">Fecha</label>
-          <Input name="date" type="date" defaultValue={new Date().toISOString().split('T')[0]} className="mt-1" />
-        </div>
-        <div>
-          <label className="text-sm font-medium">Descripción</label>
-          <Input name="description" className="mt-1" placeholder="Descripción opcional" />
-        </div>
-      </div>
-      <Button type="submit">Registrar Gasto</Button>
-    </form>
-  )
-}
-
 export default async function GastosPage() {
-  const expenses = await getExpenses()
-  const today = new Date().toISOString().split('T')[0]
-  
-  const todayTotal = expenses
-    .filter((e: any) => e.date.toISOString().split('T')[0] === today)
-    .reduce((sum: number, e: any) => sum + Number(e.amount), 0)
+  const expensesRaw = await getExpenses()
 
-  const monthTotal = expenses
-    .filter((e: any) => {
-      const expDate = new Date(e.date)
-      const now = new Date()
-      return expDate.getMonth() === now.getMonth() && expDate.getFullYear() === now.getFullYear()
-    })
-    .reduce((sum: number, e: any) => sum + Number(e.amount), 0)
+  // Serialize Decimals for Client Components
+  const expenses = expensesRaw.map((e: any) => ({
+    ...e,
+    amount: Number(e.amount)
+  }))
+  const totalExpenses = expenses.reduce((sum: number, e: any) => sum + Number(e.amount), 0)
 
   return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold text-black dark:text-white tracking-tight">Gastos</h1>
-        <p className="text-gray-500 dark:text-slate-400">Controla los gastos operativos de tu negocio</p>
-        <p className="text-zinc-500">Controla tus gastos indirectos</p>
+    <div className="space-y-10 animate-fade-in">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <div>
+          <h1 className="text-4xl font-extrabold tracking-tight font-display">Control de Gastos</h1>
+          <p className="text-muted-foreground font-medium mt-1">Registra y monitorea los costos indirectos de tu operación.</p>
+        </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Gastos Hoy</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(todayTotal)}</div>
+      {/* Stats */}
+      <div className="grid gap-6 md:grid-cols-2">
+        <Card className="rounded-3xl border-none bg-gradient-to-br from-rose-500/10 to-rose-500/5 shadow-sm overflow-hidden relative group">
+          <div className="absolute -right-4 -top-4 w-24 h-24 bg-rose-500/10 rounded-full blur-2xl group-hover:bg-rose-500/20 transition-all" />
+          <CardContent className="p-8">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-2xl bg-rose-500 flex items-center justify-center shadow-lg shadow-rose-500/20">
+                <TrendingDown className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-rose-600">Total Gastos del Mes</p>
+                <p className="text-3xl font-extrabold">{formatCurrency(totalExpenses)}</p>
+              </div>
+            </div>
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Gastos del Mes</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(monthTotal)}</div>
+
+        <Card className="rounded-3xl border-none bg-gradient-to-br from-blue-500/10 to-blue-500/5 shadow-sm overflow-hidden relative group">
+          <div className="absolute -right-4 -top-4 w-24 h-24 bg-blue-500/10 rounded-full blur-2xl group-hover:bg-blue-500/20 transition-all" />
+          <CardContent className="p-8">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-2xl bg-blue-500 flex items-center justify-center shadow-lg shadow-blue-500/20">
+                <Receipt className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-blue-600">Registros Recientes</p>
+                <p className="text-3xl font-extrabold">{expenses.length}</p>
+              </div>
+            </div>
           </CardContent>
         </Card>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Nuevo Gasto</CardTitle>
+      {/* New Expense Form */}
+      <Card className="rounded-lg border-rose-500/20 bg-rose-500/[0.02]">
+        <CardHeader className="p-8 pb-0">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-rose-500 flex items-center justify-center shadow-lg shadow-rose-500/20">
+              <Plus size={20} className="text-white" />
+            </div>
+            <CardTitle>Registrar Nuevo Gasto</CardTitle>
+          </div>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-8">
           <ExpenseForm />
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Historial de Gastos</CardTitle>
+      {/* Table Section */}
+      <Card className="rounded-lg border-border/40 bg-card/30 backdrop-blur-md overflow-hidden">
+        <CardHeader className="p-8 pb-0 flex flex-row items-center justify-between">
+          <CardTitle className="text-2xl">Historial de Gastos</CardTitle>
         </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Fecha</TableHead>
-                <TableHead>Tipo</TableHead>
-                <TableHead>Descripción</TableHead>
-                <TableHead>Monto</TableHead>
-                <TableHead>Acciones</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {expenses.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={5} className="text-center text-zinc-500">
-                    No hay gastos registrados
-                  </TableCell>
-                </TableRow>
-              ) : (
-                expenses.map((expense: any) => (
-                  <TableRow key={expense.id}>
-                    <TableCell>{formatDate(expense.date)}</TableCell>
-                    <TableCell>
-                      <span className="px-2 py-1 bg-zinc-100 rounded text-sm">{expense.type}</span>
-                    </TableCell>
-                    <TableCell>{expense.description || '-'}</TableCell>
-                    <TableCell className="font-medium">{formatCurrency(Number(expense.amount))}</TableCell>
-                    <TableCell>
-                      <form action={deleteExpense.bind(null, expense.id)}>
-                        <Button type="submit" variant="ghost" size="sm" className="text-red-600 hover:text-red-700">
-                          <Trash2 size={16} />
-                        </Button>
-                      </form>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
+        <CardContent className="p-8">
+          <ExpenseTable expenses={expenses} />
         </CardContent>
       </Card>
     </div>

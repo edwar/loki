@@ -29,6 +29,25 @@ export async function createExpense(formData: FormData) {
   revalidatePath('/gastos')
 }
 
+export async function updateExpense(id: string, formData: FormData) {
+  const type = formData.get('type') as string
+  const amount = parseFloat(formData.get('amount') as string) || 0
+  const description = formData.get('description') as string | null
+  const dateStr = formData.get('date') as string
+
+  await prisma.indirectCost.update({
+    where: { id },
+    data: {
+      type,
+      amount,
+      description,
+      date: dateStr ? new Date(dateStr) : new Date()
+    }
+  })
+
+  revalidatePath('/gastos')
+}
+
 export async function deleteExpense(id: string) {
   await prisma.indirectCost.update({
     where: { id },
