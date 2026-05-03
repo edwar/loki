@@ -1,12 +1,12 @@
 import { NextResponse } from 'next/server'
 
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY
-const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent'
+const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY
+const OPENROUTER_API_URL = 'https://openrouter.ai/api/v1/chat/completions'
 
 export async function POST(request: Request) {
   try {
-    if (!GEMINI_API_KEY) {
-      return NextResponse.json({ error: 'API key no configurada' }, { status: 500 })
+    if (!OPENROUTER_API_KEY) {
+      return NextResponse.json({ error: 'API key de OpenRouter no configurada' }, { status: 500 })
     }
 
     const { imageBase64, mimeType } = await request.json()
@@ -38,48 +38,47 @@ Reglas:
 - El total debe ser la suma de los subtotales
 `
 
-    const requestBody = {
-      contents: [
-        {
-          parts: [
-            { text: prompt },
-            {
-              inlineData: {
-                mimeType: mimeType,
-                data: imageBase64
-              }
-            }
-          ]
-        }
-      ],
-      generationConfig: {
-        temperature: 0.1,
-        maxOutputTokens: 2048,
-        topP: 0.8,
-        topK: 40
-      }
-    }
-
-    const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
+    const response = await fetch(OPENROUTER_API_URL, {
       method: 'POST',
       headers: {
+        'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
         'Content-Type': 'application/json',
+        'HTTP-Referer': 'https://loki.vercel.app',
+        'X-Title': 'Loki'
       },
-      body: JSON.stringify(requestBody)
+      body: JSON.stringify({
+        model: 'google/gemini-2.0-flash-exp',
+        messages: [
+          {
+            role: 'user',
+            content: [
+              { type: 'text', text: prompt },
+              { 
+                type: 'image_url', 
+                image_url: { 
+                  url: `data:${mimeType};base64,${imageBase64}` 
+                } 
+              }
+            ]
+          }
+        ],
+        max_tokens: 2048,
+        temperature: 0.1
+      })
     })
 
     if (!response.ok) {
       const errorText = await response.text()
-      throw new Error(`Gemini API error: ${response.status} - ${errorText}`)
+      throw new Error(`OpenRouter API error: ${response.status} - ${errorText}`)
     }
 
     const data = await response.json()
     
-    if (!data.candidates || !data.candidates[0]?.content?.parts?.[0]?.text) {
+    if (!data.choices || !data.choices[0]?.message?.content) {
       throw new Error('No se pudo procesar la imagen')
     }
 
-    const jsonText = data.candidates[0].content.parts[0].text
+    const jsonText = data.choices[0].message.content
     
     const jsonMatch = jsonText.match(/\{[\s\S]*\}/)
     if (!jsonMatch) {

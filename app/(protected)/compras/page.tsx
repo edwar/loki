@@ -54,6 +54,13 @@ export default function ComprasPage() {
   const [cameraActive, setCameraActive] = useState(false)
   const streamRef = useRef<MediaStream | null>(null)
 
+  useEffect(() => {
+    if (cameraActive && streamRef.current && videoRef.current) {
+      videoRef.current.srcObject = streamRef.current
+      videoRef.current.play().catch(console.error)
+    }
+  }, [cameraActive])
+
   const startCamera = async () => {
     try {
       console.log('Starting camera...')
@@ -66,13 +73,6 @@ export default function ComprasPage() {
       console.log('Camera stream obtained:', mediaStream.id)
       
       streamRef.current = mediaStream
-      
-      if (videoRef.current) {
-        videoRef.current.srcObject = mediaStream
-        await videoRef.current.play()
-        console.log('Video playing')
-      }
-      
       setCameraActive(true)
       setError(null)
     } catch (err: any) {
