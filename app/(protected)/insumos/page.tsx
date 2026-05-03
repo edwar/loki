@@ -89,7 +89,7 @@ export default async function InsumosPage() {
   ])
 
   const totalValue = supplies.reduce((sum: number, s: any) => sum + Number(s.currentStock) * Number(s.purchasePrice), 0)
-  const lowStockCount = supplies.filter(s => Number(s.currentStock) < Number(s.minStock)).length
+  const lowStockCount = supplies.filter((s: any) => Number(s.currentStock) < Number(s.minStock)).length
 
   return (
     <div className="space-y-8 animate-fade-in">
