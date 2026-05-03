@@ -45,7 +45,6 @@ export function ThemeToggle() {
       />
       <svg 
         viewBox="0 0 69.667 44" 
-        xmlns="http://www.w3.org/1999/xlink" 
         xmlns="http://www.w3.org/2000/svg"
         className="w-full h-auto drop-shadow-md"
       >
