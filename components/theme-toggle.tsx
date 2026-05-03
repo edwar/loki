@@ -32,19 +32,19 @@ export function ThemeToggle() {
   const isDark = theme === 'dark'
 
   return (
-    <label 
-      className="relative inline-block w-[70px] cursor-pointer active:scale-95 transition-transform duration-200" 
+    <label
+      className="relative inline-block w-[70px] cursor-pointer active:scale-95 transition-transform duration-200"
       id="theme-toggle-button"
     >
-      <input 
-        type="checkbox" 
-        id="toggle" 
-        className="sr-only" 
+      <input
+        type="checkbox"
+        id="toggle"
+        className="sr-only"
         checked={isDark}
         onChange={toggleTheme}
       />
-      <svg 
-        viewBox="0 0 69.667 44" 
+      <svg
+        viewBox="0 0 69.667 44"
         xmlns="http://www.w3.org/2000/svg"
         className="w-full h-auto drop-shadow-md"
       >
@@ -61,23 +61,23 @@ export function ThemeToggle() {
             </feMerge>
           </filter>
         </defs>
-        
+
         <g transform="translate(3.5 3.5)">
           {/* Main Container */}
-          <rect 
+          <rect
             className={cn(
               "transition-colors duration-500 ease-in-out",
               isDark ? "fill-[#2b4360]" : "fill-[#83cbd8]"
             )}
-            rx="17.5" 
-            height="35" 
-            width="60.667" 
+            rx="17.5"
+            height="35"
+            width="60.667"
           />
-          
+
           {/* Moving Button Part */}
-          <g 
+          <g
             className={cn(
-              "transition-transform duration-500 ease-[cubic-bezier(0.4,0,0.2,1)]",
+              "transition-transform duration-500 ease-in-out",
               isDark ? "translate-x-[28px]" : "translate-x-0"
             )}
             transform="translate(2.333 2.333)"
@@ -88,7 +88,7 @@ export function ThemeToggle() {
               <path fill="rgba(246,254,247,0.29)" transform="translate(3.5 3.5)" d="M11.667,0A11.667,11.667,0,1,1,0,11.667,11.667,11.667,0,0,1,11.667,0Z" />
               <circle fill="#fcf4b9" transform="translate(8.167 8.167)" r="7" cy="7" cx="7" />
             </g>
-            
+
             {/* Moon Group */}
             <g className={cn("transition-opacity duration-500", isDark ? "opacity-100" : "opacity-0")}>
               <circle fill="#cce6ee" r="15.167" cy="15.167" cx="15.167" />
@@ -102,19 +102,19 @@ export function ThemeToggle() {
               </g>
             </g>
           </g>
-          
+
           {/* Cloud (Light Mode Only) */}
           <g className={cn("transition-opacity duration-500", isDark ? "opacity-0" : "opacity-100")}>
-            <path 
-              fill="#fff" 
-              transform="translate(-3466.47 -160.94)" 
-              d="M3512.81,173.815a4.463,4.463,0,0,1,2.243.62.95.95,0,0,1,.72-1.281,4.852,4.852,0,0,1,2.623.519c.034.02-.5-1.968.281-2.716a2.117,2.117,0,0,1,2.829-.274,1.821,1.821,0,0,1,.854,1.858c.063.037,2.594-.049,3.285,1.273s-.865,2.544-.807,2.626a12.192,12.192,0,0,1,2.278.892c.553.448,1.106,1.992-1.62,2.927a7.742,7.742,0,0,1-3.762-.3c-1.28-.49-1.181-2.65-1.137-2.624s-1.417,2.2-2.623,2.2a4.172,4.172,0,0,1-2.394-1.206,3.825,3.825,0,0,1-2.771.774c-3.429-.46-2.333-3.267-2.2-3.55A3.721,3.721,0,0,1,3512.81,173.815Z" 
+            <path
+              fill="#fff"
+              transform="translate(-3466.47 -160.94)"
+              d="M3512.81,173.815a4.463,4.463,0,0,1,2.243.62.95.95,0,0,1,.72-1.281,4.852,4.852,0,0,1,2.623.519c.034.02-.5-1.968.281-2.716a2.117,2.117,0,0,1,2.829-.274,1.821,1.821,0,0,1,.854,1.858c.063.037,2.594-.049,3.285,1.273s-.865,2.544-.807,2.626a12.192,12.192,0,0,1,2.278.892c.553.448,1.106,1.992-1.62,2.927a7.742,7.742,0,0,1-3.762-.3c-1.28-.49-1.181-2.65-1.137-2.624s-1.417,2.2-2.623,2.2a4.172,4.172,0,0,1-2.394-1.206,3.825,3.825,0,0,1-2.771.774c-3.429-.46-2.333-3.267-2.2-3.55A3.721,3.721,0,0,1,3512.81,173.815Z"
             />
           </g>
 
           {/* Stars (Dark Mode Only) */}
-          <g 
-            fill="#def8ff" 
+          <g
+            fill="#def8ff"
             transform="translate(3.585 1.325)"
             className={cn("transition-opacity duration-500", isDark ? "opacity-100" : "opacity-0")}
           >
