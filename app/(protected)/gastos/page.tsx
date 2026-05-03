@@ -58,11 +58,11 @@ export default async function GastosPage() {
   const today = new Date().toISOString().split('T')[0]
   
   const todayTotal = expenses
-    .filter(e => e.date.toISOString().split('T')[0] === today)
+    .filter((e: any) => e.date.toISOString().split('T')[0] === today)
     .reduce((sum: number, e: any) => sum + Number(e.amount), 0)
 
   const monthTotal = expenses
-    .filter(e => {
+    .filter((e: any) => {
       const expDate = new Date(e.date)
       const now = new Date()
       return expDate.getMonth() === now.getMonth() && expDate.getFullYear() === now.getFullYear()
