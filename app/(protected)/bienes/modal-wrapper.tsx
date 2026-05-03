@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { 
@@ -10,29 +10,53 @@ import {
   SelectTrigger, 
   SelectValue 
 } from '@/components/ui/select'
-import { Plus, X, Building2 } from 'lucide-react'
+import { Plus, X, Building2, Calculator } from 'lucide-react'
 import { createPortal } from 'react-dom'
 
 const PROPERTY_TYPES = [
-  { value: 'terreno', label: 'Terreno' },
-  { value: 'edificio', label: 'Edificio' },
-  { value: 'vehiculo', label: 'Vehículo' },
-  { value: 'equipo', label: 'Equipo' },
-  { value: 'mueble', label: 'Mueble' },
-  { value: 'maquinaria', label: 'Maquinaria' },
-  { value: 'otro', label: 'Otro' },
+  { value: 'terreno', label: 'Terreno', depreciation: 0 },
+  { value: 'edificio', label: 'Edificio', depreciation: 5 },
+  { value: 'vehiculo', label: 'Vehículo', depreciation: 20 },
+  { value: 'equipo', label: 'Equipo', depreciation: 10 },
+  { value: 'mueble', label: 'Mueble', depreciation: 10 },
+  { value: 'maquinaria', label: 'Maquinaria', depreciation: 10 },
+  { value: 'otro', label: 'Otro', depreciation: 10 },
 ]
+
+function calculateCurrentValue(purchaseValue: number, purchaseDate: string, annualDepreciation: number): number {
+  if (!purchaseDate || purchaseValue <= 0) return purchaseValue
+  
+  const purchase = new Date(purchaseDate)
+  const now = new Date()
+  const years = (now.getTime() - purchase.getTime()) / (365.25 * 24 * 60 * 60 * 1000)
+  
+  if (years <= 0) return purchaseValue
+  
+  // Depreciación compuesta: Valor * (1 - tasa)^años
+  const currentValue = purchaseValue * Math.pow(1 - annualDepreciation / 100, years)
+  return Math.max(0, currentValue)
+}
+
+function getYearsSincePurchase(purchaseDate: string): number {
+  if (!purchaseDate) return 0
+  const purchase = new Date(purchaseDate)
+  const now = new Date()
+  return Math.max(0, (now.getTime() - purchase.getTime()) / (365.25 * 24 * 60 * 60 * 1000))
+}
 
 export function ModalWrapper() {
   const [showForm, setShowForm] = useState(false)
   const [loading, setLoading] = useState(false)
   const [isMounted, setIsMounted] = useState(false)
+  const [customDepreciation, setCustomDepreciation] = useState(false)
+  const [calculatedValue, setCalculatedValue] = useState<number>(0)
+  const [yearsElapsed, setYearsElapsed] = useState<number>(0)
   const [formData, setFormData] = useState({
     name: '',
     type: '',
     address: '',
     purchaseValue: '',
-    currentValue: '',
+    depreciationRate: '10',
     purchaseDate: '',
     description: '',
   })
@@ -40,6 +64,27 @@ export function ModalWrapper() {
   useEffect(() => {
     setIsMounted(true)
   }, [])
+
+  useEffect(() => {
+    if (formData.purchaseValue && formData.purchaseDate) {
+      const rate = customDepreciation 
+        ? parseFloat(formData.depreciationRate) || 0 
+        : PROPERTY_TYPES.find(t => t.value === formData.type)?.depreciation || 10
+      
+      const value = calculateCurrentValue(
+        parseFloat(formData.purchaseValue) || 0,
+        formData.purchaseDate,
+        rate
+      )
+      setCalculatedValue(value)
+      setYearsElapsed(getYearsSincePurchase(formData.purchaseDate))
+    } else {
+      setCalculatedValue(0)
+      setYearsElapsed(0)
+    }
+  }, [formData.purchaseValue, formData.purchaseDate, formData.type, formData.depreciationRate, customDepreciation])
+
+  const defaultDepreciation = PROPERTY_TYPES.find(t => t.value === formData.type)?.depreciation || 10
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -54,7 +99,7 @@ export function ModalWrapper() {
           type: formData.type,
           address: formData.address || null,
           purchaseValue: parseFloat(formData.purchaseValue) || 0,
-          currentValue: parseFloat(formData.currentValue) || 0,
+          currentValue: calculatedValue,
           purchaseDate: formData.purchaseDate ? new Date(formData.purchaseDate) : null,
           description: formData.description || null,
         }),
@@ -66,7 +111,7 @@ export function ModalWrapper() {
         type: '',
         address: '',
         purchaseValue: '',
-        currentValue: '',
+        depreciationRate: '10',
         purchaseDate: '',
         description: '',
       })
@@ -93,9 +138,9 @@ export function ModalWrapper() {
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowForm(false)} />
       
-      <div className="relative w-full max-w-md bg-white dark:bg-slate-800 rounded-3xl shadow-2xl overflow-hidden">
+      <div className="relative w-full max-w-md bg-white dark:bg-slate-800 rounded-3xl shadow-2xl overflow-hidden max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="bg-black dark:bg-white p-6">
+        <div className="bg-black dark:bg-white p-6 sticky top-0 z-10">
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 bg-white/10 dark:bg-black/10 rounded-2xl flex items-center justify-center">
               <Building2 className="w-6 h-6 text-white dark:text-black" />
@@ -129,7 +174,9 @@ export function ModalWrapper() {
                 </SelectTrigger>
                 <SelectContent>
                   {PROPERTY_TYPES.map((type) => (
-                    <SelectItem key={type.value} value={type.value}>{type.label}</SelectItem>
+                    <SelectItem key={type.value} value={type.value}>
+                      {type.label} ({type.depreciation}% anual)
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -157,34 +204,79 @@ export function ModalWrapper() {
                     onChange={(e) => setFormData({ ...formData, purchaseValue: e.target.value })}
                     placeholder="0.00"
                     className="h-12 pl-8"
+                    required
                   />
                 </div>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-700 dark:text-slate-300 mb-2 block">Valor Actual</label>
-                <div className="relative">
-                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">$</span>
-                  <Input
-                    type="number"
-                    step="0.01"
-                    value={formData.currentValue}
-                    onChange={(e) => setFormData({ ...formData, currentValue: e.target.value })}
-                    placeholder="0.00"
-                    className="h-12 pl-8"
-                  />
-                </div>
+                <label className="text-sm font-medium text-gray-700 dark:text-slate-300 mb-2 block">Fecha de Adquisición</label>
+                <Input
+                  type="date"
+                  value={formData.purchaseDate}
+                  onChange={(e) => setFormData({ ...formData, purchaseDate: e.target.value })}
+                  className="h-12"
+                  required
+                />
               </div>
             </div>
 
-            <div>
-              <label className="text-sm font-medium text-gray-700 dark:text-slate-300 mb-2 block">Fecha de Adquisición</label>
-              <Input
-                type="date"
-                value={formData.purchaseDate}
-                onChange={(e) => setFormData({ ...formData, purchaseDate: e.target.value })}
-                className="h-12"
+            {/* Toggle depreciación personalizada */}
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                id="customDep"
+                checked={customDepreciation}
+                onChange={(e) => setCustomDepreciation(e.target.checked)}
+                className="w-4 h-4 rounded border-gray-300"
               />
+              <label htmlFor="customDep" className="text-sm text-gray-600 dark:text-slate-400">
+                Usar tasa de depreciación diferente
+              </label>
             </div>
+
+            {customDepreciation && (
+              <div>
+                <label className="text-sm font-medium text-gray-700 dark:text-slate-300 mb-2 block">Tasa de Depreciación Anual (%)</label>
+                <Input
+                  type="number"
+                  step="0.1"
+                  min="0"
+                  max="100"
+                  value={formData.depreciationRate}
+                  onChange={(e) => setFormData({ ...formData, depreciationRate: e.target.value })}
+                  placeholder="10"
+                  className="h-12"
+                />
+              </div>
+            )}
+
+            {/* Valor calculado */}
+            {formData.purchaseValue && formData.purchaseDate && (
+              <div className="bg-gray-50 dark:bg-slate-700/50 rounded-2xl p-4 space-y-3">
+                <div className="flex items-center gap-2 text-gray-500 dark:text-slate-400">
+                  <Calculator size={18} />
+                  <span className="text-sm font-medium">Cálculo de Depreciación</span>
+                </div>
+                <div className="grid grid-cols-2 gap-3 text-sm">
+                  <div>
+                    <p className="text-gray-500 dark:text-slate-500">Años transcurridos</p>
+                    <p className="font-medium text-gray-700 dark:text-slate-300">{yearsElapsed.toFixed(1)} años</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500 dark:text-slate-500">Tasa aplicada</p>
+                    <p className="font-medium text-gray-700 dark:text-slate-300">
+                      {customDepreciation ? `${formData.depreciationRate}%` : `${defaultDepreciation}%`}
+                    </p>
+                  </div>
+                </div>
+                <div className="pt-2 border-t border-gray-200 dark:border-slate-600">
+                  <p className="text-gray-500 dark:text-slate-500 text-sm">Valor Actual (calculado)</p>
+                  <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
+                    ${calculatedValue.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  </p>
+                </div>
+              </div>
+            )}
 
             <div>
               <label className="text-sm font-medium text-gray-700 dark:text-slate-300 mb-2 block">Descripción (opcional)</label>
