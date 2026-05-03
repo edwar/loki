@@ -12,26 +12,31 @@ export async function POST(request: Request) {
     const { imageBase64, mimeType } = await request.json()
 
     const prompt = `
-Eres un asistente especializado en extraer información de receipts/facturas de compras.
-SOLO analiza imágenes que sean receipts o facturas. Si la imagen NO es un receipt, 
-responde con este EXACTO JSON (sin texto adicional):
+Eres un experto en OCR de receipts y facturas.
+
+Analiza esta imagen buscando:
+- Nombre de tienda/proveedor
+- Fecha de la transacción
+- Lista de productos con precios
+- Total de la compra
+
+Si la imagen NO contiene un receipt o factura (es otra cosa), responde:
 {"error": "NO_ES_RECIBO", "mensaje": "La imagen no parece ser un receipt o factura"}
 
-Si la imagen ES un receipt, extrae los datos en este formato JSON:
+Si es un receipt válido, responde SOLO con JSON válido (sin markdown, sin texto extra):
 {
-  "nombreProveedor": "nombre del proveedor o tienda",
-  "fecha": "YYYY-MM-DD",
-  "total": 0.00,
+  "nombreProveedor": "Nombre de la tienda",
+  "fecha": "2024-01-15",
+  "total": 150.00,
   "items": [
-    {"nombre": "nombre del producto", "cantidad": 1, "precioUnitario": 0.00, "subtotal": 0.00}
+    {"nombre": "Producto 1", "cantidad": 2, "precioUnitario": 25.00, "subtotal": 50.00}
   ]
 }
 
-Reglas:
-- Si la imagen no es legible como receipt, responde con el JSON de error
-- Los precios deben ser números
-- Si no hay items, devuelve array vacío
-- El total debe ser la suma de los subtotales
+IMPORTANTE: 
+- Devuelve SOLO JSON válido
+- No uses backticks ni markdown
+- Si no puedes leer algo, usa valores por defecto razonables
 `
 
     const response = await fetch(OPENROUTER_API_URL, {
@@ -43,7 +48,7 @@ Reglas:
         'X-Title': 'Loki'
       },
       body: JSON.stringify({
-        model: 'meta-llama/llama-3.2-11b-vision-instruct',
+        model: 'qwen/qwen2-vl-7b-instruct',
         messages: [
           {
             role: 'system',
