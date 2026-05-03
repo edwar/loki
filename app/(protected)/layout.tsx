@@ -16,7 +16,8 @@ import {
   X,
   ChefHat,
   LogOut,
-  User
+  User,
+  Building2
 } from 'lucide-react'
 import { useState } from 'react'
 import { ThemeToggle } from '@/components/theme-toggle'
@@ -29,6 +30,7 @@ const navigation = [
   { name: 'Gastos', href: '/gastos', icon: Receipt },
   { name: 'Proveedores', href: '/proveedores', icon: Truck },
   { name: 'Clientes', href: '/clientes', icon: Users },
+  { name: 'Bienes', href: '/bienes', icon: Building2 },
 ]
 
 export default function ProtectedLayout({
