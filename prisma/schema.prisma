@@ -137,6 +137,7 @@ model PurchaseItem {
   supplyId      String?
   supplyName    String?
   quantity      Decimal  @db.Decimal(10, 2)
+  unit          String   @default("unidad")
   unitPrice     Decimal  @db.Decimal(10, 2)
   subtotal      Decimal  @db.Decimal(12, 2)
   createdAt     DateTime @default(now())

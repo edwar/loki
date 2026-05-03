@@ -31,13 +31,6 @@
   --color-blue: #2563eb;
   --color-blue-bg: #eff6ff;
   
-  /* Border radius */
-  --radius-sm: 16px;
-  --radius-md: 20px;
-  --radius-lg: 24px;
-  --radius-xl: 28px;
-  --radius-full: 9999px;
-  
   /* Spacing */
   --spacing-xs: 4px;
   --spacing-sm: 8px;

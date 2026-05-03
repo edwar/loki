@@ -60,7 +60,7 @@ function StatCard({ title, value, subtitle, change, index }: {
   index: number
 }) {
   return (
-    <div className={cn('bg-white dark:bg-slate-800 rounded p-6 animate-fade-in', `stagger-${index}`)}>
+    <div className={cn('bg-white dark:bg-slate-800 rounded-md p-6 animate-fade-in', `stagger-${index}`)}>
       <div className="flex justify-between items-start mb-4">
         <span className="text-xs font-medium text-gray-400 dark:text-slate-500 uppercase tracking-wide">{title}</span>
       </div>
@@ -70,7 +70,7 @@ function StatCard({ title, value, subtitle, change, index }: {
           <span className="text-sm text-gray-500 dark:text-slate-400">{subtitle}</span>
           {change !== undefined && change !== 0 && (
             <span className={cn(
-              'flex items-center text-xs font-medium px-2 py-0.5 rounded-full',
+              'flex items-center text-xs font-medium px-2 py-0.5 rounded-md-full',
               change >= 0 ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' : 'bg-rose-50 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400'
             )}>
               {change >= 0 ? '+' : ''}{change.toFixed(1)}%
@@ -86,7 +86,7 @@ function SaleRow({ sale }: { sale: any }) {
   return (
     <div className="flex items-center justify-between py-3 border-b border-gray-50 dark:border-slate-700 last:border-0">
       <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-full bg-gray-100 dark:bg-slate-700 flex items-center justify-center">
+        <div className="w-10 h-10 rounded-md-full bg-gray-100 dark:bg-slate-700 flex items-center justify-center">
           <DollarSign size={18} className="text-gray-600 dark:text-slate-300" />
         </div>
         <div>
@@ -103,7 +103,7 @@ function ExpenseRow({ expense }: { expense: any }) {
   return (
     <div className="flex items-center justify-between py-3 border-b border-gray-50 dark:border-slate-700 last:border-0">
       <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-full bg-gray-100 dark:bg-slate-700 flex items-center justify-center">
+        <div className="w-10 h-10 rounded-md-full bg-gray-100 dark:bg-slate-700 flex items-center justify-center">
           <Receipt size={18} className="text-gray-600 dark:text-slate-300" />
         </div>
         <div>
@@ -167,13 +167,13 @@ export default async function DashboardPage() {
       {/* Two Column Layout */}
       <div className="grid grid-cols-2 gap-6">
         {/* Sales Card */}
-        <div className="bg-white dark:bg-slate-800 rounded p-6 animate-fade-in">
+        <div className="bg-white dark:bg-slate-800 rounded-md p-6 animate-fade-in">
           <div className="flex items-center justify-between mb-6">
             <div>
               <h2 className="text-lg font-semibold text-black dark:text-white">Ventas Recientes</h2>
               <p className="text-sm text-gray-400 dark:text-slate-500">Últimas transacciones</p>
             </div>
-            <div className="w-10 h-10 rounded-full bg-gray-100 dark:bg-slate-700 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-md-full bg-gray-100 dark:bg-slate-700 flex items-center justify-center">
               <TrendingUp size={18} className="text-gray-500 dark:text-slate-400" />
             </div>
           </div>
@@ -191,13 +191,13 @@ export default async function DashboardPage() {
         </div>
 
         {/* Expenses Card */}
-        <div className="bg-white dark:bg-slate-800 rounded p-6 animate-fade-in">
+        <div className="bg-white dark:bg-slate-800 rounded-md p-6 animate-fade-in">
           <div className="flex items-center justify-between mb-6">
             <div>
               <h2 className="text-lg font-semibold text-black dark:text-white">Gastos Recientes</h2>
               <p className="text-sm text-gray-400 dark:text-slate-500">Últimos gastos registrados</p>
             </div>
-            <div className="w-10 h-10 rounded-full bg-gray-100 dark:bg-slate-700 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-md-full bg-gray-100 dark:bg-slate-700 flex items-center justify-center">
               <Receipt size={18} className="text-gray-500 dark:text-slate-400" />
             </div>
           </div>
@@ -217,9 +217,9 @@ export default async function DashboardPage() {
 
       {/* Low Stock Alert */}
       {lowStock.length > 0 && (
-        <div className="bg-white dark:bg-slate-800 rounded p-6 border border-amber-200 dark:border-amber-800 animate-fade-in">
+        <div className="bg-white dark:bg-slate-800 rounded-md p-6 border border-amber-200 dark:border-amber-800 animate-fade-in">
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 rounded-full bg-amber-50 dark:bg-amber-900/30 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-md-full bg-amber-50 dark:bg-amber-900/30 flex items-center justify-center">
               <AlertTriangle size={18} className="text-amber-500" />
             </div>
             <div>
@@ -229,12 +229,12 @@ export default async function DashboardPage() {
           </div>
           <div className="grid grid-cols-3 gap-4">
             {lowStock.map((supply: any) => (
-              <div key={supply.id} className="flex items-center justify-between p-3 bg-gray-50 rounded">
+              <div key={supply.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-md">
                 <div className="flex items-center gap-2">
                   <Package size={16} className="text-gray-400" />
                   <span className="text-sm font-medium text-black">{supply.name}</span>
                 </div>
-                <span className="text-xs font-medium px-2 py-1 bg-amber-50 text-amber-600 rounded-full">
+                <span className="text-xs font-medium px-2 py-1 bg-amber-50 text-amber-600 rounded-md-full">
                   {Number(supply.currentStock)} {supply.unit}
                 </span>
               </div>

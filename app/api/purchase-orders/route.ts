@@ -20,7 +20,50 @@ export async function POST(request: Request) {
       })
     }
 
-    // Crear la orden de compra
+    // Procesar cada item para crear o actualizar insumos
+    const processedItems = await Promise.all(items.map(async (item: any) => {
+      // Buscar insumo existente por nombre (insensible a mayúsculas)
+      let supply = await prisma.supply.findFirst({
+        where: {
+          name: { equals: item.supplyName, mode: 'insensitive' },
+          deletedAt: null
+        }
+      })
+
+      if (supply) {
+        // Actualizar stock y precio del insumo existente
+        supply = await prisma.supply.update({
+          where: { id: supply.id },
+          data: {
+            currentStock: { increment: item.quantity },
+            purchasePrice: item.unitPrice,
+            supplierId: supplier?.id || supply.supplierId
+          }
+        })
+      } else {
+        // Crear nuevo insumo si no existe
+        supply = await prisma.supply.create({
+          data: {
+            name: item.supplyName,
+            unit: item.unit || 'unidad',
+            currentStock: item.quantity,
+            purchasePrice: item.unitPrice,
+            supplierId: supplier?.id
+          }
+        })
+      }
+
+      return {
+        supplyId: supply.id,
+        supplyName: item.supplyName,
+        quantity: item.quantity,
+        unit: item.unit || 'unidad',
+        unitPrice: item.unitPrice,
+        subtotal: item.subtotal
+      }
+    }))
+
+    // Crear la orden de compra con los items procesados
     const purchaseOrder = await prisma.purchaseOrder.create({
       data: {
         supplier: supplier ? { connect: { id: supplier.id } } : undefined,
@@ -32,12 +75,7 @@ export async function POST(request: Request) {
         purchaseDate: purchaseDate ? new Date(purchaseDate) : new Date(),
         aiExtractedData,
         purchaseItems: {
-          create: items.map((item: any) => ({
-            supplyName: item.supplyName,
-            quantity: item.quantity,
-            unitPrice: item.unitPrice,
-            subtotal: item.subtotal
-          }))
+          create: processedItems
         }
       },
       include: {

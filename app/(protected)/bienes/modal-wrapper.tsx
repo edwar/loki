@@ -3,12 +3,12 @@
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
 } from '@/components/ui/select'
 import { Plus, X, Building2, Calculator } from 'lucide-react'
 import { createPortal } from 'react-dom'
@@ -25,13 +25,13 @@ const PROPERTY_TYPES = [
 
 function calculateCurrentValue(purchaseValue: number, purchaseDate: string, annualDepreciation: number): number {
   if (!purchaseDate || purchaseValue <= 0) return purchaseValue
-  
+
   const purchase = new Date(purchaseDate)
   const now = new Date()
   const years = (now.getTime() - purchase.getTime()) / (365.25 * 24 * 60 * 60 * 1000)
-  
+
   if (years <= 0) return purchaseValue
-  
+
   // Depreciación compuesta: Valor * (1 - tasa)^años
   const currentValue = purchaseValue * Math.pow(1 - annualDepreciation / 100, years)
   return Math.max(0, currentValue)
@@ -67,10 +67,10 @@ export function ModalWrapper() {
 
   useEffect(() => {
     if (formData.purchaseValue && formData.purchaseDate) {
-      const rate = customDepreciation 
-        ? parseFloat(formData.depreciationRate) || 0 
+      const rate = customDepreciation
+        ? parseFloat(formData.depreciationRate) || 0
         : PROPERTY_TYPES.find(t => t.value === formData.type)?.depreciation || 10
-      
+
       const value = calculateCurrentValue(
         parseFloat(formData.purchaseValue) || 0,
         formData.purchaseDate,
@@ -89,7 +89,7 @@ export function ModalWrapper() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
-    
+
     try {
       await fetch('/api/properties', {
         method: 'POST',
@@ -104,7 +104,7 @@ export function ModalWrapper() {
           description: formData.description || null,
         }),
       })
-      
+
       setShowForm(false)
       setFormData({
         name: '',
@@ -125,7 +125,7 @@ export function ModalWrapper() {
 
   if (!isMounted) {
     return (
-      <button 
+      <button
         className="flex items-center gap-2 px-5 py-2.5 bg-black dark:bg-white text-white dark:text-black font-medium rounded-full hover:bg-gray-800 dark:hover:bg-gray-200 transition-all"
       >
         <Plus size={18} />
@@ -135,19 +135,19 @@ export function ModalWrapper() {
   }
 
   const modalContent = showForm ? (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-100 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowForm(false)} />
-      
+
       <div className="relative w-full max-w-md bg-white dark:bg-slate-800 rounded-3xl shadow-2xl overflow-hidden max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="bg-black dark:bg-white p-6 sticky top-0 z-10">
+        <div className="p-6 sticky top-0 z-10">
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 bg-white/10 dark:bg-black/10 rounded-2xl flex items-center justify-center">
-              <Building2 className="w-6 h-6 text-white dark:text-black" />
+              <Building2 className="w-6 h-6" />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-white dark:text-black">Nuevo Bien</h2>
-              <p className="text-sm text-white/60 dark:text-black/60">Agregar activo a tu empresa</p>
+              <h2 className="text-xl font-bold">Nuevo Bien</h2>
+              <p className="text-sm text-gray-500 dark:text-slate-400">Agregar activo a tu empresa</p>
             </div>
           </div>
         </div>
@@ -290,15 +290,15 @@ export function ModalWrapper() {
             </div>
 
             <div className="flex gap-3 pt-2">
-              <Button 
-                type="submit" 
+              <Button
+                type="submit"
                 disabled={loading}
                 className="flex-1 h-12 bg-black dark:bg-white text-white dark:text-black font-semibold rounded-2xl hover:bg-gray-800 dark:hover:bg-gray-200"
               >
                 {loading ? 'Guardando...' : 'Agregar Bien'}
               </Button>
-              <Button 
-                type="button" 
+              <Button
+                type="button"
                 variant="secondary"
                 onClick={() => setShowForm(false)}
                 className="h-12 px-6 bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-slate-300 font-medium rounded-2xl hover:bg-gray-200 dark:hover:bg-slate-600"
@@ -310,7 +310,7 @@ export function ModalWrapper() {
         </div>
 
         {/* Close button */}
-        <button 
+        <button
           onClick={() => setShowForm(false)}
           className="absolute top-4 right-4 p-2 rounded-full bg-white/10 dark:bg-black/10 hover:bg-white/20 dark:hover:bg-black/20 transition-colors"
         >
@@ -322,14 +322,14 @@ export function ModalWrapper() {
 
   return (
     <>
-      <button 
+      <button
         onClick={() => setShowForm(true)}
         className="flex items-center gap-2 px-5 py-2.5 bg-black dark:bg-white text-white dark:text-black font-medium rounded-full hover:bg-gray-800 dark:hover:bg-gray-200 transition-all"
       >
         <Plus size={18} />
         <span>Nuevo Bien</span>
       </button>
-      
+
       {createPortal(modalContent, document.body)}
     </>
   )

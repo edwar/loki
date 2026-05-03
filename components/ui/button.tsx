@@ -26,7 +26,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       <button
         className={cn(
           'inline-flex items-center justify-center transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed',
-          variant === 'pill' ? 'rounded-full px-6 font-semibold' : 'rounded',
+          variant === 'pill' ? 'rounded-full px-6 font-semibold' : 'rounded-md',
           variants[variant],
           sizes[size],
           className

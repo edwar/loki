@@ -4,23 +4,22 @@ import { useState, useRef, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
 } from '@/components/ui/select'
-import { 
-  Upload, 
-  Camera, 
-  FileText, 
-  Check, 
+import {
+  Upload,
+  Camera,
+  FileText,
+  Check,
   Loader2,
-  Package,
   Trash2,
   Plus,
-  X
+  Minus
 } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils'
 import { useRouter } from 'next/navigation'
@@ -28,9 +27,12 @@ import { useRouter } from 'next/navigation'
 interface ExtractedItem {
   nombre: string
   cantidad: number
+  unidad: string
   precioUnitario: number
   subtotal: number
 }
+
+const UNIDADES = ['unidad', 'gramo', 'kilogramo', 'litro', 'mililitro', 'libra', 'onza', 'pack', 'caja', 'bolsa']
 
 interface ExtractedData {
   nombreProveedor: string
@@ -47,15 +49,32 @@ export default function ComprasPage() {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
-  
+
   const [step, setStep] = useState<'upload' | 'processing' | 'review' | 'success'>('upload')
+  const [isManual, setIsManual] = useState(false)
   const [imagePreview, setImagePreview] = useState<string | null>(null)
   const [extractedData, setExtractedData] = useState<ExtractedData | null>(null)
   const [supplierName, setSupplierName] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [cameraActive, setCameraActive] = useState(false)
+  const [suppliers, setSuppliers] = useState<{ id: string; name: string }[]>([])
   const streamRef = useRef<MediaStream | null>(null)
+
+  useEffect(() => {
+    const fetchSuppliers = async () => {
+      try {
+        const response = await fetch('/api/suppliers')
+        if (response.ok) {
+          const data = await response.json()
+          setSuppliers(data)
+        }
+      } catch (err) {
+        console.error('Error fetching suppliers:', err)
+      }
+    }
+    fetchSuppliers()
+  }, [])
 
   useEffect(() => {
     if (cameraActive && streamRef.current && videoRef.current) {
@@ -67,14 +86,14 @@ export default function ComprasPage() {
   const startCamera = async () => {
     try {
       console.log('Starting camera...')
-      
+
       const mediaStream = await navigator.mediaDevices.getUserMedia({
         video: { facingMode: 'environment' },
         audio: false
       })
-      
+
       console.log('Camera stream obtained:', mediaStream.id)
-      
+
       streamRef.current = mediaStream
       setCameraActive(true)
       setError(null)
@@ -100,29 +119,29 @@ export default function ComprasPage() {
       setError('Cámara no lista')
       return
     }
-    
+
     const video = videoRef.current
-    
+
     if (video.videoWidth === 0 || video.videoHeight === 0) {
       setError('Video no está mostrando')
       return
     }
-    
+
     const canvas = canvasRef.current
     canvas.width = video.videoWidth
     canvas.height = video.videoHeight
-    
+
     const ctx = canvas.getContext('2d')
     if (!ctx) {
       setError('No se pudo crear el contexto')
       return
     }
-    
+
     ctx.drawImage(video, 0, 0)
-    
+
     const dataUrl = canvas.toDataURL('image/jpeg', 0.8)
     const base64 = dataUrl.split(',')[1]
-    
+
     setImagePreview(dataUrl)
     stopCamera()
     processImage(base64, 'image/jpeg')
@@ -140,18 +159,18 @@ export default function ComprasPage() {
     try {
       const arrayBuffer = await file.arrayBuffer()
       const bytes = new Uint8Array(arrayBuffer)
-      
+
       let binary = ''
       const len = bytes.byteLength
       for (let i = 0; i < len; i++) {
         binary += String.fromCharCode(bytes[i])
       }
       const base64 = btoa(binary)
-      
+
       console.log('Base64 length:', base64.length)
       console.log('MimeType:', file.type)
       console.log('File size:', file.size)
-      
+
       if (base64 && base64.length > 0) {
         processImage(base64, file.type)
       } else {
@@ -176,12 +195,12 @@ export default function ComprasPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ imageBase64: base64, mimeType })
       })
-      
+
       if (!response.ok) {
         const errorData = await response.json()
         throw new Error(errorData.error || 'Error al procesar')
       }
-      
+
       const result = await response.json()
       setExtractedData(result)
       setSupplierName(result.nombreProveedor)
@@ -198,7 +217,7 @@ export default function ComprasPage() {
     if (!extractedData) return
     setExtractedData({
       ...extractedData,
-      items: [...extractedData.items, { nombre: '', cantidad: 1, precioUnitario: 0, subtotal: 0 }]
+      items: [...extractedData.items, { nombre: '', cantidad: 1, unidad: 'unidad', precioUnitario: 0, subtotal: 0 }]
     })
   }
 
@@ -225,15 +244,15 @@ export default function ComprasPage() {
 
   const handleItemChange = (index: number, field: keyof ExtractedItem, value: string | number) => {
     if (!extractedData) return
-    
+
     const newItems = [...extractedData.items]
     newItems[index] = { ...newItems[index], [field]: value }
-    
+
     newItems[index].subtotal = newItems[index].cantidad * newItems[index].precioUnitario
-    
+
     const newSubtotal = newItems.reduce((sum, item) => sum + item.subtotal, 0)
     const newTotal = calculateTotal(newItems, extractedData.descuentoPorcentaje, extractedData.impuestoPorcentaje)
-    
+
     setExtractedData({
       ...extractedData,
       items: newItems,
@@ -280,6 +299,7 @@ export default function ComprasPage() {
           items: extractedData.items.map(item => ({
             supplyName: item.nombre,
             quantity: item.cantidad,
+            unit: item.unidad || 'unidad',
             unitPrice: item.precioUnitario,
             subtotal: item.subtotal
           }))
@@ -296,6 +316,7 @@ export default function ComprasPage() {
 
   const resetForm = () => {
     setStep('upload')
+    setIsManual(false)
     setImagePreview(null)
     setExtractedData(null)
     setSupplierName('')
@@ -311,58 +332,85 @@ export default function ComprasPage() {
       </div>
 
       {/* Step indicator */}
-      <div className="flex items-center gap-4">
-        {['upload', 'processing', 'review', 'success'].map((s, i) => (
-          <div key={s} className="flex items-center gap-2">
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-              step === s 
-                ? 'bg-black dark:bg-white text-white dark:text-black' 
-                : i < ['upload', 'processing', 'review', 'success'].indexOf(step)
-                  ? 'bg-emerald-500 text-white'
-                  : 'bg-gray-200 dark:bg-slate-700 text-gray-500'
-            }`}>
-              {i < ['upload', 'processing', 'review', 'success'].indexOf(step) ? <Check size={16} /> : i + 1}
-            </div>
-            <span className={`text-sm ${step === s ? 'text-black dark:text-white font-medium' : 'text-gray-400'}`}>
-              {s === 'upload' && 'Subir'}
-              {s === 'processing' && 'Procesando'}
-              {s === 'review' && 'Revisar'}
-              {s === 'success' && 'Guardado'}
-            </span>
-            {i < 3 && <div className="w-8 h-px bg-gray-200" />}
-          </div>
-        ))}
+      <div className="flex w-full justify-center">
+        <div className="flex w-full max-w-3xl justify-center items-center">
+          {(isManual 
+            ? [
+                { step: 'review', num: '1', label: 'Registrar' },
+                { step: 'success', num: '2', label: 'Guardado' }
+              ]
+            : [
+                { step: 'upload', num: '1', label: 'Subir' },
+                { step: 'processing', num: '2', label: 'Procesando' },
+                { step: 'review', num: '3', label: 'Revisar' },
+                { step: 'success', num: '4', label: 'Guardado' }
+              ]
+          ).map(({ step: s, num, label }, i, arr) => {
+            const isPast = isManual 
+              ? (s === 'review' && step === 'success')
+              : ((s === 'upload' && ['processing', 'review', 'success'].includes(step)) ||
+                 (s === 'processing' && ['review', 'success'].includes(step)) ||
+                 (s === 'review' && step === 'success'))
+            const isCurrent = step === s
+
+            const getBgColor = () => {
+              if (isPast) return 'bg-emerald-500 text-white'
+              if (isCurrent) return 'bg-black dark:bg-white text-white dark:text-black'
+              return 'bg-gray-200 dark:bg-slate-700 text-gray-500'
+            }
+
+            return (
+              <div key={s} className={`flex items-center ${i < arr.length - 1 ? 'flex-1' : ''}`}>
+                <div className="flex flex-col items-center">
+                  <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-semibold ${getBgColor()}`}>
+                    {isPast ? <Check size={18} /> : num}
+                  </div>
+                  <span className={`text-xs font-medium mt-2 ${isCurrent ? 'text-black dark:text-white' : isPast ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-400'}`}>
+                    {label}
+                  </span>
+                </div>
+                {i < arr.length - 1 && (
+                  <div className={`flex-1 h-0.5 mx-2 ${
+                    isManual
+                    ? (step === 'success' ? 'bg-emerald-500' : 'bg-gray-200 dark:bg-slate-700')
+                    : (['processing', 'review', 'success'].includes(step) && i < (step === 'processing' ? 0 : step === 'review' ? 1 : step === 'success' ? 2 : -1) ? 'bg-emerald-500' : 'bg-gray-200 dark:bg-slate-700')
+                  }`} />
+                )}
+              </div>
+            )
+          })}
+        </div>
       </div>
 
       {/* Upload Step */}
       {step === 'upload' && (
-        <Card className="bg-white dark:bg-slate-800 rounded p-8">
+        <Card className="bg-white dark:bg-slate-800 rounded-md p-8">
           <CardContent className="p-0">
             {/* Camera Preview */}
             {cameraActive ? (
               <div className="space-y-4">
-<div className="relative aspect-[9/16] md:aspect-video bg-black rounded overflow-hidden">
-                  <video 
-                      ref={videoRef} 
-                      autoPlay 
-                      playsInline 
-                      muted
-                      className="w-full h-full object-cover"
-                    />
+                <div className="relative aspect-9/16 md:aspect-video bg-black rounded-md overflow-hidden">
+                  <video
+                    ref={videoRef}
+                    autoPlay
+                    playsInline
+                    muted
+                    className="w-full h-full object-cover"
+                  />
                   <canvas ref={canvasRef} className="hidden" />
                 </div>
                 <div className="flex gap-4">
-                  <Button 
+                  <Button
                     onClick={capturePhoto}
-                    className="flex-1 h-12 bg-emerald-500 hover:bg-emerald-600 text-white rounded"
+                    className="flex-1 h-12 bg-emerald-500 hover:bg-emerald-600 text-white rounded-md"
                   >
                     <Camera className="w-5 h-5 mr-2" />
                     Capturar
                   </Button>
-                  <Button 
+                  <Button
                     onClick={stopCamera}
                     variant="secondary"
-                    className="h-12 rounded"
+                    className="h-12 rounded-md"
                   >
                     Cancelar
                   </Button>
@@ -373,58 +421,69 @@ export default function ComprasPage() {
                 <div className="grid grid-cols-2 gap-4 mb-6">
                   <button
                     onClick={startCamera}
-                    className="border-2 border-dashed border-gray-300 dark:border-slate-600 rounded p-6 text-center hover:border-cyan-500 hover:bg-cyan-50 dark:hover:bg-cyan-900/20 transition-colors"
+                    className="border-2 border-dashed border-gray-300 dark:border-slate-600 rounded-md p-6 text-center hover:border-cyan-500 hover:bg-cyan-50 dark:hover:bg-cyan-900/20 transition-colors"
                   >
-                    <div className="w-12 h-12 bg-cyan-100 dark:bg-cyan-900/30 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <div className="w-12 h-12 bg-cyan-100 dark:bg-cyan-900/30 rounded-md-full flex items-center justify-center mx-auto mb-3">
                       <Camera className="w-6 h-6 text-cyan-600 dark:text-cyan-400" />
                     </div>
                     <span className="text-sm font-medium text-gray-700 dark:text-slate-300">
                       Tomar foto
                     </span>
                   </button>
-                  
+
                   <button
                     onClick={() => fileInputRef.current?.click()}
-                    className="border-2 border-dashed border-gray-300 dark:border-slate-600 rounded p-6 text-center hover:border-black dark:hover:border-white transition-colors"
+                    className="border-2 border-dashed border-gray-300 dark:border-slate-600 rounded-md p-6 text-center hover:border-black dark:hover:border-white transition-colors"
                   >
-                    <div className="w-12 h-12 bg-gray-100 dark:bg-slate-700 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <div className="w-12 h-12 bg-gray-100 dark:bg-slate-700 rounded-md-full flex items-center justify-center mx-auto mb-3">
                       <Upload className="w-6 h-6 text-gray-500" />
                     </div>
                     <span className="text-sm font-medium text-gray-700 dark:text-slate-300">
                       Subir archivo
                     </span>
+                    <span className="text-xs text-gray-400 block mt-1">
+                      JPG, PNG, PDF, DOCX, XLSX
+                    </span>
                   </button>
                 </div>
-                
-                <div 
-                  className="border-2 border-dashed border-gray-300 dark:border-slate-600 rounded p-8 text-center cursor-pointer hover:border-black dark:hover:border-white transition-colors"
-                  onClick={() => fileInputRef.current?.click()}
-                >
-                  <div className="w-16 h-16 bg-gray-100 dark:bg-slate-700 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Upload className="w-8 h-8 text-gray-500" />
-                  </div>
-                  <h3 className="text-lg font-semibold text-black dark:text-white mb-2">
-                    Subir imagen del receipt
-                  </h3>
-                  <p className="text-gray-500 dark:text-slate-400">
-                    Arrastra o selecciona una imagen
-                  </p>
-                  <p className="text-sm text-gray-400 mt-2">
-                    Formatos: JPG, PNG, WEBP
-                  </p>
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*,.pdf,.docx,.doc,.xlsx,.xls"
-                    className="hidden"
-                    onChange={handleFileSelect}
-                  />
-                </div>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*,.pdf,.docx,.doc,.xlsx,.xls"
+                  className="hidden"
+                  onChange={handleFileSelect}
+                />
               </>
             )}
 
+            <div className="mt-8 text-center">
+              <Button
+                onClick={() => {
+                  setStep('review')
+                  setIsManual(true)
+                  setExtractedData({
+                    nombreProveedor: '',
+                    fecha: new Date().toISOString().split('T')[0],
+                    subtotal: 0,
+                    descuentoPorcentaje: 0,
+                    impuestoPorcentaje: 0,
+                    total: 0,
+                    items: [{ nombre: '', cantidad: 1, unidad: 'unidad', precioUnitario: 0, subtotal: 0 }]
+                  })
+                  setSupplierName('')
+                  setImagePreview(null)
+                  setError(null)
+                }}
+                variant="secondary"
+                className="h-10 rounded-md"
+              >
+                <FileText className="w-4 h-4 mr-2" />
+                Registrar compra manualmente
+              </Button>
+            </div>
+
             {error && (
-              <div className="mt-4 p-4 bg-rose-50 dark:bg-rose-900/20 text-rose-600 dark:text-rose-400 rounded">
+              <div className="mt-4 p-4 bg-rose-50 dark:bg-rose-900/20 text-rose-600 dark:text-rose-400 rounded-md">
                 {error}
               </div>
             )}
@@ -434,9 +493,9 @@ export default function ComprasPage() {
 
       {/* Processing Step */}
       {step === 'processing' && (
-        <Card className="bg-white dark:bg-slate-800 rounded p-8">
+        <Card className="bg-white dark:bg-slate-800 rounded-md p-8">
           <CardContent className="p-0 text-center py-12">
-            <div className="w-20 h-20 bg-black dark:bg-white rounded-full flex items-center justify-center mx-auto mb-6">
+            <div className="w-20 h-20 bg-black dark:bg-white rounded-md-full flex items-center justify-center mx-auto mb-6">
               <Loader2 className="w-10 h-10 text-white dark:text-black animate-spin" />
             </div>
             <h3 className="text-xl font-semibold text-black dark:text-white mb-2">
@@ -445,13 +504,13 @@ export default function ComprasPage() {
             <p className="text-gray-500 dark:text-slate-400">
               La IA está analizando la imagen para extraer los datos
             </p>
-            
+
             {imagePreview && (
               <div className="mt-8 max-w-xs mx-auto">
-                <img 
-                  src={imagePreview} 
-                  alt="Receipt" 
-                  className="rounded border border-gray-200 dark:border-slate-600"
+                <img
+                  src={imagePreview}
+                  alt="Receipt"
+                  className="rounded-md border border-gray-200 dark:border-slate-600"
                 />
               </div>
             )}
@@ -462,27 +521,27 @@ export default function ComprasPage() {
       {/* Review Step */}
       {step === 'review' && extractedData && (
         <div className="space-y-6">
-          {/* Image Preview */}
-          <Card className="bg-white dark:bg-slate-800 rounded p-4">
-            <CardContent className="p-0">
-              <div className="flex items-center gap-4">
-                {imagePreview && (
-                  <img 
-                    src={imagePreview} 
-                    alt="Receipt" 
-                    className="w-24 h-24 object-cover rounded border border-gray-200"
+          {/* Image Preview - Only show if there's an image */}
+          {imagePreview && (
+            <Card className="bg-white dark:bg-slate-800 rounded-md p-4">
+              <CardContent className="p-0">
+                <div className="flex items-center gap-4">
+                  <img
+                    src={imagePreview}
+                    alt="Receipt"
+                    className="w-24 h-24 object-cover rounded-md border border-gray-200"
                   />
-                )}
-                <div>
-                  <p className="text-sm text-gray-500">Receipt escaneado</p>
-                  <p className="text-xs text-gray-400">Los datos fueron extraídos automáticamente</p>
+                  <div>
+                    <p className="text-sm text-gray-500">Receipt escaneado</p>
+                    <p className="text-xs text-gray-400">Los datos fueron extraídos automáticamente</p>
+                  </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Supplier */}
-          <Card className="bg-white dark:bg-slate-800 rounded p-6">
+          <Card className="bg-white dark:bg-slate-800 rounded-md p-6">
             <CardHeader className="px-0 pt-0">
               <CardTitle className="text-lg font-semibold text-black dark:text-white">
                 Datos del Proveedor
@@ -498,21 +557,27 @@ export default function ComprasPage() {
                   onChange={(e) => setSupplierName(e.target.value)}
                   className="h-12"
                   placeholder="Nombre del proveedor"
+                  list="suppliers-list"
                 />
+                <datalist id="suppliers-list">
+                  {suppliers.map(s => (
+                    <option key={s.id} value={s.name} />
+                  ))}
+                </datalist>
               </div>
             </CardContent>
           </Card>
 
           {/* Items */}
-          <Card className="bg-white dark:bg-slate-800 rounded p-6">
+          <Card className="bg-white dark:bg-slate-800 rounded-md p-6">
             <CardHeader className="px-0 pt-0 flex flex-row items-center justify-between">
               <CardTitle className="text-lg font-semibold text-black dark:text-white">
                 Items de la Compra
               </CardTitle>
-              <Button 
+              <Button
                 onClick={handleAddItem}
                 variant="secondary"
-                className="h-10 rounded"
+                className="h-10 rounded-md"
               >
                 <Plus className="w-4 h-4 mr-2" />
                 Agregar Item
@@ -525,16 +590,17 @@ export default function ComprasPage() {
                 <div className="space-y-3">
                   {/* Header */}
                   <div className="grid grid-cols-12 gap-2 text-xs font-medium text-gray-500 uppercase px-2">
-                    <div className="col-span-4">Producto</div>
+                    <div className="col-span-3">Producto</div>
                     <div className="col-span-2">Cantidad</div>
+                    <div className="col-span-2">Unidad</div>
                     <div className="col-span-2">Precio</div>
-                    <div className="col-span-2">Subtotal</div>
-                    <div className="col-span-2"></div>
+                    <div className="col-span-1">Total</div>
+                    <div className="col-span-1"></div>
                   </div>
 
                   {extractedData.items.map((item, index) => (
-                    <div key={index} className="grid grid-cols-12 gap-2 items-center p-2 bg-gray-50 dark:bg-slate-700/50 rounded">
-                      <div className="col-span-4">
+                    <div key={index} className="grid grid-cols-12 gap-2 items-center p-2 bg-gray-50 dark:bg-slate-700/50 rounded-md">
+                      <div className="col-span-3">
                         <Input
                           value={item.nombre}
                           onChange={(e) => handleItemChange(index, 'nombre', e.target.value)}
@@ -544,28 +610,54 @@ export default function ComprasPage() {
                       </div>
                       <div className="col-span-2">
                         <Input
-                          type="number"
-                          value={item.cantidad}
-                          onChange={(e) => handleItemChange(index, 'cantidad', parseFloat(e.target.value) || 0)}
-                          className="h-9"
+                          type="text"
+                          inputMode="numeric"
+                          value={item.cantidad.toLocaleString('es-CO')}
+                          onChange={(e) => {
+                            const raw = e.target.value.replace(/\./g, '')
+                            const val = parseInt(raw, 10) || 0
+                            handleItemChange(index, 'cantidad', val)
+                          }}
+                          onFocus={(e) => e.target.select()}
+                          className="h-9 text-right"
                         />
                       </div>
                       <div className="col-span-2">
+                        <Select
+                          value={item.unidad || 'unidad'}
+                          onValueChange={(value) => handleItemChange(index, 'unidad', value)}
+                        >
+                          <SelectTrigger className="h-9">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {UNIDADES.map(u => (
+                              <SelectItem key={u} value={u}>{u}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="col-span-2">
                         <Input
-                          type="number"
-                          step="0.01"
-                          value={item.precioUnitario}
-                          onChange={(e) => handleItemChange(index, 'precioUnitario', parseFloat(e.target.value) || 0)}
-                          className="h-9"
+                          type="text"
+                          inputMode="numeric"
+                          value={item.precioUnitario.toLocaleString('es-CO')}
+                          onChange={(e) => {
+                            const raw = e.target.value.replace(/\./g, '')
+                            const val = parseFloat(raw) || 0
+                            handleItemChange(index, 'precioUnitario', val)
+                          }}
+                          onFocus={(e) => e.target.select()}
+                          className="h-9 text-right font-medium"
                         />
                       </div>
-                      <div className="col-span-2 text-right font-medium text-black dark:text-white">
+                      <div className="col-span-1 text-right font-medium text-black dark:text-white">
                         {formatCurrency(item.subtotal)}
                       </div>
-                      <div className="col-span-2 flex justify-end">
+                      <div className="col-span-1 flex justify-end">
                         <button
                           onClick={() => handleRemoveItem(index)}
-                          className="p-2 hover:bg-rose-100 dark:hover:bg-rose-900/30 rounded-lg transition-colors"
+                          className="p-2 hover:bg-rose-100 dark:hover:bg-rose-900/30 rounded-md-lg transition-colors"
                         >
                           <Trash2 className="w-4 h-4 text-rose-500" />
                         </button>
@@ -586,14 +678,29 @@ export default function ComprasPage() {
                 <div className="flex justify-between items-center">
                   <div className="flex items-center gap-2">
                     <span className="text-gray-600 dark:text-slate-400">Descuento</span>
-                    <Input
-                      type="number"
-                      value={extractedData.descuentoPorcentaje}
-                      onChange={(e) => handleDiscountChange(parseFloat(e.target.value) || 0)}
-                      className="h-8 w-16 text-right text-sm"
-                      min={0}
-                      max={100}
-                    />
+                    <div className="flex items-center bg-gray-100 dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-0.5">
+                      <button
+                        onClick={() => handleDiscountChange(Math.max(0, extractedData.descuentoPorcentaje - 1))}
+                        className="w-7 h-7 flex items-center justify-center hover:bg-white dark:hover:bg-slate-700 rounded-lg transition-all active:scale-90 disabled:opacity-30"
+                        disabled={extractedData.descuentoPorcentaje <= 0}
+                      >
+                        <Minus size={14} className="text-gray-600 dark:text-gray-400" />
+                      </button>
+                      <input
+                        type="number"
+                        value={extractedData.descuentoPorcentaje}
+                        onChange={(e) => handleDiscountChange(Math.min(100, Math.max(0, parseFloat(e.target.value) || 0)))}
+                        onFocus={(e) => e.target.select()}
+                        className="w-8 text-center font-bold text-sm bg-transparent border-none focus:outline-none focus:ring-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none text-black dark:text-white"
+                      />
+                      <button
+                        onClick={() => handleDiscountChange(Math.min(100, extractedData.descuentoPorcentaje + 1))}
+                        className="w-7 h-7 flex items-center justify-center hover:bg-white dark:hover:bg-slate-700 rounded-lg transition-all active:scale-90 disabled:opacity-30"
+                        disabled={extractedData.descuentoPorcentaje >= 100}
+                      >
+                        <Plus size={14} className="text-gray-600 dark:text-gray-400" />
+                      </button>
+                    </div>
                     <span className="text-gray-500">%</span>
                   </div>
                   <span className="text-rose-500">
@@ -603,14 +710,29 @@ export default function ComprasPage() {
                 <div className="flex justify-between items-center">
                   <div className="flex items-center gap-2">
                     <span className="text-gray-600 dark:text-slate-400">Impuesto/IVA</span>
-                    <Input
-                      type="number"
-                      value={extractedData.impuestoPorcentaje}
-                      onChange={(e) => handleTaxChange(parseFloat(e.target.value) || 0)}
-                      className="h-8 w-16 text-right text-sm"
-                      min={0}
-                      max={100}
-                    />
+                    <div className="flex items-center bg-gray-100 dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-0.5">
+                      <button
+                        onClick={() => handleTaxChange(Math.max(0, extractedData.impuestoPorcentaje - 1))}
+                        className="w-7 h-7 flex items-center justify-center hover:bg-white dark:hover:bg-slate-700 rounded-lg transition-all active:scale-90 disabled:opacity-30"
+                        disabled={extractedData.impuestoPorcentaje <= 0}
+                      >
+                        <Minus size={14} className="text-gray-600 dark:text-gray-400" />
+                      </button>
+                      <input
+                        type="number"
+                        value={extractedData.impuestoPorcentaje}
+                        onChange={(e) => handleTaxChange(Math.min(100, Math.max(0, parseFloat(e.target.value) || 0)))}
+                        onFocus={(e) => e.target.select()}
+                        className="w-8 text-center font-bold text-sm bg-transparent border-none focus:outline-none focus:ring-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none text-black dark:text-white"
+                      />
+                      <button
+                        onClick={() => handleTaxChange(Math.min(100, extractedData.impuestoPorcentaje + 1))}
+                        className="w-7 h-7 flex items-center justify-center hover:bg-white dark:hover:bg-slate-700 rounded-lg transition-all active:scale-90 disabled:opacity-30"
+                        disabled={extractedData.impuestoPorcentaje >= 100}
+                      >
+                        <Plus size={14} className="text-gray-600 dark:text-gray-400" />
+                      </button>
+                    </div>
                     <span className="text-gray-500">%</span>
                   </div>
                   <span className="text-gray-500">
@@ -629,16 +751,16 @@ export default function ComprasPage() {
 
           {/* Actions */}
           <div className="flex gap-4">
-            <Button 
+            <Button
               onClick={resetForm}
               variant="secondary"
-              className="flex-1 h-12 rounded"
+              className="flex-1 h-12 rounded-md"
             >
-              EscANEAR OTRO
+              ESCANEAR OTRO
             </Button>
-            <Button 
+            <Button
               onClick={handleSavePurchase}
-              className="flex-1 h-12 bg-black dark:bg-white text-white dark:text-black font-semibold rounded"
+              className="flex-1 h-12 bg-black dark:bg-white text-white dark:text-black font-semibold rounded-md"
             >
               GUARDAR COMPRA
             </Button>
@@ -648,9 +770,9 @@ export default function ComprasPage() {
 
       {/* Success Step */}
       {step === 'success' && (
-        <Card className="bg-white dark:bg-slate-800 rounded p-8">
+        <Card className="bg-white dark:bg-slate-800 rounded-md p-8">
           <CardContent className="p-0 text-center py-12">
-            <div className="w-20 h-20 bg-emerald-500 rounded-full flex items-center justify-center mx-auto mb-6">
+            <div className="w-20 h-20 bg-emerald-500 rounded-md-full flex items-center justify-center mx-auto mb-6">
               <Check className="w-10 h-10 text-white" />
             </div>
             <h3 className="text-xl font-semibold text-black dark:text-white mb-2">
@@ -659,9 +781,9 @@ export default function ComprasPage() {
             <p className="text-gray-500 dark:text-slate-400 mb-8">
               Los items han sido agregados al inventario
             </p>
-            <Button 
+            <Button
               onClick={() => router.push('/insumos')}
-              className="bg-black dark:bg-white text-white dark:text-black rounded"
+              className="bg-black dark:bg-white text-white dark:text-black rounded-md"
             >
               VER INVENTARIO
             </Button>
