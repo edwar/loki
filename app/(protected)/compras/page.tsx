@@ -22,7 +22,6 @@ import {
   Plus,
   X
 } from 'lucide-react'
-import { analyzeReceipt } from '@/lib/ai/gemini'
 import { formatCurrency } from '@/lib/utils'
 import { useRouter } from 'next/navigation'
 
@@ -130,7 +129,18 @@ export default function ComprasPage() {
     setError(null)
 
     try {
-      const result = await analyzeReceipt(base64, mimeType)
+      const response = await fetch('/api/analyze-receipt', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ imageBase64: base64, mimeType })
+      })
+      
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Error al procesar')
+      }
+      
+      const result = await response.json()
       setExtractedData(result)
       setSupplierName(result.nombreProveedor)
       setStep('review')
