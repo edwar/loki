@@ -2,29 +2,33 @@ import * as React from 'react'
 import { cn } from '@/lib/utils'
 
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'default' | 'outline' | 'ghost' | 'destructive' | 'secondary'
-  size?: 'default' | 'sm' | 'lg' | 'icon'
+  variant?: 'primary' | 'secondary' | 'ghost' | 'outline' | 'pill'
+  size?: 'sm' | 'md' | 'lg'
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant = 'default', size = 'default', ...props }, ref) => {
+  ({ className, variant = 'primary', size = 'md', ...props }, ref) => {
+    const variants = {
+      primary: 'bg-black dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200',
+      secondary: 'bg-gray-100 dark:bg-slate-700 text-black dark:text-white hover:bg-gray-200 dark:hover:bg-slate-600',
+      ghost: 'bg-transparent text-gray-600 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-700',
+      outline: 'bg-white dark:bg-slate-800 border-2 border-black dark:border-white text-black dark:text-white hover:bg-black dark:hover:bg-white hover:text-white dark:hover:text-black',
+      pill: 'rounded-full font-semibold',
+    }
+    
+    const sizes = {
+      sm: 'h-8 px-4 text-xs',
+      md: 'h-10 px-5 text-sm',
+      lg: 'h-12 px-6 text-base',
+    }
+
     return (
       <button
         className={cn(
-          'inline-flex items-center justify-center rounded-lg text-sm font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 active:scale-[0.98]',
-          {
-            'bg-[var(--primary)] text-[var(--primary-foreground)] hover:bg-[var(--primary)]/90 shadow-sm hover:shadow-md': variant === 'default',
-            'border-2 border-[var(--primary)] bg-transparent text-[var(--primary)] hover:bg-[var(--primary)]/10': variant === 'outline',
-            'bg-[var(--secondary)] text-[var(--secondary-foreground)] hover:bg-[var(--secondary)]/80': variant === 'secondary',
-            'hover:bg-[var(--accent)] text-[var(--foreground)]': variant === 'ghost',
-            'bg-[var(--destructive)] text-white hover:bg-[var(--destructive)]/90': variant === 'destructive',
-          },
-          {
-            'h-10 px-4 py-2': size === 'default',
-            'h-8 px-3 text-xs': size === 'sm',
-            'h-12 px-6 text-base': size === 'lg',
-            'h-10 w-10': size === 'icon',
-          },
+          'inline-flex items-center justify-center transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed',
+          variant === 'pill' ? 'rounded-full px-6 font-semibold' : 'rounded-2xl',
+          variants[variant],
+          sizes[size],
           className
         )}
         ref={ref}

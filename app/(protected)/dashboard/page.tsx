@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { formatCurrency, formatDate } from '@/lib/utils'
-import { Package, ShoppingBag, TrendingUp, Receipt, AlertTriangle, DollarSign, TrendingDown, ArrowUpRight, ArrowDownRight } from 'lucide-react'
+import { Package, ShoppingBag, TrendingUp, Receipt, AlertTriangle, DollarSign, ArrowUpRight } from 'lucide-react'
 import { prisma } from '@/lib/prisma'
 import { cn } from '@/lib/utils'
 
@@ -52,49 +52,66 @@ async function getRecentExpenses() {
   })
 }
 
-function StatCard({ title, value, subtitle, icon: IconComponent, color, change, changeLabel }: { 
+function StatCard({ title, value, subtitle, change, index }: { 
   title: string
   value: string
   subtitle?: string
-  icon: React.ReactNode
-  color: string
   change?: number
-  changeLabel?: string
+  index: number
 }) {
   return (
-    <Card className="card-hover relative overflow-hidden group">
-      <div className={cn('absolute top-0 right-0 w-24 h-24 rounded-full -translate-y-8 translate-x-8 opacity-20', color.replace('bg-', 'bg-opacity-100 bg-'))} />
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-semibold text-[var(--muted-foreground)] uppercase tracking-wide">{title}</CardTitle>
-        <div className={cn('p-2.5 rounded-xl', color)}>
-          {IconComponent}
+    <div className={cn('bg-white dark:bg-slate-800 rounded-[24px] p-6 animate-fade-in', `stagger-${index}`)}>
+      <div className="flex justify-between items-start mb-4">
+        <span className="text-xs font-medium text-gray-400 dark:text-slate-500 uppercase tracking-wide">{title}</span>
+      </div>
+      <div className="text-4xl font-bold text-black dark:text-white tracking-tight">{value}</div>
+      {subtitle && (
+        <div className="flex items-center gap-2 mt-3">
+          <span className="text-sm text-gray-500 dark:text-slate-400">{subtitle}</span>
+          {change !== undefined && change !== 0 && (
+            <span className={cn(
+              'flex items-center text-xs font-medium px-2 py-0.5 rounded-full',
+              change >= 0 ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' : 'bg-rose-50 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400'
+            )}>
+              {change >= 0 ? '+' : ''}{change.toFixed(1)}%
+            </span>
+          )}
         </div>
-      </CardHeader>
-      <CardContent>
-        <div className="text-3xl font-bold text-[var(--foreground)] tracking-tight">{value}</div>
-        {subtitle && (
-          <div className="flex items-center gap-2 mt-1">
-            <p className="text-xs text-[var(--muted-foreground)]">{subtitle}</p>
-            {change !== undefined && (
-              <span className={cn('flex items-center text-xs font-medium', change >= 0 ? 'text-emerald-600' : 'text-rose-600')}>
-                {change >= 0 ? <ArrowUpRight size={12} className="mr-0.5" /> : <ArrowDownRight size={12} className="mr-0.5" />}
-                {Math.abs(change).toFixed(1)}%
-              </span>
-            )}
-          </div>
-        )}
-      </CardContent>
-    </Card>
+      )}
+    </div>
   )
 }
 
-function EmptyState({ icon: Icon, message }: { icon: any; message: string }) {
+function SaleRow({ sale }: { sale: any }) {
   return (
-    <div className="flex flex-col items-center justify-center py-8 text-center">
-      <div className="w-14 h-14 rounded-full bg-[var(--muted)] flex items-center justify-center mb-3">
-        <Icon className="w-7 h-7 text-[var(--muted-foreground)]" />
+    <div className="flex items-center justify-between py-3 border-b border-gray-50 dark:border-slate-700 last:border-0">
+      <div className="flex items-center gap-3">
+        <div className="w-10 h-10 rounded-full bg-gray-100 dark:bg-slate-700 flex items-center justify-center">
+          <DollarSign size={18} className="text-gray-600 dark:text-slate-300" />
+        </div>
+        <div>
+          <p className="text-sm font-medium text-black dark:text-white">{sale.saleItems.map((si: any) => si.product.name).join(', ')}</p>
+          <p className="text-xs text-gray-400 dark:text-slate-500">{formatDate(sale.createdAt)}</p>
+        </div>
       </div>
-      <p className="text-sm text-[var(--muted-foreground)]">{message}</p>
+      <span className="text-sm font-semibold text-black dark:text-white">{formatCurrency(Number(sale.totalAmount))}</span>
+    </div>
+  )
+}
+
+function ExpenseRow({ expense }: { expense: any }) {
+  return (
+    <div className="flex items-center justify-between py-3 border-b border-gray-50 dark:border-slate-700 last:border-0">
+      <div className="flex items-center gap-3">
+        <div className="w-10 h-10 rounded-full bg-gray-100 dark:bg-slate-700 flex items-center justify-center">
+          <Receipt size={18} className="text-gray-600 dark:text-slate-300" />
+        </div>
+        <div>
+          <p className="text-sm font-medium text-black dark:text-white">{expense.type}</p>
+          <p className="text-xs text-gray-400 dark:text-slate-500">{formatDate(expense.date)}</p>
+        </div>
+      </div>
+      <span className="text-sm font-semibold text-black dark:text-white">{formatCurrency(Number(expense.amount))}</span>
     </div>
   )
 }
@@ -111,151 +128,119 @@ export default async function DashboardPage() {
   }).then(supplies => supplies.filter(s => Number(s.currentStock) < Number(s.minStock)).slice(0, 5))
 
   return (
-    <div className="space-y-8 animate-fade-in">
-      <div className="flex flex-col gap-1">
-        <h1 className="text-3xl font-bold text-[var(--foreground)] tracking-tight">Bienvenido</h1>
-        <p className="text-[var(--muted-foreground)]">Aquí está el resumen de tu negocio hoy</p>
+    <div className="space-y-8">
+      {/* Greeting */}
+      <div className="animate-fade-in">
+        <h1 className="text-3xl font-bold text-black dark:text-white tracking-tight">Buenos días</h1>
+        <p className="text-gray-500 dark:text-slate-400 mt-1">Aquí está el resumen de tu negocio</p>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <div className="animate-fade-in stagger-1">
-          <StatCard 
-            title="Ventas Hoy" 
-            value={formatCurrency(stats.salesTotal)} 
-            subtitle={`${recentSales.length} transacciones`}
-            change={stats.salesChange}
-            icon={<TrendingUp className="w-5 h-5 text-emerald-600" />}
-            color="bg-emerald-100 dark:bg-emerald-900/30"
-          />
-        </div>
-        <div className="animate-fade-in stagger-2">
-          <StatCard 
-            title="Gastos Hoy" 
-            value={formatCurrency(stats.expensesTotal)}
-            subtitle="Gastos indirectos"
-            icon={<Receipt className="w-5 h-5 text-rose-600" />}
-            color="bg-rose-100 dark:bg-rose-900/30"
-          />
-        </div>
-        <div className="animate-fade-in stagger-3">
-          <StatCard 
-            title="Insumos" 
-            value={stats.suppliesCount.toString()}
-            subtitle="Productos en inventario"
-            icon={<Package className="w-5 h-5 text-amber-600" />}
-            color="bg-amber-100 dark:bg-amber-900/30"
-          />
-        </div>
-        <div className="animate-fade-in stagger-4">
-          <StatCard 
-            title="Productos" 
-            value={stats.productsCount.toString()}
-            subtitle="Productos disponibles"
-            icon={<ShoppingBag className="w-5 h-5 text-blue-600" />}
-            color="bg-blue-100 dark:bg-blue-900/30"
-          />
-        </div>
+      {/* Stats Grid - 4 columns */}
+      <div className="grid grid-cols-4 gap-6">
+        <StatCard 
+          title="Ventas Hoy" 
+          value={formatCurrency(stats.salesTotal)} 
+          subtitle={`${recentSales.length} transacciones`}
+          change={stats.salesChange}
+          index={1}
+        />
+        <StatCard 
+          title="Gastos Hoy" 
+          value={formatCurrency(stats.expensesTotal)}
+          subtitle="Gastos indirectos"
+          index={2}
+        />
+        <StatCard 
+          title="Insumos" 
+          value={stats.suppliesCount.toString()}
+          subtitle="En inventario"
+          index={3}
+        />
+        <StatCard 
+          title="Productos" 
+          value={stats.productsCount.toString()}
+          subtitle="Disponibles"
+          index={4}
+        />
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        <Card className="animate-fade-in">
-          <CardHeader className="flex flex-row items-center justify-between">
+      {/* Two Column Layout */}
+      <div className="grid grid-cols-2 gap-6">
+        {/* Sales Card */}
+        <div className="bg-white dark:bg-slate-800 rounded-[24px] p-6 animate-fade-in">
+          <div className="flex items-center justify-between mb-6">
             <div>
-              <CardTitle className="text-lg font-bold">Ventas Recientes</CardTitle>
-              <p className="text-sm text-[var(--muted-foreground)]">Últimas transacciones</p>
+              <h2 className="text-lg font-semibold text-black dark:text-white">Ventas Recientes</h2>
+              <p className="text-sm text-gray-400 dark:text-slate-500">Últimas transacciones</p>
             </div>
-            <div className="p-2 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg">
-              <TrendingUp className="w-5 h-5 text-emerald-600" />
+            <div className="w-10 h-10 rounded-full bg-gray-100 dark:bg-slate-700 flex items-center justify-center">
+              <TrendingUp size={18} className="text-gray-500 dark:text-slate-400" />
             </div>
-          </CardHeader>
-          <CardContent>
-            {recentSales.length === 0 ? (
-              <EmptyState icon={TrendingUp} message="No hay ventas registradas aún" />
-            ) : (
-              <div className="space-y-2">
-                {recentSales.map((sale) => (
-                  <div key={sale.id} className="flex items-center justify-between p-3 rounded-lg hover:bg-[var(--accent)] transition-colors group cursor-pointer">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
-                        <DollarSign className="w-5 h-5 text-emerald-600" />
-                      </div>
-                      <div>
-                        <p className="text-sm font-semibold text-[var(--foreground)] group-hover:text-[var(--primary)] transition-colors">
-                          {sale.saleItems.map(si => si.product.name).join(', ')}
-                        </p>
-                        <p className="text-xs text-[var(--muted-foreground)]">{formatDate(sale.createdAt)}</p>
-                      </div>
-                    </div>
-                    <span className="text-sm font-bold text-emerald-600">{formatCurrency(Number(sale.totalAmount))}</span>
-                  </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card className="animate-fade-in">
-          <CardHeader className="flex flex-row items-center justify-between">
+          </div>
+          {recentSales.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-8 text-center">
+              <p className="text-sm text-gray-400 dark:text-slate-500">No hay ventas registradas aún</p>
+            </div>
+          ) : (
             <div>
-              <CardTitle className="text-lg font-bold">Gastos Recientes</CardTitle>
-              <p className="text-sm text-[var(--muted-foreground)]">Últimos gastos registrados</p>
-            </div>
-            <div className="p-2 bg-rose-100 dark:bg-rose-900/30 rounded-lg">
-              <Receipt className="w-5 h-5 text-rose-600" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            {recentExpenses.length === 0 ? (
-              <EmptyState icon={Receipt} message="No hay gastos registrados aún" />
-            ) : (
-              <div className="space-y-2">
-                {recentExpenses.map((expense) => (
-                  <div key={expense.id} className="flex items-center justify-between p-3 rounded-lg hover:bg-[var(--accent)] transition-colors group cursor-pointer">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-lg bg-rose-100 dark:bg-rose-900/30 flex items-center justify-center">
-                        <Receipt className="w-5 h-5 text-rose-600" />
-                      </div>
-                      <div>
-                        <p className="text-sm font-semibold text-[var(--foreground)] group-hover:text-[var(--primary)] transition-colors">{expense.type}</p>
-                        <p className="text-xs text-[var(--muted-foreground)]">{formatDate(expense.date)}</p>
-                      </div>
-                    </div>
-                    <span className="text-sm font-bold text-rose-600">{formatCurrency(Number(expense.amount))}</span>
-                  </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-
-      {lowStock.length > 0 && (
-        <Card className="border-2 border-amber-200/50 bg-gradient-to-br from-amber-50/50 to-transparent dark:from-amber-900/10 animate-fade-in">
-          <CardHeader className="flex flex-row items-center gap-3">
-            <div className="p-2.5 bg-amber-100 dark:bg-amber-900/30 rounded-xl">
-              <AlertTriangle className="h-5 w-5 text-amber-600" />
-            </div>
-            <div>
-              <CardTitle className="text-lg font-bold text-amber-800 dark:text-amber-200">Alerta de Stock Bajo</CardTitle>
-              <p className="text-sm text-amber-600/80 dark:text-amber-400/70">{lowStock.length} productos necesitan reposición</p>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-              {lowStock.map((supply) => (
-                <div key={supply.id} className="flex items-center justify-between p-3 bg-white dark:bg-zinc-900 rounded-lg border border-amber-200/30">
-                  <div className="flex items-center gap-2">
-                    <Package className="w-4 h-4 text-amber-500" />
-                    <span className="text-sm font-semibold text-amber-900 dark:text-amber-100">{supply.name}</span>
-                  </div>
-                  <span className="text-xs font-medium px-2 py-1 bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300 rounded-full">
-                    {Number(supply.currentStock)} {supply.unit}
-                  </span>
-                </div>
+              {recentSales.map((sale) => (
+                <SaleRow key={sale.id} sale={sale} />
               ))}
             </div>
-          </CardContent>
-        </Card>
+          )}
+        </div>
+
+        {/* Expenses Card */}
+        <div className="bg-white dark:bg-slate-800 rounded-[24px] p-6 animate-fade-in">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h2 className="text-lg font-semibold text-black dark:text-white">Gastos Recientes</h2>
+              <p className="text-sm text-gray-400 dark:text-slate-500">Últimos gastos registrados</p>
+            </div>
+            <div className="w-10 h-10 rounded-full bg-gray-100 dark:bg-slate-700 flex items-center justify-center">
+              <Receipt size={18} className="text-gray-500 dark:text-slate-400" />
+            </div>
+          </div>
+          {recentExpenses.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-8 text-center">
+              <p className="text-sm text-gray-400 dark:text-slate-500">No hay gastos registrados aún</p>
+            </div>
+          ) : (
+            <div>
+              {recentExpenses.map((expense) => (
+                <ExpenseRow key={expense.id} expense={expense} />
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Low Stock Alert */}
+      {lowStock.length > 0 && (
+        <div className="bg-white dark:bg-slate-800 rounded-[24px] p-6 border border-amber-200 dark:border-amber-800 animate-fade-in">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-10 h-10 rounded-full bg-amber-50 dark:bg-amber-900/30 flex items-center justify-center">
+              <AlertTriangle size={18} className="text-amber-500" />
+            </div>
+            <div>
+              <h2 className="text-lg font-semibold text-black">Alerta de Stock Bajo</h2>
+              <p className="text-sm text-amber-600">{lowStock.length} productos necesitan reposición</p>
+            </div>
+          </div>
+          <div className="grid grid-cols-3 gap-4">
+            {lowStock.map((supply) => (
+              <div key={supply.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
+                <div className="flex items-center gap-2">
+                  <Package size={16} className="text-gray-400" />
+                  <span className="text-sm font-medium text-black">{supply.name}</span>
+                </div>
+                <span className="text-xs font-medium px-2 py-1 bg-amber-50 text-amber-600 rounded-full">
+                  {Number(supply.currentStock)} {supply.unit}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
       )}
     </div>
   )

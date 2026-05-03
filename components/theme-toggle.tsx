@@ -30,15 +30,13 @@ export function ThemeToggle() {
   }
 
   if (!mounted) {
-    return (
-      <div className="w-10 h-10 rounded-xl bg-[var(--muted)] border-2 border-[var(--border)]" />
-    )
+    return <div className="w-10 h-10 rounded-2xl bg-gray-100" />
   }
 
   return (
     <button
       onClick={toggleTheme}
-      className="group relative w-10 h-10 rounded-xl bg-[var(--accent)] border-2 border-[var(--border)] flex items-center justify-center hover:bg-[var(--muted)] transition-all duration-200 cursor-pointer"
+      className="relative w-10 h-10 rounded-2xl bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-slate-700 transition-all duration-200"
       aria-label={`Cambiar a modo ${theme === 'light' ? 'oscuro' : 'claro'}`}
       type="button"
     >
@@ -53,9 +51,9 @@ export function ThemeToggle() {
         <Moon 
           className={`w-5 h-5 absolute inset-0 transition-all duration-300 ${
             theme === 'light' 
-              ? 'opacity-0 -rotate-90 scale-50 text-blue-500' 
+              ? 'opacity-0 -rotate-90 scale-50 text-blue-400' 
               : 'opacity-100 rotate-0 scale-100 text-blue-400'
-          }`} 
+          }`}
         />
       </div>
     </button>

@@ -16,9 +16,9 @@ const SelectTrigger = React.forwardRef<
   <SelectPrimitive.Trigger
     ref={ref}
     className={cn(
-      'flex h-10 w-full items-center justify-between rounded-lg border-2 border-[var(--border)] bg-[var(--card)] px-4 py-2 text-sm transition-all duration-200',
-      'placeholder:text-[var(--muted-foreground)]',
-      'focus:outline-none focus:border-[var(--ring)] focus:ring-2 focus:ring-[var(--ring)]/20',
+      'flex h-11 w-full items-center justify-between rounded-2xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-2 text-sm transition-all duration-200',
+      'placeholder:text-gray-400 dark:placeholder:text-slate-500',
+      'focus:outline-none focus:border-black dark:focus:border-white focus:ring-0',
       'disabled:cursor-not-allowed disabled:opacity-50',
       className
     )}
@@ -40,7 +40,7 @@ const SelectContent = React.forwardRef<
     <SelectPrimitive.Content
       ref={ref}
       className={cn(
-        'relative z-50 min-w-[8rem] overflow-hidden rounded-xl border-2 border-[var(--border)] bg-[var(--card)] shadow-lg animate-in fade-in-0 zoom-in-95',
+        'relative z-[100] min-w-[8rem] overflow-hidden rounded-2xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-lg animate-in fade-in-0 zoom-in-95',
         position === 'popper' &&
           'translate-y-1 data-[side=bottom]:translate-y-1 data-[side=left]:-translate-x-1 data-[side=right]:translate-x-1 data-[side=top]:-translate-y-1',
         className
@@ -69,8 +69,9 @@ const SelectItem = React.forwardRef<
   <SelectPrimitive.Item
     ref={ref}
     className={cn(
-      'relative flex w-full cursor-pointer select-none items-center rounded-lg py-2.5 px-3 text-sm outline-none transition-colors duration-150',
-      'data-[highlighted]:bg-[var(--accent)] data-[highlighted]:text-[var(--accent-foreground)]',
+      'relative flex w-full cursor-pointer select-none items-center rounded-xl py-2.5 px-3 text-sm outline-none transition-colors duration-150',
+      'data-[highlighted]:bg-gray-100 dark:data-[highlighted]:bg-slate-700',
+      'data-[highlighted]:text-black dark:data-[highlighted]:text-white',
       'data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
       className
     )}
@@ -78,7 +79,7 @@ const SelectItem = React.forwardRef<
   >
     <span className="absolute right-2 flex h-4 w-4 items-center justify-center">
       <SelectPrimitive.ItemIndicator>
-        <Check className="h-4 w-4 text-[var(--primary)]" />
+        <Check className="h-4 w-4 text-black dark:text-white" />
       </SelectPrimitive.ItemIndicator>
     </span>
     <SelectPrimitive.ItemText>{children}</SelectPrimitive.ItemText>
