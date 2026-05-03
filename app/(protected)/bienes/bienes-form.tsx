@@ -10,8 +10,7 @@ import {
   SelectTrigger, 
   SelectValue 
 } from '@/components/ui/select'
-import { Plus, X } from 'lucide-react'
-import { cn } from '@/lib/utils'
+import { Plus, X, Building2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
 const PROPERTY_TYPES = [
@@ -77,131 +76,160 @@ export function BienesForm() {
 
   if (!showForm) {
     return (
-      <Button 
+      <button 
         onClick={() => setShowForm(true)}
-        className="bg-black dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200 rounded-2xl"
+        className="flex items-center gap-2 px-5 py-2.5 bg-black dark:bg-white text-white dark:text-black font-medium rounded-full hover:bg-gray-800 dark:hover:bg-gray-200 transition-all"
       >
-        <Plus className="w-4 h-4 mr-2" />
-        Nuevo Bien
-      </Button>
+        <Plus size={18} />
+        <span>Nuevo Bien</span>
+      </button>
     )
   }
 
   return (
     <>
-      <Button 
+      <button 
         onClick={() => setShowForm(true)}
-        className="bg-black dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200 rounded-2xl"
+        className="flex items-center gap-2 px-5 py-2.5 bg-black dark:bg-white text-white dark:text-black font-medium rounded-full hover:bg-gray-800 dark:hover:bg-gray-200 transition-all"
       >
-        <Plus className="w-4 h-4 mr-2" />
-        Nuevo Bien
-      </Button>
+        <Plus size={18} />
+        <span>Nuevo Bien</span>
+      </button>
 
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-        <div className="bg-white dark:bg-slate-800 rounded-[24px] p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-bold text-black dark:text-white">
-              Nuevo Bien
-            </h2>
-            <button onClick={() => setShowForm(false)} className="p-2 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-xl">
-              <X className="w-5 h-5 text-gray-500" />
-            </button>
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowForm(false)} />
+        
+        <div className="relative w-full max-w-md bg-white dark:bg-slate-800 rounded-3xl shadow-2xl overflow-hidden">
+          {/* Header */}
+          <div className="bg-black dark:bg-white p-6">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 bg-white/10 dark:bg-black/10 rounded-2xl flex items-center justify-center">
+                <Building2 className="w-6 h-6 text-white dark:text-black" />
+              </div>
+              <div>
+                <h2 className="text-xl font-bold text-white dark:text-black">Nuevo Bien</h2>
+                <p className="text-sm text-white/60 dark:text-black/60">Agregar activo a tu empresa</p>
+              </div>
+            </div>
           </div>
-          
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="text-sm font-medium text-gray-700 dark:text-slate-300 mb-1 block">Nombre</label>
-              <Input
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                placeholder="Ej: Oficina principal"
-                required
-              />
-            </div>
 
-            <div>
-              <label className="text-sm font-medium text-gray-700 dark:text-slate-300 mb-1 block">Tipo</label>
-              <Select value={formData.type} onValueChange={(v) => setFormData({ ...formData, type: v })}>
-                <SelectTrigger className="h-11">
-                  <SelectValue placeholder="Seleccionar tipo" />
-                </SelectTrigger>
-                <SelectContent>
-                  {PROPERTY_TYPES.map((type) => (
-                    <SelectItem key={type.value} value={type.value}>{type.label}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div>
-              <label className="text-sm font-medium text-gray-700 dark:text-slate-300 mb-1 block">Dirección</label>
-              <Input
-                value={formData.address}
-                onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                placeholder="Ej: Calle 123, Ciudad"
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
+          {/* Body */}
+          <div className="p-6">
+            <form onSubmit={handleSubmit} className="space-y-5">
               <div>
-                <label className="text-sm font-medium text-gray-700 dark:text-slate-300 mb-1 block">Valor Compra</label>
+                <label className="text-sm font-medium text-gray-700 dark:text-slate-300 mb-2 block">Nombre del Bien</label>
                 <Input
-                  type="number"
-                  step="0.01"
-                  value={formData.purchaseValue}
-                  onChange={(e) => setFormData({ ...formData, purchaseValue: e.target.value })}
-                  placeholder="0.00"
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  placeholder="Ej: Camioneta Ford"
+                  className="h-12"
+                  required
                 />
               </div>
+
               <div>
-                <label className="text-sm font-medium text-gray-700 dark:text-slate-300 mb-1 block">Valor Actual</label>
+                <label className="text-sm font-medium text-gray-700 dark:text-slate-300 mb-2 block">Tipo de Activo</label>
+                <Select value={formData.type} onValueChange={(v) => setFormData({ ...formData, type: v })}>
+                  <SelectTrigger className="h-12">
+                    <SelectValue placeholder="Seleccionar tipo" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {PROPERTY_TYPES.map((type) => (
+                      <SelectItem key={type.value} value={type.value}>{type.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <label className="text-sm font-medium text-gray-700 dark:text-slate-300 mb-2 block">Dirección / Ubicación</label>
                 <Input
-                  type="number"
-                  step="0.01"
-                  value={formData.currentValue}
-                  onChange={(e) => setFormData({ ...formData, currentValue: e.target.value })}
-                  placeholder="0.00"
+                  value={formData.address}
+                  onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                  placeholder="Ej: Av. Principal 123"
+                  className="h-12"
                 />
               </div>
-            </div>
 
-            <div>
-              <label className="text-sm font-medium text-gray-700 dark:text-slate-300 mb-1 block">Fecha de Compra</label>
-              <Input
-                type="date"
-                value={formData.purchaseDate}
-                onChange={(e) => setFormData({ ...formData, purchaseDate: e.target.value })}
-              />
-            </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium text-gray-700 dark:text-slate-300 mb-2 block">Valor de Compra</label>
+                  <div className="relative">
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">$</span>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      value={formData.purchaseValue}
+                      onChange={(e) => setFormData({ ...formData, purchaseValue: e.target.value })}
+                      placeholder="0.00"
+                      className="h-12 pl-8"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-700 dark:text-slate-300 mb-2 block">Valor Actual</label>
+                  <div className="relative">
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">$</span>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      value={formData.currentValue}
+                      onChange={(e) => setFormData({ ...formData, currentValue: e.target.value })}
+                      placeholder="0.00"
+                      className="h-12 pl-8"
+                    />
+                  </div>
+                </div>
+              </div>
 
-            <div>
-              <label className="text-sm font-medium text-gray-700 dark:text-slate-300 mb-1 block">Descripción</label>
-              <textarea
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                placeholder="Descripción opcional..."
-                className="flex w-full px-4 py-2 text-sm bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-2xl transition-all duration-200"
-                rows={3}
-              />
-            </div>
+              <div>
+                <label className="text-sm font-medium text-gray-700 dark:text-slate-300 mb-2 block">Fecha de Adquisición</label>
+                <Input
+                  type="date"
+                  value={formData.purchaseDate}
+                  onChange={(e) => setFormData({ ...formData, purchaseDate: e.target.value })}
+                  className="h-12"
+                />
+              </div>
 
-            <div className="flex gap-3 pt-4">
-              <Button 
-                type="submit" 
-                disabled={loading}
-                className="flex-1 bg-black dark:bg-white text-white dark:text-black"
-              >
-                {loading ? 'Guardando...' : 'Crear Bien'}
-              </Button>
-              <Button 
-                type="button" 
-                variant="secondary" 
-                onClick={() => setShowForm(false)}
-              >
-                Cancelar
-              </Button>
-            </div>
-          </form>
+              <div>
+                <label className="text-sm font-medium text-gray-700 dark:text-slate-300 mb-2 block">Descripción (opcional)</label>
+                <textarea
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  placeholder="Detalles adicionales..."
+                  className="flex w-full px-4 py-3 text-sm bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-600 rounded-2xl transition-all duration-200 resize-none"
+                  rows={2}
+                />
+              </div>
+
+              <div className="flex gap-3 pt-2">
+                <Button 
+                  type="submit" 
+                  disabled={loading}
+                  className="flex-1 h-12 bg-black dark:bg-white text-white dark:text-black font-semibold rounded-2xl hover:bg-gray-800 dark:hover:bg-gray-200"
+                >
+                  {loading ? 'Guardando...' : 'Agregar Bien'}
+                </Button>
+                <Button 
+                  type="button" 
+                  variant="secondary"
+                  onClick={() => setShowForm(false)}
+                  className="h-12 px-6 bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-slate-300 font-medium rounded-2xl hover:bg-gray-200 dark:hover:bg-slate-600"
+                >
+                  Cancelar
+                </Button>
+              </div>
+            </form>
+          </div>
+
+          {/* Close button */}
+          <button 
+            onClick={() => setShowForm(false)}
+            className="absolute top-4 right-4 p-2 rounded-full bg-white/10 dark:bg-black/10 hover:bg-white/20 dark:hover:bg-black/20 transition-colors"
+          >
+            <X className="w-5 h-5 text-white dark:text-black" />
+          </button>
         </div>
       </div>
     </>
