@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -43,6 +43,8 @@ interface ExtractedData {
 export default function ComprasPage() {
   const router = useRouter()
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const videoRef = useRef<HTMLVideoElement>(null)
+  const canvasRef = useRef<HTMLCanvasElement>(null)
   
   const [step, setStep] = useState<'upload' | 'processing' | 'review' | 'success'>('upload')
   const [imagePreview, setImagePreview] = useState<string | null>(null)
@@ -50,6 +52,61 @@ export default function ComprasPage() {
   const [supplierName, setSupplierName] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [cameraActive, setCameraActive] = useState(false)
+  const [stream, setStream] = useState<MediaStream | null>(null)
+
+  // Cleanup camera on unmount
+  useEffect(() => {
+    return () => {
+      if (stream) {
+        stream.getTracks().forEach(track => track.stop())
+      }
+    }
+  }, [stream])
+
+  const startCamera = async () => {
+    try {
+      const mediaStream = await navigator.mediaDevices.getUserMedia({ 
+        video: { facingMode: 'environment' } 
+      })
+      setStream(mediaStream)
+      setCameraActive(true)
+      if (videoRef.current) {
+        videoRef.current.srcObject = mediaStream
+      }
+    } catch (err) {
+      setError('No se pudo acceder a la cámara')
+    }
+  }
+
+  const stopCamera = () => {
+    if (stream) {
+      stream.getTracks().forEach(track => track.stop())
+      setStream(null)
+    }
+    setCameraActive(false)
+  }
+
+  const capturePhoto = () => {
+    if (!videoRef.current || !canvasRef.current) return
+    
+    const video = videoRef.current
+    const canvas = canvasRef.current
+    canvas.width = video.videoWidth
+    canvas.height = video.videoHeight
+    
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
+    
+    ctx.drawImage(video, 0, 0)
+    
+    const dataUrl = canvas.toDataURL('image/jpeg', 0.8)
+    const base64 = dataUrl.split(',')[1]
+    
+    setImagePreview(dataUrl)
+    stopCamera()
+    processImage(base64, 'image/jpeg')
+  }
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -195,30 +252,89 @@ export default function ComprasPage() {
       {step === 'upload' && (
         <Card className="bg-white dark:bg-slate-800 rounded-[24px] p-8">
           <CardContent className="p-0">
-            <div 
-              className="border-2 border-dashed border-gray-300 dark:border-slate-600 rounded-2xl p-12 text-center cursor-pointer hover:border-black dark:hover:border-white transition-colors"
-              onClick={() => fileInputRef.current?.click()}
-            >
-              <div className="w-16 h-16 bg-gray-100 dark:bg-slate-700 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Upload className="w-8 h-8 text-gray-500" />
+            {/* Camera Preview */}
+            {cameraActive ? (
+              <div className="space-y-4">
+                <div className="relative aspect-video bg-black rounded-xl overflow-hidden">
+                  <video 
+                    ref={videoRef} 
+                    autoPlay 
+                    playsInline 
+                    className="w-full h-full object-cover"
+                  />
+                  <canvas ref={canvasRef} className="hidden" />
+                </div>
+                <div className="flex gap-4">
+                  <Button 
+                    onClick={capturePhoto}
+                    className="flex-1 h-12 bg-emerald-500 hover:bg-emerald-600 text-white rounded-2xl"
+                  >
+                    <Camera className="w-5 h-5 mr-2" />
+                    Capturar
+                  </Button>
+                  <Button 
+                    onClick={stopCamera}
+                    variant="secondary"
+                    className="h-12 rounded-2xl"
+                  >
+                    Cancelar
+                  </Button>
+                </div>
               </div>
-              <h3 className="text-lg font-semibold text-black dark:text-white mb-2">
-                Subir imagen del receipt
-              </h3>
-              <p className="text-gray-500 dark:text-slate-400 mb-4">
-                Arrastra una imagen o haz click para seleccionar
-              </p>
-              <p className="text-sm text-gray-400">
-                Formatos soportados: JPG, PNG, WEBP
-              </p>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={handleFileSelect}
-              />
-            </div>
+            ) : (
+              <>
+                <div className="grid grid-cols-2 gap-4 mb-6">
+                  <button
+                    onClick={startCamera}
+                    className="border-2 border-dashed border-gray-300 dark:border-slate-600 rounded-2xl p-6 text-center hover:border-cyan-500 hover:bg-cyan-50 dark:hover:bg-cyan-900/20 transition-colors"
+                  >
+                    <div className="w-12 h-12 bg-cyan-100 dark:bg-cyan-900/30 rounded-full flex items-center justify-center mx-auto mb-3">
+                      <Camera className="w-6 h-6 text-cyan-600 dark:text-cyan-400" />
+                    </div>
+                    <span className="text-sm font-medium text-gray-700 dark:text-slate-300">
+                      Tomar foto
+                    </span>
+                  </button>
+                  
+                  <button
+                    onClick={() => fileInputRef.current?.click()}
+                    className="border-2 border-dashed border-gray-300 dark:border-slate-600 rounded-2xl p-6 text-center hover:border-black dark:hover:border-white transition-colors"
+                  >
+                    <div className="w-12 h-12 bg-gray-100 dark:bg-slate-700 rounded-full flex items-center justify-center mx-auto mb-3">
+                      <Upload className="w-6 h-6 text-gray-500" />
+                    </div>
+                    <span className="text-sm font-medium text-gray-700 dark:text-slate-300">
+                      Subir archivo
+                    </span>
+                  </button>
+                </div>
+                
+                <div 
+                  className="border-2 border-dashed border-gray-300 dark:border-slate-600 rounded-2xl p-8 text-center cursor-pointer hover:border-black dark:hover:border-white transition-colors"
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  <div className="w-16 h-16 bg-gray-100 dark:bg-slate-700 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Upload className="w-8 h-8 text-gray-500" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-black dark:text-white mb-2">
+                    Subir imagen del receipt
+                  </h3>
+                  <p className="text-gray-500 dark:text-slate-400">
+                    Arrastra o selecciona una imagen
+                  </p>
+                  <p className="text-sm text-gray-400 mt-2">
+                    Formatos: JPG, PNG, WEBP
+                  </p>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleFileSelect}
+                  />
+                </div>
+              </>
+            )}
 
             {error && (
               <div className="mt-4 p-4 bg-rose-50 dark:bg-rose-900/20 text-rose-600 dark:text-rose-400 rounded-xl">
