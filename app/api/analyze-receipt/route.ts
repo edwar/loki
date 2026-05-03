@@ -48,7 +48,7 @@ IMPORTANTE:
         'X-Title': 'Loki'
       },
       body: JSON.stringify({
-        model: 'qwen/qwen2.5-vl-32b-instruct',
+        model: 'google/gemini-flash-8b',
         messages: [
           {
             role: 'system',
