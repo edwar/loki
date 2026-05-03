@@ -37,7 +37,7 @@ async function getProperties() {
 export default async function BienesPage() {
   const properties = await getProperties()
   
-  const totalValue = properties.reduce((sum: number, p) => sum + Number(p.currentValue), 0)
+  const totalValue = properties.reduce((sum: number, p: any) => sum + Number(p.currentValue), 0)
   const propertyCount = properties.length
 
   const typeLabel = (type: string) => PROPERTY_TYPES.find(t => t.value === type)?.label || type
