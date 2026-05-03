@@ -10,8 +10,9 @@ import {
   SelectValue 
 } from '@/components/ui/select'
 import { formatCurrency } from '@/lib/utils'
-import { Building2, Plus, Pencil, Trash2, X } from 'lucide-react'
-import { BienesForm } from './bienes-form'
+import { Building2, Plus, X } from 'lucide-react'
+import { DeleteButton } from './delete-button'
+import { ModalWrapper } from './modal-wrapper'
 
 export const dynamic = 'force-dynamic'
 
@@ -80,7 +81,7 @@ export default async function BienesPage() {
 
         <Card className="bg-white dark:bg-slate-800 rounded-[24px] p-6">
           <CardContent className="p-0 flex items-center justify-center h-full">
-            <BienesForm />
+            <ModalWrapper />
           </CardContent>
         </Card>
       </div>
@@ -127,16 +128,8 @@ export default async function BienesPage() {
                       <td className="py-4 text-right text-gray-600 dark:text-slate-300">{formatCurrency(Number(property.purchaseValue))}</td>
                       <td className="py-4 text-right font-medium text-black dark:text-white">{formatCurrency(Number(property.currentValue))}</td>
                       <td className="py-4">
-                        <div className="flex items-center justify-center gap-2">
-                          <form action={`/api/properties/${property.id}/delete`} method="POST">
-                            <input type="hidden" name="id" value={property.id} />
-                            <button 
-                              type="submit"
-                              className="p-2 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-xl transition-colors"
-                            >
-                              <Trash2 className="w-4 h-4 text-rose-500" />
-                            </button>
-                          </form>
+                        <div className="flex items-center justify-center">
+                          <DeleteButton id={property.id} />
                         </div>
                       </td>
                     </tr>
