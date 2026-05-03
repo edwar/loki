@@ -18,16 +18,18 @@ import {
   LogOut,
   User,
   Building2,
-  ShoppingCart
+  ShoppingCart,
+  ChevronRight,
+  Settings
 } from 'lucide-react'
 import { useState } from 'react'
 import { ThemeToggle } from '@/components/theme-toggle'
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-  { name: 'Insumos', href: '/insumos', icon: Package },
-  { name: 'Productos', href: '/productos', icon: ShoppingBag },
   { name: 'Ventas', href: '/ventas', icon: TrendingUp },
+  { name: 'Productos', href: '/productos', icon: ShoppingBag },
+  { name: 'Insumos', href: '/insumos', icon: Package },
   { name: 'Gastos', href: '/gastos', icon: Receipt },
   { name: 'Compras', href: '/compras', icon: ShoppingCart },
   { name: 'Proveedores', href: '/proveedores', icon: Truck },
@@ -55,54 +57,49 @@ export default function ProtectedLayout({
   }
 
   return (
-    <div className="min-h-screen bg-[#f0f4f8] dark:bg-slate-900">
-      <div className="lg:hidden fixed top-4 left-4 z-50">
+    <div className="min-h-screen bg-background font-sans selection:bg-primary/20 transition-colors duration-500">
+      {/* Background Decorative Elements */}
+      <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/5 blur-[120px] rounded-full" />
+        <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-violet-500/5 blur-[120px] rounded-full" />
+      </div>
+
+      {/* Mobile Trigger */}
+      <div className="lg:hidden fixed top-4 right-4 z-50">
         <button
           onClick={() => setMobileOpen(!mobileOpen)}
-          className="p-2.5 rounded-md bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-all"
+          className="p-3 rounded-2xl bg-card/80 backdrop-blur-xl border border-border shadow-xl active:scale-95 transition-all"
         >
-          {mobileOpen ? <X size={20} className="text-black dark:text-white" /> : <Menu size={20} className="text-black dark:text-white" />}
+          {mobileOpen ? <X size={20} /> : <Menu size={20} />}
         </button>
       </div>
 
+      {/* Sidebar */}
       <aside
         className={cn(
-          'fixed inset-y-0 left-0 z-40 w-64 bg-white dark:bg-slate-800 border-r border-gray-200 dark:border-slate-700 transition-all duration-300 lg:translate-x-0',
+          'fixed inset-y-0 left-0 z-40 w-72 bg-card/40 backdrop-blur-3xl border-r border-border/50 transition-all duration-500 ease-in-out lg:translate-x-0',
           mobileOpen ? 'translate-x-0' : '-translate-x-full'
         )}
       >
         <div className="flex flex-col h-full">
-          <div className="p-6 border-b border-gray-100 dark:border-slate-700">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-md bg-black flex items-center justify-center">
-                <ChefHat size={22} className="text-white" />
+          {/* Logo */}
+          <div className="p-8">
+            <Link href="/dashboard" className="flex items-center gap-3 group">
+              <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/20 group-hover:scale-110 transition-transform duration-300">
+                <ChefHat size={22} className="text-primary-foreground" />
               </div>
               <div>
-                <h1 className="text-lg font-bold text-black dark:text-white tracking-tight">Loki</h1>
-                <p className="text-xs text-gray-400 dark:text-slate-400">Business Manager</p>
+                <h1 className="text-xl font-bold tracking-tight font-display">Loki</h1>
+                <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold opacity-70">Business Hub</p>
               </div>
-            </div>
+            </Link>
           </div>
-          
-          {session?.user && (
-            <div className="p-4 mx-4 mt-4 mb-2 rounded-md bg-gray-50 dark:bg-slate-700/50">
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-md-full bg-gray-200 dark:bg-slate-600 flex items-center justify-center">
-                  <User size={18} className="text-gray-600 dark:text-slate-300" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-black dark:text-white truncate">
-                    {session.user.name}
-                  </p>
-                  <p className="text-xs text-gray-400 dark:text-slate-400">
-                    {roleLabel[session.user.role as keyof typeof roleLabel] || session.user.role}
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
 
-          <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
+          {/* Navigation */}
+          <nav className="flex-1 px-4 space-y-1 overflow-y-auto scrollbar-none">
+            <div className="px-4 mb-4">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">Menú Principal</p>
+            </div>
             {navigation.map((item, index) => {
               const isActive = pathname === item.href || 
                 (item.href !== '/dashboard' && pathname.startsWith(item.href))
@@ -112,47 +109,74 @@ export default function ProtectedLayout({
                   href={item.href}
                   onClick={() => setMobileOpen(false)}
                   className={cn(
-                    'flex items-center gap-3 px-4 py-2.5 rounded-md text-sm font-medium transition-all duration-200',
+                    'group flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold transition-all duration-300 relative overflow-hidden',
                     isActive
-                      ? 'bg-black dark:bg-white text-white dark:text-black'
-                      : 'text-gray-500 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-700 hover:text-black dark:hover:text-white'
+                      ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/20'
+                      : 'text-muted-foreground hover:bg-accent/50 hover:text-foreground'
                   )}
-                  style={{ animationDelay: `${index * 0.03}s` }}
                 >
-                  <item.icon size={18} />
-                  {item.name}
+                  <item.icon size={18} className={cn(isActive ? 'text-white' : 'text-primary/70 group-hover:text-primary')} />
+                  <span className="flex-1">{item.name}</span>
+                  {isActive && <ChevronRight size={14} className="opacity-50" />}
                 </Link>
               )
             })}
           </nav>
 
-          <div className="p-4 border-t border-gray-100 dark:border-slate-700 space-y-3">
-            <div className="flex items-center justify-center">
-              <ThemeToggle />
+          {/* User & Settings */}
+          <div className="p-4 mt-auto">
+            <div className="p-4 rounded-3xl bg-accent/30 border border-border/50 space-y-4">
+              {session?.user && (
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-violet-500 flex items-center justify-center text-white shadow-md">
+                    <User size={20} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-bold truncate">
+                      {session.user.name}
+                    </p>
+                    <p className="text-[10px] font-bold uppercase tracking-tighter text-muted-foreground">
+                      {roleLabel[session.user.role as keyof typeof roleLabel] || session.user.role}
+                    </p>
+                  </div>
+                </div>
+              )}
+              
+              <div className="grid grid-cols-2 gap-2">
+                <div className="flex items-center justify-center bg-background/50 rounded-xl h-10 border border-border/50">
+                  <ThemeToggle />
+                </div>
+                <button
+                  onClick={handleSignOut}
+                  className="flex items-center justify-center gap-2 bg-background/50 rounded-xl h-10 border border-border/50 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
+                  title="Cerrar Sesión"
+                >
+                  <LogOut size={16} />
+                </button>
+              </div>
             </div>
-            <button
-              onClick={handleSignOut}
-              className="flex items-center gap-3 w-full px-4 py-2.5 rounded-md text-sm font-medium text-gray-500 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-700 hover:text-black dark:hover:text-white transition-colors"
-            >
-              <LogOut size={18} />
-              Cerrar Sesión
-            </button>
-            <div className="text-xs text-gray-300 dark:text-slate-600 text-center">
-              Loki v1.0.0
+            <div className="mt-4 text-[10px] font-bold text-center text-muted-foreground/40 uppercase tracking-[0.2em]">
+              Loki v2.0.4
             </div>
           </div>
         </div>
       </aside>
 
+      {/* Overlay */}
       {mobileOpen && (
         <div
-          className="fixed inset-0 z-30 bg-black/40 backdrop-blur-sm lg:hidden"
+          className="fixed inset-0 z-30 bg-background/40 backdrop-blur-sm lg:hidden transition-opacity duration-500"
           onClick={() => setMobileOpen(false)}
         />
       )}
 
-      <main className="lg:ml-64 min-h-screen">
-        <div className="p-6 lg:p-10 pt-20 lg:pt-24">{children}</div>
+      {/* Main Content */}
+      <main className="lg:ml-72 min-h-screen relative">
+        <div className="max-w-7xl mx-auto p-6 lg:p-10 pb-20">
+          <div className="animate-fade-in transition-all duration-500">
+            {children}
+          </div>
+        </div>
       </main>
     </div>
   )

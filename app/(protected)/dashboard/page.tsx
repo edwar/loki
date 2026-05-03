@@ -1,8 +1,22 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { formatCurrency, formatDate } from '@/lib/utils'
-import { Package, ShoppingBag, TrendingUp, Receipt, AlertTriangle, DollarSign, ArrowUpRight } from 'lucide-react'
+import { 
+  Package, 
+  ShoppingBag, 
+  TrendingUp, 
+  Receipt, 
+  AlertTriangle, 
+  DollarSign, 
+  ArrowUpRight,
+  ChevronRight,
+  Plus,
+  BarChart3,
+  Calendar
+} from 'lucide-react'
 import { prisma } from '@/lib/prisma'
 import { cn } from '@/lib/utils'
+import Link from 'next/link'
+import { Button } from '@/components/ui/button'
 
 export const dynamic = 'force-dynamic'
 
@@ -52,66 +66,75 @@ async function getRecentExpenses() {
   })
 }
 
-function StatCard({ title, value, subtitle, change, index }: { 
+function StatCard({ title, value, subtitle, change, index, icon: Icon, color }: { 
   title: string
   value: string
   subtitle?: string
   change?: number
   index: number
+  icon: any
+  color: string
 }) {
   return (
-    <div className={cn('bg-white dark:bg-slate-800 rounded-md p-6 animate-fade-in', `stagger-${index}`)}>
-      <div className="flex justify-between items-start mb-4">
-        <span className="text-xs font-medium text-gray-400 dark:text-slate-500 uppercase tracking-wide">{title}</span>
-      </div>
-      <div className="text-4xl font-bold text-black dark:text-white tracking-tight">{value}</div>
-      {subtitle && (
-        <div className="flex items-center gap-2 mt-3">
-          <span className="text-sm text-gray-500 dark:text-slate-400">{subtitle}</span>
+    <Card className={cn(
+      'group relative overflow-hidden border-border/40 bg-card/50 backdrop-blur-sm hover:border-primary/50 transition-all duration-500 animate-fade-in rounded-3xl',
+      `stagger-${index}`
+    )}>
+      <div className={cn('absolute top-0 right-0 w-24 h-24 blur-3xl opacity-10 transition-opacity group-hover:opacity-20', color)} />
+      <CardContent className="p-6">
+        <div className="flex justify-between items-start mb-4">
+          <div className={cn('p-2.5 rounded-xl bg-background/50 border border-border/50 group-hover:scale-110 transition-transform duration-500', color.replace('bg-', 'text-'))}>
+            <Icon size={20} />
+          </div>
           {change !== undefined && change !== 0 && (
-            <span className={cn(
-              'flex items-center text-xs font-medium px-2 py-0.5 rounded-md-full',
-              change >= 0 ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' : 'bg-rose-50 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400'
+            <div className={cn(
+              'flex items-center gap-1 text-[10px] font-bold px-2 py-1 rounded-lg',
+              change >= 0 ? 'bg-emerald-500/10 text-emerald-500' : 'bg-rose-500/10 text-rose-500'
             )}>
-              {change >= 0 ? '+' : ''}{change.toFixed(1)}%
-            </span>
+              {change >= 0 ? <ArrowUpRight size={12} /> : <ArrowUpRight size={12} className="rotate-90" />}
+              {Math.abs(change).toFixed(1)}%
+            </div>
           )}
         </div>
-      )}
-    </div>
+        <div className="space-y-1">
+          <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground opacity-70">{title}</p>
+          <h3 className="text-3xl font-bold tracking-tight font-display">{value}</h3>
+          {subtitle && (
+            <p className="text-xs text-muted-foreground font-medium pt-1">{subtitle}</p>
+          )}
+        </div>
+      </CardContent>
+    </Card>
   )
 }
 
-function SaleRow({ sale }: { sale: any }) {
+function RecentItemRow({ title, date, amount, icon: Icon, isNegative }: { 
+  title: string
+  date: Date
+  amount: number
+  icon: any
+  isNegative?: boolean
+}) {
   return (
-    <div className="flex items-center justify-between py-3 border-b border-gray-50 dark:border-slate-700 last:border-0">
-      <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-md-full bg-gray-100 dark:bg-slate-700 flex items-center justify-center">
-          <DollarSign size={18} className="text-gray-600 dark:text-slate-300" />
+    <div className="group flex items-center justify-between p-4 rounded-2xl hover:bg-accent/30 transition-all duration-300">
+      <div className="flex items-center gap-4">
+        <div className="w-12 h-12 rounded-xl bg-background border border-border/50 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
+          <Icon size={20} className="text-primary/70" />
         </div>
         <div>
-          <p className="text-sm font-medium text-black dark:text-white">{sale.saleItems.map((si: any) => si.product.name).join(', ')}</p>
-          <p className="text-xs text-gray-400 dark:text-slate-500">{formatDate(sale.createdAt)}</p>
+          <p className="text-sm font-bold text-foreground group-hover:text-primary transition-colors">{title}</p>
+          <div className="flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+            <Calendar size={10} />
+            {formatDate(date)}
+          </div>
         </div>
       </div>
-      <span className="text-sm font-semibold text-black dark:text-white">{formatCurrency(Number(sale.totalAmount))}</span>
-    </div>
-  )
-}
-
-function ExpenseRow({ expense }: { expense: any }) {
-  return (
-    <div className="flex items-center justify-between py-3 border-b border-gray-50 dark:border-slate-700 last:border-0">
-      <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-md-full bg-gray-100 dark:bg-slate-700 flex items-center justify-center">
-          <Receipt size={18} className="text-gray-600 dark:text-slate-300" />
-        </div>
-        <div>
-          <p className="text-sm font-medium text-black dark:text-white">{expense.type}</p>
-          <p className="text-xs text-gray-400 dark:text-slate-500">{formatDate(expense.date)}</p>
-        </div>
+      <div className="text-right">
+        <p className={cn("text-sm font-bold", isNegative ? "text-rose-500" : "text-foreground")}>
+          {isNegative ? '-' : ''}{formatCurrency(amount)}
+        </p>
+        <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-tighter">Exitosa</p>
       </div>
-      <span className="text-sm font-semibold text-black dark:text-white">{formatCurrency(Number(expense.amount))}</span>
     </div>
   )
 }
@@ -128,120 +151,161 @@ export default async function DashboardPage() {
   }).then((supplies: any[]) => supplies.filter((s: any) => Number(s.currentStock) < Number(s.minStock)).slice(0, 5))
 
   return (
-    <div className="space-y-8">
-      {/* Greeting */}
-      <div className="animate-fade-in">
-        <h1 className="text-3xl font-bold text-black dark:text-white tracking-tight">Buenos días</h1>
-        <p className="text-gray-500 dark:text-slate-400 mt-1">Aquí está el resumen de tu negocio</p>
+    <div className="space-y-10">
+      {/* Header & Actions */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 animate-fade-in">
+        <div>
+          <h1 className="text-4xl font-extrabold tracking-tight font-display">Resumen Ejecutivo</h1>
+          <p className="text-muted-foreground font-medium mt-1">Sincronización en tiempo real de tu operación.</p>
+        </div>
+        <div className="flex items-center gap-3">
+          <Link href="/ventas/nueva">
+            <Button className="rounded-2xl h-12 px-6 font-bold shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 active:scale-95 transition-all">
+              <Plus size={20} className="mr-2" />
+              Nueva Venta
+            </Button>
+          </Link>
+        </div>
       </div>
 
-      {/* Stats Grid - 4 columns */}
-      <div className="grid grid-cols-4 gap-6">
+      {/* Main Stats Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard 
-          title="Ventas Hoy" 
+          title="Ventas de Hoy" 
           value={formatCurrency(stats.salesTotal)} 
-          subtitle={`${recentSales.length} transacciones`}
+          subtitle={`${recentSales.length} transacciones registradas`}
           change={stats.salesChange}
+          icon={TrendingUp}
+          color="bg-primary"
           index={1}
         />
         <StatCard 
-          title="Gastos Hoy" 
+          title="Inversión Hoy" 
           value={formatCurrency(stats.expensesTotal)}
-          subtitle="Gastos indirectos"
+          subtitle="Gastos indirectos totales"
+          icon={Receipt}
+          color="bg-rose-500"
           index={2}
         />
         <StatCard 
-          title="Insumos" 
-          value={stats.suppliesCount.toString()}
-          subtitle="En inventario"
+          title="Stock Crítico" 
+          value={lowStock.length.toString()}
+          subtitle="Insumos bajo el mínimo"
+          icon={AlertTriangle}
+          color="bg-amber-500"
           index={3}
         />
         <StatCard 
-          title="Productos" 
+          title="Catálogo Activo" 
           value={stats.productsCount.toString()}
-          subtitle="Disponibles"
+          subtitle="Productos en vitrina"
+          icon={ShoppingBag}
+          color="bg-indigo-500"
           index={4}
         />
       </div>
 
-      {/* Two Column Layout */}
-      <div className="grid grid-cols-2 gap-6">
-        {/* Sales Card */}
-        <div className="bg-white dark:bg-slate-800 rounded-md p-6 animate-fade-in">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h2 className="text-lg font-semibold text-black dark:text-white">Ventas Recientes</h2>
-              <p className="text-sm text-gray-400 dark:text-slate-500">Últimas transacciones</p>
+      <div className="grid lg:grid-cols-12 gap-8">
+        {/* Recent Activity Section */}
+        <div className="lg:col-span-8 space-y-6">
+          <Card className="rounded-[2.5rem] border-border/40 bg-card/30 backdrop-blur-md overflow-hidden">
+            <div className="p-8 pb-0 flex items-center justify-between">
+              <div>
+                <h2 className="text-2xl font-bold font-display tracking-tight">Actividad Reciente</h2>
+                <p className="text-sm text-muted-foreground font-medium">Ventas y egresos del día</p>
+              </div>
+              <Link href="/ventas">
+                <Button variant="ghost" className="rounded-xl text-xs font-bold text-primary hover:bg-primary/5">
+                  Ver Todo <ChevronRight size={14} className="ml-1" />
+                </Button>
+              </Link>
             </div>
-            <div className="w-10 h-10 rounded-md-full bg-gray-100 dark:bg-slate-700 flex items-center justify-center">
-              <TrendingUp size={18} className="text-gray-500 dark:text-slate-400" />
-            </div>
-          </div>
-          {recentSales.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-8 text-center">
-              <p className="text-sm text-gray-400 dark:text-slate-500">No hay ventas registradas aún</p>
-            </div>
-          ) : (
-            <div>
-              {recentSales.map((sale: any) => (
-                <SaleRow key={sale.id} sale={sale} />
-              ))}
-            </div>
-          )}
+            <CardContent className="p-4 pt-6 space-y-2">
+              {recentSales.length === 0 && recentExpenses.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-20 text-center space-y-4">
+                  <div className="w-16 h-16 rounded-full bg-accent/50 flex items-center justify-center">
+                    <BarChart3 className="text-muted-foreground/30" />
+                  </div>
+                  <p className="text-sm text-muted-foreground font-medium">No se detectó actividad hoy aún.</p>
+                </div>
+              ) : (
+                <div className="space-y-1">
+                  {recentSales.map((sale: any) => (
+                    <RecentItemRow 
+                      key={sale.id} 
+                      title={sale.saleItems.map((si: any) => si.product.name).join(', ')}
+                      date={sale.createdAt}
+                      amount={Number(sale.totalAmount)}
+                      icon={DollarSign}
+                    />
+                  ))}
+                  {recentExpenses.map((expense: any) => (
+                    <RecentItemRow 
+                      key={expense.id} 
+                      title={expense.type}
+                      date={expense.date}
+                      amount={Number(expense.amount)}
+                      icon={Receipt}
+                      isNegative
+                    />
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </div>
 
-        {/* Expenses Card */}
-        <div className="bg-white dark:bg-slate-800 rounded-md p-6 animate-fade-in">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h2 className="text-lg font-semibold text-black dark:text-white">Gastos Recientes</h2>
-              <p className="text-sm text-gray-400 dark:text-slate-500">Últimos gastos registrados</p>
-            </div>
-            <div className="w-10 h-10 rounded-md-full bg-gray-100 dark:bg-slate-700 flex items-center justify-center">
-              <Receipt size={18} className="text-gray-500 dark:text-slate-400" />
-            </div>
-          </div>
-          {recentExpenses.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-8 text-center">
-              <p className="text-sm text-gray-400 dark:text-slate-500">No hay gastos registrados aún</p>
-            </div>
-          ) : (
-            <div>
-              {recentExpenses.map((expense: any) => (
-                <ExpenseRow key={expense.id} expense={expense} />
-              ))}
-            </div>
+        {/* Alerts & Insights */}
+        <div className="lg:col-span-4 space-y-8">
+          {lowStock.length > 0 && (
+            <Card className="rounded-[2rem] border-amber-500/20 bg-amber-500/[0.03] overflow-hidden relative group">
+              <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:scale-125 transition-transform duration-1000">
+                <AlertTriangle size={120} className="text-amber-500" />
+              </div>
+              <CardContent className="p-8 space-y-6 relative z-10">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-2xl bg-amber-500/10 flex items-center justify-center">
+                    <AlertTriangle size={24} className="text-amber-500" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-lg">Reposición</h3>
+                    <p className="text-xs text-amber-600/80 font-bold uppercase tracking-wider">Acción Requerida</p>
+                  </div>
+                </div>
+                <div className="space-y-3">
+                  {lowStock.map((supply: any) => (
+                    <div key={supply.id} className="flex items-center justify-between p-3 bg-background/50 rounded-2xl border border-amber-500/10 group/item hover:bg-background transition-colors">
+                      <div className="flex items-center gap-2">
+                        <Package size={14} className="text-muted-foreground" />
+                        <span className="text-sm font-bold">{supply.name}</span>
+                      </div>
+                      <span className="text-[10px] font-extrabold px-2 py-1 bg-rose-500/10 text-rose-600 rounded-lg">
+                        {Number(supply.currentStock)} {supply.unit}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+                <Link href="/insumos" className="block">
+                  <Button variant="outline" className="w-full rounded-2xl border-amber-500/30 text-amber-700 hover:bg-amber-500/10 h-11 font-bold">
+                    Gestionar Inventario
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
           )}
+
+          {/* Productivity Insight */}
+          <Card className="rounded-[2rem] border-primary/20 bg-primary/[0.03] p-8 space-y-4">
+             <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                <ArrowUpRight className="text-primary" size={20} />
+             </div>
+             <h4 className="font-bold">Dato del día</h4>
+             <p className="text-sm text-muted-foreground leading-relaxed">
+                Tus ventas han crecido un <span className="text-primary font-bold">{stats.salesChange.toFixed(1)}%</span> respecto a ayer. ¡Buen trabajo!
+             </p>
+          </Card>
         </div>
       </div>
-
-      {/* Low Stock Alert */}
-      {lowStock.length > 0 && (
-        <div className="bg-white dark:bg-slate-800 rounded-md p-6 border border-amber-200 dark:border-amber-800 animate-fade-in">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 rounded-md-full bg-amber-50 dark:bg-amber-900/30 flex items-center justify-center">
-              <AlertTriangle size={18} className="text-amber-500" />
-            </div>
-            <div>
-              <h2 className="text-lg font-semibold text-black">Alerta de Stock Bajo</h2>
-              <p className="text-sm text-amber-600">{lowStock.length} productos necesitan reposición</p>
-            </div>
-          </div>
-          <div className="grid grid-cols-3 gap-4">
-            {lowStock.map((supply: any) => (
-              <div key={supply.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-md">
-                <div className="flex items-center gap-2">
-                  <Package size={16} className="text-gray-400" />
-                  <span className="text-sm font-medium text-black">{supply.name}</span>
-                </div>
-                <span className="text-xs font-medium px-2 py-1 bg-amber-50 text-amber-600 rounded-md-full">
-                  {Number(supply.currentStock)} {supply.unit}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
     </div>
   )
 }
