@@ -125,7 +125,7 @@ export default async function DashboardPage() {
 
   const lowStock = await prisma.supply.findMany({
     where: { deletedAt: null }
-  }).then(supplies => supplies.filter(s => Number(s.currentStock) < Number(s.minStock)).slice(0, 5))
+  }).then((supplies: any[]) => supplies.filter((s: any) => Number(s.currentStock) < Number(s.minStock)).slice(0, 5))
 
   return (
     <div className="space-y-8">
