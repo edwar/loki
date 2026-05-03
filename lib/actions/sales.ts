@@ -31,7 +31,12 @@ export async function getActiveProducts() {
 }
 
 export async function createSale(formData: FormData) {
-  const customerId = formData.get('customerId') as string | null
+  let customerId = formData.get('customerId') as string | null
+  
+  // Si el customerId es "none" o comienza con "none_", lo tratamos como null (Venta General)
+  if (!customerId || customerId === 'none' || customerId.startsWith('none_')) {
+    customerId = null
+  }
   const itemsJson = formData.get('items') as string
 
   const items = JSON.parse(itemsJson) as { productId: string; quantity: number; unitPrice: number }[]

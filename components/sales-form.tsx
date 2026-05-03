@@ -7,7 +7,7 @@ import { NumericInput } from '@/components/ui/numeric-input'
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { formatCurrency } from '@/lib/utils'
-import { Plus, Trash2, ShoppingBag, User } from 'lucide-react'
+import { Plus, Minus, Trash2, ShoppingBag, User } from 'lucide-react'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { createSale } from '@/lib/actions/sales'
 
@@ -81,42 +81,83 @@ export function NewSaleForm({ products, customers }: { products: Product[]; cust
         </CardHeader>
         <CardContent className="p-0">
           {/* Item Adder Section */}
-          <div className="p-6 space-y-4">
-            <div className="grid grid-cols-12 gap-3 items-end">
-              <div className="col-span-12 md:col-span-7 space-y-1.5">
+          <div className="p-6 space-y-2">
+            <div className="flex items-end gap-3 h-[64px]">
+              <div className="flex-1 flex flex-col justify-end gap-1.5 h-full">
                 <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground ml-1">Producto</label>
                 <Select value={selectedProductId} onValueChange={setSelectedProductId}>
                   <SelectTrigger className="h-11 rounded-xl bg-background/60 border-primary/5 hover:border-primary/20 transition-all shadow-sm">
                     <SelectValue placeholder="Seleccionar producto" />
                   </SelectTrigger>
                   <SelectContent className="rounded-xl border-primary/10">
-                    {products.map(p => (
-                      <SelectItem key={p.id} value={p.id} className="rounded-lg">
-                        <div className="flex justify-between items-center w-full gap-4">
-                          <span>{p.name}</span>
-                          <span className="text-xs font-bold text-primary/60">{formatCurrency(Number(p.salePrice))}</span>
-                        </div>
-                      </SelectItem>
-                    ))}
+                    <SelectGroup>
+                      <SelectLabel className="text-[10px] uppercase tracking-widest text-muted-foreground/50 px-2 py-1.5">Tus Productos</SelectLabel>
+                      {products.map(p => {
+                        const price = Number(p.salePrice)
+                        const formattedPrice = price >= 1000
+                          ? `${(price / 1000) % 1 === 0 ? price / 1000 : (price / 1000).toFixed(1)}k`
+                          : price.toString()
+
+                        return (
+                          <SelectItem key={p.id} value={p.id} className="rounded-lg group">
+                            <div className="flex justify-between items-center w-full gap-2">
+                              <span>{p.name}</span>
+                              <span className="text-xs font-bold text-primary/60 group-hover:text-white group-data-[highlighted]:text-white transition-colors">
+                                {formattedPrice}
+                              </span>
+                            </div>
+                          </SelectItem>
+                        )
+                      })}
+                    </SelectGroup>
                   </SelectContent>
                 </Select>
               </div>
-              <div className="col-span-8 md:col-span-3 space-y-1.5">
+
+              <div className="flex flex-col justify-end gap-1.5 h-full">
                 <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground ml-1">Cant.</label>
-                <NumericInput
-                  value={quantity}
-                  onChange={setQuantity}
-                  placeholder="0"
-                  className="h-11 rounded-xl bg-background/60 border-primary/5 hover:border-primary/20 transition-all shadow-sm"
-                />
+                <div className="flex items-center bg-background/60 rounded-xl border border-primary/5 p-1 h-11 shadow-sm">
+                  <Button
+                    disabled={quantity === 0}
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setQuantity(Math.max(0, quantity - 1))}
+                    className="h-9 w-9 rounded-lg hover:bg-primary/10 hover:text-primary transition-all active:scale-90"
+                  >
+                    <Minus size={14} />
+                  </Button>
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    value={quantity === 0 ? '0' : quantity.toString()}
+                    onChange={(e) => {
+                      const val = e.target.value.replace(/\D/g, '')
+                      const parsed = parseInt(val, 10)
+                      setQuantity(isNaN(parsed) ? 0 : parsed)
+                    }}
+                    className="w-12 text-center font-bold text-sm bg-transparent border-none focus:outline-none focus:ring-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    onFocus={(e) => e.target.select()}
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setQuantity(quantity + 1)}
+                    className="h-9 w-9 rounded-lg hover:bg-primary/10 hover:text-primary transition-all active:scale-90"
+                  >
+                    <Plus size={14} />
+                  </Button>
+                </div>
               </div>
-              <div className="col-span-4 md:col-span-2">
+
+              <div className="flex flex-col justify-end h-full">
                 <Button
                   type="button"
                   onClick={addItem}
                   variant="secondary"
                   size="icon"
-                  className="h-11 w-11 rounded-full shadow-lg shadow-primary/5 hover:shadow-primary/20 transition-all active:scale-95"
+                  className="h-11 w-11 rounded-full shadow-lg shadow-primary/5 hover:shadow-primary/20 transition-all active:scale-95 shrink-0"
                 >
                   <Plus size={20} strokeWidth={3} />
                 </Button>
@@ -190,8 +231,8 @@ export function NewSaleForm({ products, customers }: { products: Product[]; cust
                 <ShoppingBag size={40} className="opacity-20 -mr-2 relative z-10" />
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <div className="relative group">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <div className="relative group md:col-span-2">
                   <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/50 group-focus-within:text-primary transition-colors pointer-events-none">
                     <User size={18} />
                   </div>
@@ -219,9 +260,9 @@ export function NewSaleForm({ products, customers }: { products: Product[]; cust
                 <Button
                   type="submit"
                   disabled={isPending}
-                  className="h-12 rounded-xl text-md font-bold shadow-lg shadow-primary/10 hover:shadow-primary/20 transition-all active:scale-95 bg-primary text-white"
+                  className="md:col-span-1 h-12 rounded-xl text-md font-bold shadow-lg shadow-primary/10 hover:shadow-primary/20 transition-all active:scale-95 bg-primary text-white"
                 >
-                  {isPending ? 'Procesando...' : 'Finalizar Venta'}
+                  {isPending ? 'Vendiendo...' : 'Vender'}
                 </Button>
               </div>
             </div>
