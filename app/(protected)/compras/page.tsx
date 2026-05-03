@@ -65,16 +65,25 @@ export default function ComprasPage() {
 
   const startCamera = async () => {
     try {
+      console.log('Starting camera...')
       const mediaStream = await navigator.mediaDevices.getUserMedia({ 
         video: { facingMode: 'environment' } 
       })
+      console.log('Camera stream obtained:', mediaStream.id)
       setStream(mediaStream)
       setCameraActive(true)
-      if (videoRef.current) {
-        videoRef.current.srcObject = mediaStream
-      }
+      setError(null) // Clear any previous error
+      
+      // Wait for video to be ready
+      setTimeout(() => {
+        if (videoRef.current) {
+          console.log('Video width:', videoRef.current.videoWidth)
+          console.log('Video height:', videoRef.current.videoHeight)
+        }
+      }, 500)
     } catch (err) {
-      setError('No se pudo acceder a la cámara')
+      console.error('Camera error:', err)
+      setError('No se pudo acceder a la cámara: ' + (err instanceof Error ? err.message : 'Unknown error'))
     }
   }
 
@@ -87,51 +96,80 @@ export default function ComprasPage() {
   }
 
   const capturePhoto = () => {
-    if (!videoRef.current || !canvasRef.current) return
+    if (!videoRef.current || !canvasRef.current) {
+      setError('Cámara no lista')
+      return
+    }
     
     const video = videoRef.current
     const canvas = canvasRef.current
+    
+    if (video.videoWidth === 0 || video.videoHeight === 0) {
+      setError('Video no está mostrando')
+      return
+    }
+    
     canvas.width = video.videoWidth
     canvas.height = video.videoHeight
     
     const ctx = canvas.getContext('2d')
-    if (!ctx) return
+    if (!ctx) {
+      setError('No se pudo crear el contexto')
+      return
+    }
     
     ctx.drawImage(video, 0, 0)
     
+    // Get base64 from canvas
     const dataUrl = canvas.toDataURL('image/jpeg', 0.8)
     const base64 = dataUrl.split(',')[1]
+    
+    console.log('Photo base64 length:', base64?.length)
+    
+    if (!base64 || base64.length === 0) {
+      setError('Error al convertir la foto')
+      return
+    }
     
     setImagePreview(dataUrl)
     stopCamera()
     processImage(base64, 'image/jpeg')
   }
 
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
 
-    // Convertir a base64
-    const reader = new FileReader()
-    reader.onload = () => {
-      const result = reader.result as string
-      // Remover el prefijo data URL
-      const base64 = result.split(',')[1]
-      console.log('Base64 length:', base64?.length)
+    try {
+      // Convertir a base64 usando array buffer
+      const arrayBuffer = await file.arrayBuffer()
+      const bytes = new Uint8Array(arrayBuffer)
+      
+      // Convertir a base64 manualmente
+      let binary = ''
+      const len = bytes.byteLength
+      for (let i = 0; i < len; i++) {
+        binary += String.fromCharCode(bytes[i])
+      }
+      const base64 = btoa(binary)
+      
+      console.log('Base64 length:', base64.length)
       console.log('MimeType:', file.type)
-      setImagePreview(result)
-      if (base64) {
+      console.log('File size:', file.size)
+      
+      setImagePreview(URL.createObjectURL(file))
+      
+      if (base64 && base64.length > 0) {
         processImage(base64, file.type)
       } else {
         setError('Error al procesar la imagen')
         setStep('upload')
       }
-    }
-    reader.onerror = () => {
+    } catch (err) {
+      console.error('Error reading file:', err)
       setError('Error al leer el archivo')
       setStep('upload')
     }
-    reader.readAsDataURL(file)
   }
 
   const processImage = async (base64: string, mimeType: string) => {
