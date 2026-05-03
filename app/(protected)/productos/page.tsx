@@ -89,8 +89,8 @@ export default async function ProductosPage() {
     getSupplies()
   ])
 
-  const categories = [...new Set(products.map(p => p.category).filter(Boolean) as string[])]
-  const allSupplies = supplies.map(s => ({ id: s.id, name: s.name, unit: s.unit }))
+  const categories = [...new Set(products.map((p: any) => p.category).filter(Boolean) as string[])]
+  const allSupplies = supplies.map((s: any) => ({ id: s.id, name: s.name, unit: s.unit }))
 
   return (
     <div className="space-y-8">
