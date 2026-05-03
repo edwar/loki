@@ -235,39 +235,28 @@ users (
 - Total de compras acumuladas
 - Datos de contacto
 
-### 4.6 Módulo de Productos/Recetas (MVP)
+### 4.6 Módulo de Producción y Recetario (Core)
 
-Este módulo es clave para tu negocio de empanadas y permite que el software sea genérico para otros negocios:
+Este módulo es el corazón del control de inventario y opera bajo una lógica estricta de transformación de materia prima a producto final:
 
-**Productos Finales** (ej: Empanada de Carne, Pan Francés):
-- Nombre del producto
-- Precio de venta
-- Categoría (empanadas, panes, repostería, etc.)
-- Imagen (opcional)
-- **Receta**: Lista de insumos con cantidades requeridas
+**1. Insumos (Materia Prima)**: 
+- Se adquieren mediante compras y representan el inventario base.
+- Tienen stock actual, stock mínimo y control de costos.
 
-**Relación Producto-Insumo**:
-```
-Ejemplo: Empanada de Carne
-├── Harina de trigo: 50g
-├── Carne molida: 80g
-├── Cebolla: 10g
-├── Aceite: 5ml
-└── Condimentos: 5g
-```
+**2. Productos y Recetas (Rendimiento Teórico)**: 
+- Cada producto final tiene asociada una "fórmula" o receta.
+- La receta establece exactamente qué cantidad de cada insumo se consume para obtener una cantidad *esperada* de producto final (Rendimiento o Yield).
+- Ejemplo: 500g de Harina + 200g de Carne = *Rendimiento teórico de 50 Empanadas*.
 
-**Flujo de Venta**:
-1. Se registra una venta (ej: 10 empanadas de carne)
-2. Sistema calcula: 10 × 50g = 500g harina, 10 × 80g = 800g carne, etc.
-3. Se descuenta automáticamente del inventario
-4. Alerta si no hay stock suficiente para la venta
+**3. Proceso de Producción (Acción "Producir")**:
+- Al hacer clic en "Producir", el sistema calcula los insumos a descontar basándose estrictamente en la receta.
+- Se abre una interfaz (Modal) de confirmación donde el usuario ve el resumen de la operación.
+- **Ajuste de Producción Real**: El sistema sugiere ingresar el rendimiento teórico al inventario, pero el usuario **puede editar este valor** (ej. salieron 48 en lugar de 50, o salieron 52).
+- Al confirmar, el sistema descuenta los insumos exactos dictados por la receta y suma al inventario la cantidad *real* de productos finales declarada por el usuario.
 
-**Insumos (Inventario)**:
-- Lista de productos/materiales
-- Stock actual vs stock mínimo
-- Alertas de stock bajo
-- Historial de movimientos
-- Categorización
+**4. Inventario de Venta**:
+- Los productos finales generados en el paso anterior son los únicos disponibles para la venta.
+- Las ventas descuentan de este inventario terminado, manteniendo una separación clara entre "Lo que compro" (insumos) y "Lo que vendo" (producto final).
 
 **Inmuebles/Activos**:
 - Bienes de la empresa

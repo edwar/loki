@@ -14,11 +14,12 @@ export function ProductForm({
   categories,
   onSuccess
 }: {
-  product?: { id: string; name: string; category: string | null; salePrice: number } | null
+  product?: { id: string; name: string; category: string | null; salePrice: number; yield: number } | null
   categories: string[]
   onSuccess?: () => void
 }) {
   const [salePrice, setSalePrice] = useState(product?.salePrice ?? 0)
+  const [yieldAmount, setYieldAmount] = useState(product?.yield ?? 1)
   const action = product ? updateProduct.bind(null, product.id) : createProduct
 
   const handleSubmit = async (formData: FormData) => {
@@ -62,7 +63,17 @@ export function ProductForm({
               placeholder="0"
               className="h-12"
             />
-            <input type="hidden" name="salePrice" value={salePrice} />
+            <input type="hidden" name="salePrice" value={salePrice?.toString() || "0"} />
+          </div>
+          <div className="space-y-2">
+            <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Rendimiento (Porción/Lote)</label>
+            <NumericInput
+              value={yieldAmount}
+              onChange={setYieldAmount}
+              placeholder="1"
+              className="h-12"
+            />
+            <input type="hidden" name="yield" value={yieldAmount?.toString() || "1"} />
           </div>
         </div>
       </div>

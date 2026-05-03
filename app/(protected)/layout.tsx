@@ -20,7 +20,7 @@ import {
   Building2,
   ShoppingCart,
   ChevronRight,
-  Settings
+  Factory
 } from 'lucide-react'
 import { useState } from 'react'
 import { ThemeToggle } from '@/components/theme-toggle'
@@ -29,6 +29,7 @@ const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { name: 'Ventas', href: '/ventas', icon: TrendingUp },
   { name: 'Productos', href: '/productos', icon: ShoppingBag },
+  { name: 'Producción', href: '/produccion', icon: Factory },
   { name: 'Insumos', href: '/insumos', icon: Package },
   { name: 'Gastos', href: '/gastos', icon: Receipt },
   { name: 'Compras', href: '/compras', icon: ShoppingCart },

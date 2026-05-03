@@ -20,12 +20,14 @@ export async function createProduct(formData: FormData) {
   const name = formData.get('name') as string
   const category = formData.get('category') as string | null
   const salePrice = parseFloat(formData.get('salePrice') as string) || 0
+  const yieldAmount = parseFloat(formData.get('yield') as string) || 1
 
   await prisma.product.create({
     data: {
       name,
       category,
       salePrice,
+      yield: yieldAmount,
     },
   })
 
@@ -74,6 +76,7 @@ export async function updateProduct(id: string, formData: FormData) {
   const name = formData.get('name') as string
   const category = formData.get('category') as string | null
   const salePrice = parseFloat(formData.get('salePrice') as string) || 0
+  const yieldAmount = parseFloat(formData.get('yield') as string) || 1
 
   await prisma.product.update({
     where: { id },
@@ -81,6 +84,7 @@ export async function updateProduct(id: string, formData: FormData) {
       name,
       category,
       salePrice,
+      yield: yieldAmount,
     },
   })
 
@@ -94,4 +98,72 @@ export async function deleteProduct(id: string) {
   })
 
   revalidatePath('/productos')
+}
+
+export async function prepareProduct(productId: string, batches: number, actualYield: number) {
+  const product = await prisma.product.findUnique({
+    where: { id: productId },
+    include: { recipeItems: { where: { deletedAt: null } } }
+  })
+
+  if (!product) throw new Error('Producto no encontrado')
+
+  const yieldAmount = Number(product.yield) || 1
+  const expectedYield = yieldAmount * batches
+
+  // 1. Verificar disponibilidad y preparar deducciones
+  const supplyUpdates = []
+  for (const item of product.recipeItems) {
+    const totalRequired = Number(item.quantityRequired) * batches
+    const supply = await prisma.supply.findUnique({ where: { id: item.supplyId } })
+    
+    if (!supply || Number(supply.currentStock) < totalRequired) {
+      throw new Error(`Insumo insuficiente: ${supply?.name || 'Desconocido'}`)
+    }
+
+    supplyUpdates.push({
+      id: item.supplyId,
+      quantity: totalRequired,
+      unitCost: Number(supply.purchasePrice) // We store the current cost for historical accuracy
+    })
+  }
+
+  // 2. Ejecutar transacciones
+  await prisma.$transaction(async (tx) => {
+    // Deducir insumos
+    for (const update of supplyUpdates) {
+      await tx.supply.update({
+        where: { id: update.id },
+        data: { currentStock: { decrement: update.quantity } }
+      })
+    }
+
+    // Aumentar stock de producto con el rendimiento real obtenido
+    await tx.product.update({
+      where: { id: productId },
+      data: { currentStock: { increment: actualYield } }
+    })
+
+    // Registrar el log de producción
+    await tx.productionLog.create({
+      data: {
+        productId,
+        expectedYield,
+        actualYield,
+        batches,
+        items: {
+          create: supplyUpdates.map(update => ({
+            supplyId: update.id,
+            quantityConsumed: update.quantity,
+            unitCost: update.unitCost
+          }))
+        }
+      }
+    })
+  })
+
+  revalidatePath('/productos')
+  revalidatePath('/insumos')
+  revalidatePath('/ventas')
+  revalidatePath('/')
 }

@@ -57,6 +57,7 @@ model Supply {
 
   purchaseItems PurchaseItem[]
   recipeItems   RecipeItem[]
+  productionItems ProductionItem[]
 
   @@map("supplies")
 }
@@ -66,7 +67,9 @@ model Product {
   name      String
   category  String?
   salePrice Decimal  @db.Decimal(10, 2)
-  imageUrl  String?
+  currentStock Decimal @default(0) @db.Decimal(10, 2)
+  yield        Decimal @default(1) @db.Decimal(10, 2)
+  imageUrl     String?
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -74,6 +77,7 @@ model Product {
 
   recipeItems RecipeItem[]
   saleItems   SaleItem[]
+  productionLogs ProductionLog[]
 
   @@map("products")
 }
@@ -224,4 +228,34 @@ model VerificationToken {
 
   @@unique([identifier, token])
   @@map("verification_tokens")
+}
+
+model ProductionLog {
+  id            String   @id @default(uuid())
+  productId     String
+  expectedYield Decimal  @db.Decimal(10, 2)
+  actualYield   Decimal  @db.Decimal(10, 2)
+  batches       Decimal  @db.Decimal(10, 2)
+  date          DateTime @default(now())
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  deletedAt     DateTime?
+
+  product       Product  @relation(fields: [productId], references: [id])
+  items         ProductionItem[]
+
+  @@map("production_logs")
+}
+
+model ProductionItem {
+  id               String   @id @default(uuid())
+  productionLogId  String
+  supplyId         String
+  quantityConsumed Decimal  @db.Decimal(10, 2)
+  unitCost         Decimal  @db.Decimal(10, 2)
+  
+  productionLog    ProductionLog @relation(fields: [productionLogId], references: [id], onDelete: Cascade)
+  supply           Supply        @relation(fields: [supplyId], references: [id])
+
+  @@map("production_items")
 }

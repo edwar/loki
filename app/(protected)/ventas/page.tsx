@@ -23,6 +23,8 @@ export default async function VentasPage() {
   const products = productsRaw.map((p: any) => ({
     ...p,
     salePrice: Number(p.salePrice),
+    currentStock: Number(p.currentStock),
+    yield: Number(p.yield) || 1,
     recipeItems: p.recipeItems?.map((ri: any) => ({
       ...ri,
       quantityRequired: Number(ri.quantityRequired),
@@ -54,7 +56,9 @@ export default async function VentasPage() {
       subtotal: Number(si.subtotal),
       product: si.product ? {
         ...si.product,
-        salePrice: Number(si.salePrice)
+        salePrice: Number(si.product.salePrice),
+        currentStock: Number(si.product.currentStock),
+        yield: Number(si.product.yield) || 1
       } : null
     })) || []
   }))

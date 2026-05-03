@@ -1,8 +1,8 @@
 import { getProducts } from '@/lib/actions/products'
 import { getSupplies } from '@/lib/actions/supplies'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Package, Plus } from 'lucide-react'
-import { ProductForm } from '@/components/product-forms'
+import { Package } from 'lucide-react'
+import { NewProductSection } from '@/components/new-product-section'
 import { ProductCard } from '@/components/product-card'
 
 export const dynamic = 'force-dynamic'
@@ -13,11 +13,12 @@ export default async function ProductosPage() {
     getSupplies()
   ])
 
-  // Serialize Decimals for Client Components
-  const products = productsRaw.map((p: any) => ({
-    ...p,
-    salePrice: Number(p.salePrice),
-    recipeItems: p.recipeItems?.map((ri: any) => ({
+  // Serialize Decimals and calculate availability
+  const products = productsRaw.map((p: any) => {
+    const salePrice = Number(p.salePrice)
+    const currentStock = Number(p.currentStock)
+    const yieldAmount = Number(p.yield) || 1
+    const recipeItems = p.recipeItems?.map((ri: any) => ({
       ...ri,
       quantityRequired: Number(ri.quantityRequired),
       supply: ri.supply ? {
@@ -27,7 +28,31 @@ export default async function ProductosPage() {
         purchasePrice: Number(ri.supply.purchasePrice)
       } : null
     })) || []
-  }))
+
+    // Calcular cuántos LOTES se pueden preparar basado en insumos
+    let maxBatches = Infinity
+    if (recipeItems.length === 0) {
+      maxBatches = 0
+    } else {
+      for (const item of recipeItems) {
+        if (item.supply) {
+          const possibleBatchesWithThisSupply = Math.floor(item.supply.currentStock / item.quantityRequired)
+          if (possibleBatchesWithThisSupply < maxBatches) {
+            maxBatches = possibleBatchesWithThisSupply
+          }
+        }
+      }
+    }
+
+    return {
+      ...p,
+      salePrice,
+      currentStock,
+      yield: yieldAmount,
+      recipeItems,
+      maxPossibleBatches: maxBatches === Infinity ? 0 : maxBatches
+    }
+  })
 
   const supplies = suppliesRaw.map((s: any) => ({
     ...s,
@@ -50,19 +75,7 @@ export default async function ProductosPage() {
       </div>
 
       {/* Product Creator */}
-      <Card className="rounded-lg border-primary/20 bg-primary/2">
-        <CardHeader className="px-2 py-4 pb-0">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center shadow-lg shadow-primary/20">
-              <Plus size={20} className="text-white" />
-            </div>
-            <CardTitle>Nuevo Producto</CardTitle>
-          </div>
-        </CardHeader>
-        <CardContent className="px-2 py-4">
-          <ProductForm product={null} categories={categories} />
-        </CardContent>
-      </Card>
+      <NewProductSection categories={categories} />
 
       {/* Product List */}
       <div className="grid gap-8">
