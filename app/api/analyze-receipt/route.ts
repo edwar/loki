@@ -48,7 +48,7 @@ IMPORTANTE:
         'X-Title': 'Loki'
       },
       body: JSON.stringify({
-        model: 'qwen/qwen2-vl-7b-instruct',
+        model: 'qwen/qwen2.5-vl-32b-instruct',
         messages: [
           {
             role: 'system',
