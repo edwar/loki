@@ -93,20 +93,26 @@ export default function ComprasPage() {
     setCameraActive(false)
   }
 
-  const capturePhoto = () => {
+  const capturePhoto = async () => {
     if (!videoRef.current || !canvasRef.current) {
       setError('Cámara no lista')
       return
     }
     
     const video = videoRef.current
-    const canvas = canvasRef.current
+    
+    // Wait for video to be ready if needed
+    if (video.videoWidth === 0 || video.videoHeight === 0) {
+      console.log('Waiting for video to be ready...')
+      await new Promise(resolve => setTimeout(resolve, 1000))
+    }
     
     if (video.videoWidth === 0 || video.videoHeight === 0) {
-      setError('Video no está mostrando')
+      setError('Video no está mostrando. Recargá la página e intentá de nuevo.')
       return
     }
     
+    const canvas = canvasRef.current
     canvas.width = video.videoWidth
     canvas.height = video.videoHeight
     
@@ -317,6 +323,7 @@ export default function ComprasPage() {
                     ref={videoRef} 
                     autoPlay 
                     playsInline 
+                    muted
                     onLoadedMetadata={onVideoLoaded}
                     className="w-full h-full object-cover"
                   />
