@@ -1,0 +1,222 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Supplier {
+  id        String   @id @default(uuid())
+  name      String
+  email     String?
+  phone     String?
+  address   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+
+  purchases PurchaseOrder[]
+  supplies  Supply[]
+
+  @@map("suppliers")
+}
+
+model Customer {
+  id             String   @id @default(uuid())
+  name           String
+  email          String?
+  phone          String?
+  address        String?
+  totalPurchases Decimal  @default(0) @db.Decimal(12, 2)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  deletedAt      DateTime?
+
+  sales DailySale[]
+
+  @@map("customers")
+}
+
+model Supply {
+  id           String   @id @default(uuid())
+  name         String
+  sku          String?
+  category     String?
+  unit         String
+  currentStock Decimal  @default(0) @db.Decimal(10, 2)
+  minStock     Decimal  @default(0) @db.Decimal(10, 2)
+  purchasePrice Decimal @default(0) @db.Decimal(10, 2)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  deletedAt    DateTime?
+
+  supplierId   String?
+  supplier      Supplier?    @relation(fields: [supplierId], references: [id])
+
+  purchaseItems PurchaseItem[]
+  recipeItems   RecipeItem[]
+
+  @@map("supplies")
+}
+
+model Product {
+  id        String   @id @default(uuid())
+  name      String
+  category  String?
+  salePrice Decimal  @db.Decimal(10, 2)
+  imageUrl  String?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+
+  recipeItems RecipeItem[]
+  saleItems   SaleItem[]
+
+  @@map("products")
+}
+
+model RecipeItem {
+  id              String   @id @default(uuid())
+  productId       String
+  supplyId        String
+  quantityRequired Decimal @db.Decimal(10, 2)
+  unit            String
+  createdAt       DateTime @default(now())
+  deletedAt       DateTime?
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  supply  Supply  @relation(fields: [supplyId], references: [id])
+
+  @@unique([productId, supplyId])
+  @@map("recipe_items")
+}
+
+model Property {
+  id            String   @id @default(uuid())
+  name          String
+  type          String
+  address       String?
+  purchaseValue Decimal @db.Decimal(12, 2)
+  currentValue  Decimal @db.Decimal(12, 2)
+  purchaseDate  DateTime?
+  description   String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  deletedAt     DateTime?
+
+  @@map("properties")
+}
+
+model PurchaseOrder {
+  id              String    @id @default(uuid())
+  supplierId      String?
+  totalAmount     Decimal   @default(0) @db.Decimal(12, 2)
+  status          String    @default("pending")
+  attachmentUrl   String?
+  aiExtractedData Json?
+  purchaseDate    DateTime  @default(now())
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  deletedAt       DateTime?
+
+  supplier     Supplier?       @relation(fields: [supplierId], references: [id])
+  purchaseItems PurchaseItem[]
+
+  @@map("purchase_orders")
+}
+
+model PurchaseItem {
+  id            String   @id @default(uuid())
+  purchaseOrderId String
+  supplyId      String
+  quantity      Decimal  @db.Decimal(10, 2)
+  unitPrice     Decimal  @db.Decimal(10, 2)
+  subtotal      Decimal  @db.Decimal(12, 2)
+  createdAt     DateTime @default(now())
+  deletedAt     DateTime?
+
+  purchaseOrder PurchaseOrder @relation(fields: [purchaseOrderId], references: [id], onDelete: Cascade)
+  supply        Supply        @relation(fields: [supplyId], references: [id])
+
+  @@map("purchase_items")
+}
+
+model IndirectCost {
+  id          String   @id @default(uuid())
+  type        String
+  amount      Decimal  @db.Decimal(12, 2)
+  description String?
+  date        DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  deletedAt   DateTime?
+
+  @@map("indirect_costs")
+}
+
+model DailySale {
+  id          String   @id @default(uuid())
+  customerId  String?
+  totalAmount Decimal  @default(0) @db.Decimal(12, 2)
+  date        DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  deletedAt   DateTime?
+
+  customer  Customer?  @relation(fields: [customerId], references: [id])
+  saleItems SaleItem[]
+
+  @@map("daily_sales")
+}
+
+model SaleItem {
+  id         String   @id @default(uuid())
+  dailySaleId String
+  productId  String
+  quantity   Int
+  unitPrice  Decimal  @db.Decimal(10, 2)
+  subtotal   Decimal  @db.Decimal(12, 2)
+  createdAt  DateTime @default(now())
+  deletedAt  DateTime?
+
+  dailySale DailySale @relation(fields: [dailySaleId], references: [id], onDelete: Cascade)
+  product   Product   @relation(fields: [productId], references: [id])
+
+  @@map("sale_items")
+}
+
+model User {
+  id            String   @id @default(cuid())
+  name          String
+  email         String   @unique
+  password      String
+  role          String   @default("employee") // admin, manager, employee
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  deletedAt     DateTime?
+
+  @@map("users")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
