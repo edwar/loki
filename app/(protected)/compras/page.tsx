@@ -52,79 +52,47 @@ export default function ComprasPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [cameraActive, setCameraActive] = useState(false)
-  const [stream, setStream] = useState<MediaStream | null>(null)
-
-  // Cleanup camera on unmount
-  useEffect(() => {
-    return () => {
-      if (stream) {
-        stream.getTracks().forEach(track => track.stop())
-      }
-    }
-  }, [stream])
+  const streamRef = useRef<MediaStream | null>(null)
 
   const startCamera = async () => {
     try {
       console.log('Starting camera...')
       
-      // Try different camera configurations
-      const configs = [
-        { facingMode: 'environment' },
-        { facingMode: 'user' },
-        { facingMode: { ideal: 'environment' } },
-        {}
-      ]
-      
-      let mediaStream = null
-      for (const config of configs) {
-        try {
-          mediaStream = await navigator.mediaDevices.getUserMedia({ 
-            video: config,
-            audio: false
-          })
-          console.log('Camera found with config:', config)
-          break
-        } catch (e) {
-          console.log('Config failed:', config, e)
-        }
-      }
-      
-      if (!mediaStream) {
-        // Last attempt - any video
-        mediaStream = await navigator.mediaDevices.getUserMedia({ video: true })
-      }
+      const mediaStream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'environment' },
+        audio: false
+      })
       
       console.log('Camera stream obtained:', mediaStream.id)
       
+      streamRef.current = mediaStream
+      
       if (videoRef.current) {
         videoRef.current.srcObject = mediaStream
-        console.log('Stream assigned to video')
+        await videoRef.current.play()
+        console.log('Video playing')
       }
       
-      setStream(mediaStream)
       setCameraActive(true)
       setError(null)
-    } catch (err) {
+    } catch (err: any) {
       console.error('Camera error:', err)
-      setError('No se pudo acceder a la cámara. Asegurate de estar usando HTTPS y tener permisos.')
-    }
-  }
-
-  const onVideoLoaded = () => {
-    if (videoRef.current) {
-      console.log('Video ready - width:', videoRef.current.videoWidth, 'height:', videoRef.current.videoHeight)
+      setError(err.message || 'No se pudo acceder a la cámara. Usa HTTPS y verifica permisos.')
     }
   }
 
   const stopCamera = () => {
-    if (stream) {
-      stream.getTracks().forEach(track => track.stop())
-      setStream(null)
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => track.stop())
+      streamRef.current = null
+    }
+    if (videoRef.current) {
+      videoRef.current.srcObject = null
     }
     setCameraActive(false)
   }
 
-  const capturePhoto = async () => {
+  const capturePhoto = () => {
     if (!videoRef.current || !canvasRef.current) {
       setError('Cámara no lista')
       return
@@ -132,14 +100,8 @@ export default function ComprasPage() {
     
     const video = videoRef.current
     
-    // Wait for video to be ready if needed
     if (video.videoWidth === 0 || video.videoHeight === 0) {
-      console.log('Waiting for video to be ready...')
-      await new Promise(resolve => setTimeout(resolve, 1000))
-    }
-    
-    if (video.videoWidth === 0 || video.videoHeight === 0) {
-      setError('Video no está mostrando. Recargá la página e intentá de nuevo.')
+      setError('Video no está mostrando')
       return
     }
     
@@ -155,16 +117,8 @@ export default function ComprasPage() {
     
     ctx.drawImage(video, 0, 0)
     
-    // Get base64 from canvas
     const dataUrl = canvas.toDataURL('image/jpeg', 0.8)
     const base64 = dataUrl.split(',')[1]
-    
-    console.log('Photo base64 length:', base64?.length)
-    
-    if (!base64 || base64.length === 0) {
-      setError('Error al convertir la foto')
-      return
-    }
     
     setImagePreview(dataUrl)
     stopCamera()
@@ -350,14 +304,13 @@ export default function ComprasPage() {
             {cameraActive ? (
               <div className="space-y-4">
                 <div className="relative aspect-video bg-black rounded-xl overflow-hidden">
-                  <video 
-                    ref={videoRef} 
-                    autoPlay 
-                    playsInline 
-                    muted
-                    onLoadedMetadata={onVideoLoaded}
-                    className="w-full h-full object-cover"
-                  />
+<video 
+                      ref={videoRef} 
+                      autoPlay 
+                      playsInline 
+                      muted
+                      className="w-full h-full object-cover"
+                    />
                   <canvas ref={canvasRef} className="hidden" />
                 </div>
                 <div className="flex gap-4">
