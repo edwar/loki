@@ -1,24 +1,25 @@
 'use client'
 
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
+import { PhoneInput } from '@/components/ui/phone-input'
 import { createSupplier, updateSupplier } from '@/lib/actions/suppliers'
+import { Input } from '@/components/ui/input'
 
-export function SupplierForm({ 
-  supplier, 
-  onSuccess 
-}: { 
+export function SupplierForm({
+  supplier,
+  onSuccess
+}: {
   supplier?: any
   onSuccess?: () => void
 }) {
   const action = supplier ? updateSupplier.bind(null, supplier.id) : createSupplier
 
   return (
-    <form 
+    <form
       action={async (formData) => {
         await action(formData)
         onSuccess?.()
-      }} 
+      }}
       className="space-y-6"
     >
       <div className="grid gap-6 md:grid-cols-2">
@@ -28,7 +29,7 @@ export function SupplierForm({
         </div>
         <div className="space-y-2">
           <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Teléfono de Contacto</label>
-          <Input name="phone" defaultValue={supplier?.phone ?? ''} placeholder="+57 300 000 0000" className="h-12" />
+          <PhoneInput name="phone" defaultValue={supplier?.phone ?? ''} placeholder="300 000 0000" className="h-12" />
         </div>
         <div className="space-y-2">
           <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Correo de Ventas</label>

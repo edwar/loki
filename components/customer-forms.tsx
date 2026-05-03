@@ -1,8 +1,7 @@
 'use client'
 
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { createCustomer, updateCustomer } from '@/lib/actions/customers'
+import { PhoneInput } from '@/components/ui/phone-input'
 
 export function CustomerForm({ 
   customer, 
@@ -32,7 +31,7 @@ export function CustomerForm({
         </div>
         <div className="space-y-2">
           <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Teléfono</label>
-          <Input name="phone" defaultValue={customer?.phone ?? ''} placeholder="+57 300 000 0000" className="h-12" />
+          <PhoneInput name="phone" defaultValue={customer?.phone ?? ''} placeholder="300 000 0000" className="h-12" />
         </div>
         <div className="space-y-2">
           <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Dirección</label>
