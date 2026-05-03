@@ -72,18 +72,16 @@ export default function ComprasPage() {
       console.log('Camera stream obtained:', mediaStream.id)
       setStream(mediaStream)
       setCameraActive(true)
-      setError(null) // Clear any previous error
-      
-      // Wait for video to be ready
-      setTimeout(() => {
-        if (videoRef.current) {
-          console.log('Video width:', videoRef.current.videoWidth)
-          console.log('Video height:', videoRef.current.videoHeight)
-        }
-      }, 500)
+      setError(null)
     } catch (err) {
       console.error('Camera error:', err)
       setError('No se pudo acceder a la cámara: ' + (err instanceof Error ? err.message : 'Unknown error'))
+    }
+  }
+
+  const onVideoLoaded = () => {
+    if (videoRef.current) {
+      console.log('Video ready - width:', videoRef.current.videoWidth, 'height:', videoRef.current.videoHeight)
     }
   }
 
@@ -319,6 +317,7 @@ export default function ComprasPage() {
                     ref={videoRef} 
                     autoPlay 
                     playsInline 
+                    onLoadedMetadata={onVideoLoaded}
                     className="w-full h-full object-cover"
                   />
                   <canvas ref={canvasRef} className="hidden" />
