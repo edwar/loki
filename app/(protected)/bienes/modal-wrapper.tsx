@@ -329,7 +329,7 @@ export function ModalWrapper({ property }: { property?: any }) {
         </Button>
       ) : (
         <Button onClick={() => setShowForm(true)} className="flex items-center gap-3 px-8 h-14 bg-primary font-bold rounded-lg shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all">
-          <Plus size={22} className="stroke-[3]" />
+          <Plus size={22} className="stroke-3" />
           <span>Nuevo Bien</span>
         </Button>
       )}

@@ -13,3 +13,17 @@ export async function GET() {
     return NextResponse.json({ error: 'Error fetching suppliers' }, { status: 500 })
   }
 }
+
+export async function POST(request: Request) {
+  try {
+    const { name } = await request.json()
+    if (!name) return NextResponse.json({ error: 'Name is required' }, { status: 400 })
+
+    const supplier = await prisma.supplier.create({
+      data: { name }
+    })
+    return NextResponse.json(supplier)
+  } catch (error) {
+    return NextResponse.json({ error: 'Error creating supplier' }, { status: 500 })
+  }
+}

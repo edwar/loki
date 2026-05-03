@@ -95,6 +95,111 @@ export async function createSale(formData: FormData) {
     }
   }
 
+  revalidatePath('/')
+}
+
+export async function updateSale(id: string, formData: FormData) {
+  const oldSale = await prisma.dailySale.findUnique({
+    where: { id },
+    include: { saleItems: true }
+  })
+
+  if (!oldSale) throw new Error('Sale not found')
+
+  // 1. Revertir impactos antiguos (Stock y Cliente)
+  for (const item of oldSale.saleItems) {
+    const product = await prisma.product.findUnique({
+      where: { id: item.productId },
+      include: { recipeItems: { where: { deletedAt: null } } }
+    })
+
+    if (product) {
+      for (const recipeItem of product.recipeItems) {
+        const returnQty = Number(recipeItem.quantityRequired) * item.quantity
+        const supply = await prisma.supply.findUnique({ where: { id: recipeItem.supplyId } })
+        if (supply) {
+          await prisma.supply.update({
+            where: { id: recipeItem.supplyId },
+            data: { currentStock: Number(supply.currentStock) + returnQty }
+          })
+        }
+      }
+    }
+  }
+
+  if (oldSale.customerId) {
+    const customer = await prisma.customer.findUnique({ where: { id: oldSale.customerId } })
+    if (customer) {
+      await prisma.customer.update({
+        where: { id: oldSale.customerId },
+        data: { totalPurchases: Number(customer.totalPurchases) - Number(oldSale.totalAmount) }
+      })
+    }
+  }
+
+  // 2. Procesar nuevos datos
+  let customerId = formData.get('customerId') as string | null
+  if (!customerId || customerId === 'none' || customerId.startsWith('none_')) {
+    customerId = null
+  }
+  const itemsJson = formData.get('items') as string
+  const items = JSON.parse(itemsJson) as { productId: string; quantity: number; unitPrice: number }[]
+
+  let totalAmount = 0
+  const supplyDeductions: { supplyId: string; quantity: number }[] = []
+
+  for (const item of items) {
+    totalAmount += item.quantity * item.unitPrice
+    const product = await prisma.product.findUnique({
+      where: { id: item.productId },
+      include: { recipeItems: { where: { deletedAt: null } } }
+    })
+    if (product) {
+      for (const recipeItem of product.recipeItems) {
+        const deduction = Number(recipeItem.quantityRequired) * item.quantity
+        supplyDeductions.push({ supplyId: recipeItem.supplyId, quantity: deduction })
+      }
+    }
+  }
+
+  // 3. Actualizar venta y aplicar nuevos impactos
+  await prisma.dailySale.update({
+    where: { id },
+    data: {
+      customerId: customerId || null,
+      totalAmount,
+      saleItems: {
+        deleteMany: {},
+        create: items.map(item => ({
+          productId: item.productId,
+          quantity: item.quantity,
+          unitPrice: item.unitPrice,
+          subtotal: item.quantity * item.unitPrice
+        }))
+      }
+    }
+  })
+
+  for (const deduction of supplyDeductions) {
+    const supply = await prisma.supply.findUnique({ where: { id: deduction.supplyId } })
+    if (supply) {
+      await prisma.supply.update({
+        where: { id: deduction.supplyId },
+        data: { currentStock: Number(supply.currentStock) - deduction.quantity }
+      })
+    }
+  }
+
+  if (customerId) {
+    const customer = await prisma.customer.findUnique({ where: { id: customerId } })
+    if (customer) {
+      await prisma.customer.update({
+        where: { id: customerId },
+        data: { totalPurchases: Number(customer.totalPurchases) + totalAmount }
+      })
+    }
+  }
+
   revalidatePath('/ventas')
   revalidatePath('/insumos')
   revalidatePath('/')

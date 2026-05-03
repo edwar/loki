@@ -23,6 +23,7 @@ import {
 } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils'
 import { useRouter } from 'next/navigation'
+import { Combobox } from '@/components/ui/combobox'
 
 interface ExtractedItem {
   nombre: string
@@ -324,6 +325,23 @@ export default function ComprasPage() {
     if (fileInputRef.current) fileInputRef.current.value = ''
   }
 
+  const handleSupplierCreate = async (name: string) => {
+    try {
+      const response = await fetch('/api/suppliers', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name })
+      })
+      if (response.ok) {
+        const newSupplier = await response.json()
+        setSuppliers(prev => [...prev, newSupplier])
+        setSupplierName(newSupplier.name)
+      }
+    } catch (err) {
+      console.error('Error creating supplier:', err)
+    }
+  }
+
   return (
     <div className="space-y-8 animate-fade-in">
       <div className="flex flex-col gap-1">
@@ -551,18 +569,21 @@ export default function ComprasPage() {
                 <label className="text-sm font-medium text-gray-700 dark:text-slate-300 mb-2 block">
                   Nombre del Proveedor
                 </label>
-                <Input
-                  value={supplierName}
-                  onChange={(e) => setSupplierName(e.target.value)}
-                  className="h-12"
-                  placeholder="Nombre del proveedor"
-                  list="suppliers-list"
+                <Combobox
+                  options={suppliers.map(s => ({ value: s.id, label: s.name }))}
+                  value={suppliers.find(s => s.name === supplierName)?.id || supplierName}
+                  onValueChange={(val) => {
+                    const s = suppliers.find(opt => opt.id === val)
+                    if (s) {
+                      setSupplierName(s.name)
+                    } else {
+                      handleSupplierCreate(val)
+                    }
+                  }}
+                  placeholder="Buscar o seleccionar proveedor..."
+                  className="w-full"
+                  allowCustom
                 />
-                <datalist id="suppliers-list">
-                  {suppliers.map(s => (
-                    <option key={s.id} value={s.name} />
-                  ))}
-                </datalist>
               </div>
             </CardContent>
           </Card>

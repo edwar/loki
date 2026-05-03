@@ -6,12 +6,14 @@ import { formatCurrency, formatDate } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Trash2, ShoppingBag, History, Plus } from 'lucide-react'
 import { deleteSale } from '@/lib/actions/sales'
-import { NewSaleForm } from '@/components/sales-form'
+import { SaleForm } from '@/components/sales-form'
+import { DeleteSaleButton } from './delete-sale-button'
+import { EditSaleModal } from './edit-sale-modal'
 
 export const dynamic = 'force-dynamic'
 
 export default async function VentasPage() {
-  const [productsRaw, customers, salesRaw] = await Promise.all([
+  const [productsRaw, customersRaw, salesRaw] = await Promise.all([
     getActiveProducts(),
     getCustomers(),
     getSales()
@@ -33,9 +35,28 @@ export default async function VentasPage() {
     })) || []
   }))
 
+  const customers = customersRaw.map((c: any) => ({
+    ...c,
+    totalPurchases: Number(c.totalPurchases)
+  }))
+
   const sales = salesRaw.map((s: any) => ({
     ...s,
-    totalAmount: Number(s.totalAmount)
+    totalAmount: Number(s.totalAmount),
+    customer: s.customer ? {
+      ...s.customer,
+      totalPurchases: Number(s.customer.totalPurchases)
+    } : null,
+    saleItems: s.saleItems?.map((si: any) => ({
+      ...si,
+      quantity: Number(si.quantity),
+      unitPrice: Number(si.unitPrice),
+      subtotal: Number(si.subtotal),
+      product: si.product ? {
+        ...si.product,
+        salePrice: Number(si.salePrice)
+      } : null
+    })) || []
   }))
 
   return (
@@ -65,7 +86,7 @@ export default async function VentasPage() {
               </CardContent>
             </Card>
           ) : (
-            <NewSaleForm products={products} customers={customers} />
+            <SaleForm products={products} customers={customers} />
           )}
         </div>
 
@@ -123,11 +144,10 @@ export default async function VentasPage() {
                           </span>
                         </TableCell>
                         <TableCell className="py-4 text-right pr-6">
-                          <form action={deleteSale.bind(null, sale.id)}>
-                            <Button type="submit" variant="ghost" size="sm" className="h-8 w-8 p-0 rounded-lg opacity-0 group-hover:opacity-100 transition-all hover:bg-rose-500/10 hover:text-rose-500">
-                              <Trash2 size={16} />
-                            </Button>
-                          </form>
+                          <div className="flex justify-end gap-2">
+                            <EditSaleModal sale={sale} products={products} customers={customers} />
+                            <DeleteSaleButton id={sale.id} />
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))

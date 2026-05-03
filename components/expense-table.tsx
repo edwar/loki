@@ -8,9 +8,25 @@ import { Trash2, Edit2, Wallet, Calendar } from 'lucide-react'
 import { deleteExpense } from '@/lib/actions/expenses'
 import { Dialog } from '@/components/ui/dialog'
 import { ExpenseForm } from './expense-forms'
+import { ConfirmationModal } from '@/components/ui/confirmation-modal'
 
 export function ExpenseTable({ expenses }: { expenses: any[] }) {
   const [editingExpense, setEditingExpense] = useState<any>(null)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [isDeleting, setIsDeleting] = useState(false)
+
+  const handleDelete = async () => {
+    if (!deletingId) return
+    setIsDeleting(true)
+    try {
+      await deleteExpense(deletingId)
+      setDeletingId(null)
+    } catch (error) {
+      console.error('Error deleting expense:', error)
+    } finally {
+      setIsDeleting(false)
+    }
+  }
 
   return (
     <>
@@ -66,11 +82,14 @@ export function ExpenseTable({ expenses }: { expenses: any[] }) {
                     >
                       <Edit2 size={18} />
                     </Button>
-                    <form action={deleteExpense.bind(null, expense.id)}>
-                      <Button type="submit" variant="ghost" size="sm" className="h-10 w-10 p-0 rounded-lg hover:bg-rose-500/10 hover:text-rose-500 transition-colors">
-                        <Trash2 size={18} />
-                      </Button>
-                    </form>
+                    <Button 
+                      onClick={() => setDeletingId(expense.id)}
+                      variant="ghost" 
+                      size="sm" 
+                      className="h-10 w-10 p-0 rounded-lg hover:bg-rose-500/10 hover:text-rose-500 transition-colors"
+                    >
+                      <Trash2 size={18} />
+                    </Button>
                   </div>
                 </TableCell>
               </TableRow>
@@ -91,6 +110,15 @@ export function ExpenseTable({ expenses }: { expenses: any[] }) {
           />
         </div>
       </Dialog>
+
+      <ConfirmationModal
+        isOpen={!!deletingId}
+        onClose={() => setDeletingId(null)}
+        onConfirm={handleDelete}
+        loading={isDeleting}
+        title="¿Eliminar este gasto?"
+        description="Esta acción no se puede deshacer. El registro del gasto será eliminado permanentemente."
+      />
     </>
   )
 }

@@ -4,9 +4,10 @@ import { useState, useTransition } from 'react'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { formatCurrency } from '@/lib/utils'
+import { formatCurrency, cn } from '@/lib/utils'
 import { Plus, Minus, Trash2, ShoppingBag, User } from 'lucide-react'
-import { createSale } from '@/lib/actions/sales'
+import { createSale, updateSale } from '@/lib/actions/sales'
+import { ConfirmationModal } from '@/components/ui/confirmation-modal'
 
 type Product = {
   id: string
@@ -27,8 +28,25 @@ interface SaleItem {
   unitPrice: number
 }
 
-export function NewSaleForm({ products, customers }: { products: Product[]; customers: Customer[] }) {
-  const [items, setItems] = useState<SaleItem[]>([])
+export function SaleForm({ 
+  products, 
+  customers, 
+  sale, 
+  onSuccess 
+}: { 
+  products: Product[]; 
+  customers: Customer[]; 
+  sale?: any;
+  onSuccess?: () => void;
+}) {
+  const [items, setItems] = useState<SaleItem[]>(
+    sale?.saleItems.map((si: any) => ({
+      productId: si.productId,
+      productName: si.product?.name || 'Producto',
+      quantity: Number(si.quantity),
+      unitPrice: Number(si.unitPrice)
+    })) || []
+  )
   const [selectedProductId, setSelectedProductId] = useState('')
   const [quantity, setQuantity] = useState(1)
   const [isPending, startTransition] = useTransition()
@@ -38,47 +56,77 @@ export function NewSaleForm({ products, customers }: { products: Product[]; cust
   const addItem = () => {
     if (!selectedProduct || quantity <= 0) return
 
-    setItems([...items, {
-      productId: selectedProduct.id,
-      productName: selectedProduct.name,
-      quantity,
-      unitPrice: Number(selectedProduct.salePrice)
-    }])
+    const existingItemIndex = items.findIndex(item => item.productId === selectedProduct.id)
+
+    if (existingItemIndex !== -1) {
+      // Si ya existe, actualizamos la cantidad
+      const newItems = [...items]
+      newItems[existingItemIndex].quantity += quantity
+      setItems(newItems)
+    } else {
+      // Si no existe, lo añadimos
+      setItems([...items, {
+        productId: selectedProduct.id,
+        productName: selectedProduct.name,
+        quantity,
+        unitPrice: Number(selectedProduct.salePrice)
+      }])
+    }
 
     setSelectedProductId('')
     setQuantity(1)
   }
 
-  const removeItem = (index: number) => {
-    setItems(items.filter((_, i) => i !== index))
+  const [indexToRemove, setIndexToRemove] = useState<number | null>(null)
+
+  const removeItem = () => {
+    if (indexToRemove === null) return
+    setItems(items.filter((_, i) => i !== indexToRemove))
+    setIndexToRemove(null)
   }
 
   const total = items.reduce((sum, item) => sum + item.quantity * item.unitPrice, 0)
 
-  const handleSubmit = (formData: FormData) => {
+  const handleSubmit = async (formData: FormData) => {
     formData.set('items', JSON.stringify(items.map(i => ({
       productId: i.productId,
       quantity: i.quantity,
       unitPrice: i.unitPrice
     }))))
-    startTransition(() => createSale(formData))
-    setItems([])
+    
+    if (sale) {
+      startTransition(async () => {
+        await updateSale(sale.id, formData)
+        onSuccess?.()
+      })
+    } else {
+      startTransition(async () => {
+        await createSale(formData)
+        setItems([])
+        onSuccess?.()
+      })
+    }
   }
 
   return (
     <form action={handleSubmit}>
-      <Card className="rounded-lg border-primary/20 bg-primary/2 shadow-xl overflow-hidden backdrop-blur-md">
-        <CardHeader className="px-6 py-4 flex flex-row items-center justify-between border-b border-border/10">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center shadow-lg shadow-primary/20">
-              <ShoppingBag size={20} className="text-white" />
+      <Card className={cn(
+        "rounded-lg shadow-xl overflow-hidden backdrop-blur-md",
+        sale ? "border-none bg-transparent shadow-none" : "border-primary/20 bg-primary/2"
+      )}>
+        {!sale && (
+          <CardHeader className="px-6 py-4 flex flex-row items-center justify-between border-b border-border/10">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center shadow-lg shadow-primary/20">
+                <ShoppingBag size={20} className="text-white" />
+              </div>
+              <CardTitle className="text-xl">Nueva Venta</CardTitle>
             </div>
-            <CardTitle className="text-xl">Nueva Venta</CardTitle>
-          </div>
-        </CardHeader>
-        <CardContent className="p-0">
+          </CardHeader>
+        )}
+        <CardContent className={cn("p-0", sale && "space-y-6")}>
           {/* Item Adder Section */}
-          <div className="p-6 space-y-2">
+          <div className={cn("p-6 space-y-2", sale && "p-0")}>
             <div className="flex items-end gap-3 h-[64px]">
               <div className="flex-1 flex flex-col justify-end gap-1.5 h-full">
                 <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground ml-1">Producto</label>
@@ -200,8 +248,8 @@ export function NewSaleForm({ products, customers }: { products: Product[]; cust
                         type="button"
                         variant="ghost"
                         size="sm"
-                        onClick={() => removeItem(index)}
-                        className="h-7 w-7 p-0 rounded-md opacity-0 group-hover:opacity-100 transition-all hover:bg-rose-500/10 hover:text-rose-500"
+                        onClick={() => setIndexToRemove(index)}
+                        className="h-7 w-7 p-0 rounded-md transition-all hover:bg-rose-500/10 hover:text-rose-500"
                       >
                         <Trash2 size={14} />
                       </Button>
@@ -233,7 +281,7 @@ export function NewSaleForm({ products, customers }: { products: Product[]; cust
                   <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/50 group-focus-within:text-primary transition-colors pointer-events-none">
                     <User size={18} />
                   </div>
-                  <Select name="customerId" defaultValue="none">
+                  <Select name="customerId" defaultValue={sale?.customerId || "none"}>
                     <SelectTrigger className="h-12 pl-10 rounded-lg bg-background border-border/40 hover:border-primary/20 transition-all">
                       <SelectValue placeholder="Venta General / Consumidor" />
                     </SelectTrigger>
@@ -259,13 +307,20 @@ export function NewSaleForm({ products, customers }: { products: Product[]; cust
                   disabled={isPending}
                   className="md:col-span-1 h-12 rounded-lg text-md font-bold shadow-lg shadow-primary/10 hover:shadow-primary/20 transition-all active:scale-95 bg-primary text-white"
                 >
-                  {isPending ? 'Vendiendo...' : 'Vender'}
+                  {isPending ? 'Procesando...' : sale ? 'Actualizar' : 'Vender'}
                 </Button>
               </div>
             </div>
           )}
         </CardContent>
       </Card>
+      <ConfirmationModal
+        isOpen={indexToRemove !== null}
+        onClose={() => setIndexToRemove(null)}
+        onConfirm={removeItem}
+        title="¿Quitar producto?"
+        description="Este producto será removido de la lista actual de la venta."
+      />
     </form>
   )
 }
