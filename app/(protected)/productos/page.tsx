@@ -95,7 +95,8 @@ export default async function ProductosPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold text-zinc-900">Productos</h1>
+        <h1 className="text-3xl font-bold text-black dark:text-white tracking-tight">Productos</h1>
+        <p className="text-gray-500 dark:text-slate-400">Administra tu catálogo de productos</p>
         <p className="text-zinc-500">Crea productos y define sus recetas</p>
       </div>
 

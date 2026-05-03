@@ -72,7 +72,8 @@ export default async function GastosPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold text-zinc-900">Gastos</h1>
+        <h1 className="text-3xl font-bold text-black dark:text-white tracking-tight">Gastos</h1>
+        <p className="text-gray-500 dark:text-slate-400">Controla los gastos operativos de tu negocio</p>
         <p className="text-zinc-500">Controla tus gastos indirectos</p>
       </div>
 

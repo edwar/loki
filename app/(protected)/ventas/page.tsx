@@ -20,7 +20,8 @@ export default async function VentasPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold text-zinc-900">Ventas</h1>
+        <h1 className="text-3xl font-bold text-black dark:text-white tracking-tight">Ventas</h1>
+        <p className="text-gray-500 dark:text-slate-400">Registra y gestiona las ventas</p>
         <p className="text-zinc-500">Registra ventas y controla el inventario</p>
       </div>
 

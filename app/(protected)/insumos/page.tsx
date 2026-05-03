@@ -94,13 +94,8 @@ export default async function InsumosPage() {
   return (
     <div className="space-y-8 animate-fade-in">
       <div className="flex flex-col gap-1">
-        <h1 className="text-3xl font-bold text-[var(--foreground)] tracking-tight flex items-center gap-3">
-          <div className="p-2 bg-amber-100 dark:bg-amber-900/30 rounded-xl">
-            <Package className="w-6 h-6 text-amber-600" />
-          </div>
-          Insumos
-        </h1>
-        <p className="text-[var(--muted-foreground)]">Gestiona el inventario de tu negocio</p>
+        <h1 className="text-3xl font-bold text-black dark:text-white tracking-tight">Insumos</h1>
+        <p className="text-gray-500 dark:text-slate-400">Gestiona el inventario de tu negocio</p>
       </div>
 
       <div className="grid gap-4 md:grid-cols-3">
