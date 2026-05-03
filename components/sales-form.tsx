@@ -2,13 +2,10 @@
 
 import { useState, useTransition } from 'react'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { NumericInput } from '@/components/ui/numeric-input'
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { formatCurrency } from '@/lib/utils'
 import { Plus, Minus, Trash2, ShoppingBag, User } from 'lucide-react'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { createSale } from '@/lib/actions/sales'
 
 type Product = {
@@ -70,7 +67,7 @@ export function NewSaleForm({ products, customers }: { products: Product[]; cust
 
   return (
     <form action={handleSubmit}>
-      <Card className="rounded-lg border-primary/20 bg-primary/[0.02] shadow-xl overflow-hidden backdrop-blur-md">
+      <Card className="rounded-lg border-primary/20 bg-primary/2 shadow-xl overflow-hidden backdrop-blur-md">
         <CardHeader className="px-6 py-4 flex flex-row items-center justify-between border-b border-border/10">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/20">
@@ -102,7 +99,7 @@ export function NewSaleForm({ products, customers }: { products: Product[]; cust
                           <SelectItem key={p.id} value={p.id} className="rounded-lg group">
                             <div className="flex justify-between items-center w-full gap-2">
                               <span>{p.name}</span>
-                              <span className="text-xs font-bold text-primary/60 group-hover:text-white group-data-[highlighted]:text-white transition-colors">
+                              <span className="text-xs font-bold text-primary/60 group-hover:text-white group-data-highlighted:text-white transition-colors">
                                 {formattedPrice}
                               </span>
                             </div>
@@ -185,7 +182,7 @@ export function NewSaleForm({ products, customers }: { products: Product[]; cust
           {/* Items List (Receipt Style) */}
           {items.length > 0 && (
             <div className="border-t border-border/10">
-              <div className="max-h-[300px] overflow-y-auto px-6 py-4 space-y-3 bg-primary/[0.01]">
+              <div className="max-h-[300px] overflow-y-auto px-6 py-4 space-y-3 bg-primary/1">
                 {items.map((item, index) => (
                   <div key={index} className="flex items-center justify-between group animate-in slide-in-from-left-2 duration-300">
                     <div className="flex items-center gap-3">

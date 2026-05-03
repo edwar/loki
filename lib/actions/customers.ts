@@ -4,13 +4,18 @@ import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
 
 export async function getCustomers() {
-  return prisma.customer.findMany({
+  const customers = await prisma.customer.findMany({
     where: { deletedAt: null },
     include: {
       _count: { select: { sales: true } }
     },
     orderBy: { createdAt: 'desc' },
   })
+
+  return customers.map(c => ({
+    ...c,
+    totalPurchases: Number(c.totalPurchases)
+  }))
 }
 
 export async function createCustomer(formData: FormData) {

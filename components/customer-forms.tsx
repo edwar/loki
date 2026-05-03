@@ -1,6 +1,8 @@
 'use client'
 
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { createCustomer, updateCustomer } from '@/lib/actions/customers'
 import { PhoneInput } from '@/components/ui/phone-input'
 
 export function CustomerForm({ 

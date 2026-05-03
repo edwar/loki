@@ -126,7 +126,7 @@ export function ModalWrapper() {
   if (!isMounted) {
     return (
       <button
-        className="flex items-center gap-2 px-5 py-2.5 bg-black dark:bg-white text-white dark:text-black font-medium rounded-full hover:bg-gray-800 dark:hover:bg-gray-200 transition-all"
+        className="flex items-center gap-2 px-5 py-2.5 bg-primary text-white dark:text-black font-medium rounded-full hover:bg-gray-800 dark:hover:bg-gray-200 transition-all"
       >
         <Plus size={18} />
         <span>Nuevo Bien</span>
@@ -322,13 +322,10 @@ export function ModalWrapper() {
 
   return (
     <>
-      <button
-        onClick={() => setShowForm(true)}
-        className="flex items-center gap-2 px-5 py-2.5 bg-black dark:bg-white text-white dark:text-black font-medium rounded-full hover:bg-gray-800 dark:hover:bg-gray-200 transition-all"
-      >
+      <Button onClick={() => setShowForm(true)} className="flex items-center gap-2 px-5 py-2.5 bg-primary font-medium rounded-lg">
         <Plus size={18} />
         <span>Nuevo Bien</span>
-      </button>
+      </Button>
 
       {createPortal(modalContent, document.body)}
     </>
