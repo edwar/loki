@@ -247,7 +247,7 @@ export default function ComprasPage() {
   const handleRemoveItem = (index: number) => {
     if (!extractedData) return
     const newItems = extractedData.items.filter((_, i) => i !== index)
-    const newTotal = newItems.reduce((sum, item) => sum + item.subtotal, 0)
+    const newTotal = newItems.reduce((sum: number, item: any) => sum + item.subtotal, 0)
     setExtractedData({
       ...extractedData,
       items: newItems,
@@ -264,7 +264,7 @@ export default function ComprasPage() {
     // Recalcular subtotal
     newItems[index].subtotal = newItems[index].cantidad * newItems[index].precioUnitario
     
-    const newTotal = newItems.reduce((sum, item) => sum + item.subtotal, 0)
+    const newTotal = newItems.reduce((sum: number, item: any) => sum + item.subtotal, 0)
     
     setExtractedData({
       ...extractedData,

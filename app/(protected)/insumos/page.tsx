@@ -88,7 +88,7 @@ export default async function InsumosPage() {
     prisma.supplier.findMany({ where: { deletedAt: null }, select: { id: true, name: true } })
   ])
 
-  const totalValue = supplies.reduce((sum, s) => sum + Number(s.currentStock) * Number(s.purchasePrice), 0)
+  const totalValue = supplies.reduce((sum: number, s: any) => sum + Number(s.currentStock) * Number(s.purchasePrice), 0)
   const lowStockCount = supplies.filter(s => Number(s.currentStock) < Number(s.minStock)).length
 
   return (

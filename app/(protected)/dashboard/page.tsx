@@ -26,9 +26,9 @@ async function getStats() {
     })
   ])
 
-  const salesTotal = todaySales.reduce((sum, s) => sum + Number(s.totalAmount), 0)
-  const expensesTotal = todayExpenses.reduce((sum, e) => sum + Number(e.amount), 0)
-  const yesterdayTotal = yesterdaySales.reduce((sum, s) => sum + Number(s.totalAmount), 0)
+  const salesTotal = todaySales.reduce((sum: number, s: any) => sum + Number(s.totalAmount), 0)
+  const expensesTotal = todayExpenses.reduce((sum: number, e: any) => sum + Number(e.amount), 0)
+  const yesterdayTotal = yesterdaySales.reduce((sum: number, s: any) => sum + Number(s.totalAmount), 0)
   
   const salesChange = yesterdayTotal > 0 ? ((salesTotal - yesterdayTotal) / yesterdayTotal) * 100 : 0
 
