@@ -31,13 +31,22 @@ async function getProperties() {
     where: { deletedAt: null },
     orderBy: { createdAt: 'desc' }
   })
-  return properties
+  
+  // Serialize properties to avoid "Decimal objects are not supported" error
+  return properties.map(p => ({
+    ...p,
+    purchaseValue: Number(p.purchaseValue),
+    currentValue: Number(p.currentValue),
+    purchaseDate: p.purchaseDate?.toISOString() || null,
+    createdAt: p.createdAt.toISOString(),
+    updatedAt: p.updatedAt.toISOString(),
+  }))
 }
 
 export default async function BienesPage() {
   const properties = await getProperties()
   
-  const totalValue = properties.reduce((sum: number, p: any) => sum + Number(p.currentValue), 0)
+  const totalValue = properties.reduce((sum, p) => sum + p.currentValue, 0)
   const propertyCount = properties.length
 
   const typeLabel = (type: string) => PROPERTY_TYPES.find(t => t.value === type)?.label || type
@@ -128,7 +137,8 @@ export default async function BienesPage() {
                       <td className="py-4 text-right text-gray-600 dark:text-slate-300">{formatCurrency(Number(property.purchaseValue))}</td>
                       <td className="py-4 text-right font-medium text-black dark:text-white">{formatCurrency(Number(property.currentValue))}</td>
                       <td className="py-4">
-                        <div className="flex items-center justify-center">
+                        <div className="flex items-center justify-center gap-2">
+                          <ModalWrapper property={property} />
                           <DeleteButton id={property.id} />
                         </div>
                       </td>

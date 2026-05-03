@@ -27,7 +27,7 @@ export function CustomerTable({ customers }: { customers: any[] }) {
             <TableRow>
               <TableCell colSpan={4} className="text-center py-20">
                 <div className="flex flex-col items-center gap-4">
-                  <div className="w-16 h-16 rounded-3xl bg-accent/50 flex items-center justify-center opacity-50">
+                  <div className="w-16 h-16 rounded-lg bg-accent/50 flex items-center justify-center opacity-50">
                     <User size={32} />
                   </div>
                   <p className="text-muted-foreground font-medium">No hay clientes registrados</p>
@@ -66,16 +66,16 @@ export function CustomerTable({ customers }: { customers: any[] }) {
                 </TableCell>
                 <TableCell>
                   <div className="flex justify-end gap-2">
-                    <Button 
+                    <Button
                       onClick={() => setEditingCustomer(customer)}
-                      variant="ghost" 
-                      size="sm" 
-                      className="h-10 w-10 p-0 rounded-xl hover:bg-primary/10 hover:text-primary transition-colors"
+                      variant="ghost"
+                      size="sm"
+                      className="h-10 w-10 p-0 rounded-lg hover:bg-primary/10 hover:text-primary transition-colors"
                     >
                       <Edit2 size={18} />
                     </Button>
                     <form action={deleteCustomer.bind(null, customer.id)}>
-                      <Button type="submit" variant="ghost" size="sm" className="h-10 w-10 p-0 rounded-xl hover:bg-rose-500/10 hover:text-rose-500 transition-colors">
+                      <Button type="submit" variant="ghost" size="sm" className="h-10 w-10 p-0 rounded-lg hover:bg-rose-500/10 hover:text-rose-500 transition-colors">
                         <Trash2 size={18} />
                       </Button>
                     </form>
@@ -87,15 +87,15 @@ export function CustomerTable({ customers }: { customers: any[] }) {
         </TableBody>
       </Table>
 
-      <Dialog 
-        isOpen={!!editingCustomer} 
+      <Dialog
+        isOpen={!!editingCustomer}
         onClose={() => setEditingCustomer(null)}
         title="Editar Información de Cliente"
       >
         <div className="mt-4">
-          <CustomerForm 
-            customer={editingCustomer} 
-            onSuccess={() => setEditingCustomer(null)} 
+          <CustomerForm
+            customer={editingCustomer}
+            onSuccess={() => setEditingCustomer(null)}
           />
         </div>
       </Dialog>

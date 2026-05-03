@@ -55,7 +55,7 @@ export default async function VentasPage() {
           {products.length === 0 ? (
             <Card variant="glass" className="py-12 border-dashed border-primary/20">
               <CardContent className="text-center space-y-4">
-                <div className="w-16 h-16 rounded-2xl bg-primary/5 flex items-center justify-center mx-auto">
+                <div className="w-16 h-16 rounded-lg bg-primary/5 flex items-center justify-center mx-auto">
                   <ShoppingBag size={32} className="text-primary/30" />
                 </div>
                 <div className="space-y-1">
@@ -74,7 +74,7 @@ export default async function VentasPage() {
           <Card className="rounded-lg border-border/40 bg-card/30 backdrop-blur-md overflow-hidden shadow-sm">
             <CardHeader className="px-6 py-4 flex flex-row items-center justify-between border-b border-border/10">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-accent/50 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-lg bg-accent/50 flex items-center justify-center">
                   <History size={20} className="text-primary" />
                 </div>
                 <CardTitle className="text-xl">Historial</CardTitle>

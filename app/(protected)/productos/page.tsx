@@ -53,7 +53,7 @@ export default async function ProductosPage() {
       <Card className="rounded-lg border-primary/20 bg-primary/2">
         <CardHeader className="px-2 py-4 pb-0">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/20">
+            <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center shadow-lg shadow-primary/20">
               <Plus size={20} className="text-white" />
             </div>
             <CardTitle>Nuevo Producto</CardTitle>
@@ -79,7 +79,7 @@ export default async function ProductosPage() {
         {products.length === 0 && (
           <Card className="rounded-lg border-dashed border-2 py-20 bg-accent/5">
             <CardContent className="text-center space-y-4">
-              <div className="w-16 h-16 rounded-3xl bg-accent/50 flex items-center justify-center mx-auto">
+              <div className="w-16 h-16 rounded-lg bg-accent/50 flex items-center justify-center mx-auto">
                 <Package size={32} className="text-muted-foreground/30" />
               </div>
               <p className="text-muted-foreground font-medium">Empieza creando tu primer producto arriba.</p>

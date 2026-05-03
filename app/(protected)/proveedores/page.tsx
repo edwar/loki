@@ -19,11 +19,11 @@ export default async function ProveedoresPage() {
 
       {/* Stats */}
       <div className="grid gap-6 md:grid-cols-2">
-        <Card className="rounded-3xl border-none bg-gradient-to-br from-primary/10 to-primary/5 shadow-sm overflow-hidden relative group">
+        <Card className="rounded-lg border-none bg-gradient-to-br from-primary/10 to-primary/5 shadow-sm overflow-hidden relative group">
           <div className="absolute -right-4 -top-4 w-24 h-24 bg-primary/10 rounded-full blur-2xl group-hover:bg-primary/20 transition-all" />
           <CardContent className="p-8">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-2xl bg-primary flex items-center justify-center shadow-lg shadow-primary/20">
+              <div className="w-12 h-12 rounded-lg bg-primary flex items-center justify-center shadow-lg shadow-primary/20">
                 <Building2 className="w-6 h-6 text-white" />
               </div>
               <div>
@@ -34,11 +34,11 @@ export default async function ProveedoresPage() {
           </CardContent>
         </Card>
 
-        <Card className="rounded-3xl border-none bg-gradient-to-br from-amber-500/10 to-amber-500/5 shadow-sm overflow-hidden relative group">
+        <Card className="rounded-lg border-none bg-gradient-to-br from-amber-500/10 to-amber-500/5 shadow-sm overflow-hidden relative group">
           <div className="absolute -right-4 -top-4 w-24 h-24 bg-amber-500/10 rounded-full blur-2xl group-hover:bg-amber-500/20 transition-all" />
           <CardContent className="p-8">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-2xl bg-amber-500 flex items-center justify-center shadow-lg shadow-amber-500/20">
+              <div className="w-12 h-12 rounded-lg bg-amber-500 flex items-center justify-center shadow-lg shadow-amber-500/20">
                 <Handshake className="w-6 h-6 text-white" />
               </div>
               <div>
@@ -54,7 +54,7 @@ export default async function ProveedoresPage() {
       <Card className="rounded-lg border-primary/20 bg-primary/[0.02]">
         <CardHeader className="p-8 pb-0">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/20">
+            <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center shadow-lg shadow-primary/20">
               <Plus size={20} className="text-white" />
             </div>
             <CardTitle>Vincular Nuevo Proveedor</CardTitle>

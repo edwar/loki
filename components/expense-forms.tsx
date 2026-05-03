@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { NumericInput } from '@/components/ui/numeric-input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { DatePicker } from '@/components/ui/date-picker'
 import { createExpense, updateExpense } from '@/lib/actions/expenses'
 
 const EXPENSE_TYPES = [
@@ -25,6 +26,7 @@ export function ExpenseForm({
   onSuccess?: () => void
 }) {
   const [amount, setAmount] = useState(expense?.amount ?? 0)
+  const [date, setDate] = useState(expense?.date ? new Date(expense.date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0])
   
   const action = expense ? updateExpense.bind(null, expense.id) : createExpense
 
@@ -57,11 +59,10 @@ export function ExpenseForm({
         </div>
         <div className="space-y-2">
           <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Fecha</label>
-          <Input 
-            name="date" 
-            type="date" 
-            defaultValue={expense?.date ? new Date(expense.date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0]} 
-            className="h-12" 
+          <DatePicker 
+            name="date"
+            value={date}
+            onChange={setDate}
           />
         </div>
         <div className="space-y-2">

@@ -10,7 +10,7 @@ import {
   SelectTrigger,
   SelectValue
 } from '@/components/ui/select'
-import { Plus, X, Building2, Calculator } from 'lucide-react'
+import { Plus, X, Building2, Calculator, Edit2 } from 'lucide-react'
 import { createPortal } from 'react-dom'
 import { DatePicker } from '@/components/ui/date-picker'
 
@@ -45,7 +45,7 @@ function getYearsSincePurchase(purchaseDate: string): number {
   return Math.max(0, (now.getTime() - purchase.getTime()) / (365.25 * 24 * 60 * 60 * 1000))
 }
 
-export function ModalWrapper() {
+export function ModalWrapper({ property }: { property?: any }) {
   const [showForm, setShowForm] = useState(false)
   const [loading, setLoading] = useState(false)
   const [isMounted, setIsMounted] = useState(false)
@@ -53,13 +53,13 @@ export function ModalWrapper() {
   const [calculatedValue, setCalculatedValue] = useState<number>(0)
   const [yearsElapsed, setYearsElapsed] = useState<number>(0)
   const [formData, setFormData] = useState({
-    name: '',
-    type: '',
-    address: '',
-    purchaseValue: '',
+    name: property?.name || '',
+    type: property?.type || '',
+    address: property?.address || '',
+    purchaseValue: property?.purchaseValue?.toString() || '',
     depreciationRate: '10',
-    purchaseDate: '',
-    description: '',
+    purchaseDate: property?.purchaseDate ? new Date(property.purchaseDate).toISOString().split('T')[0] : '',
+    description: property?.description || '',
   })
 
   useEffect(() => {
@@ -92,8 +92,11 @@ export function ModalWrapper() {
     setLoading(true)
 
     try {
-      await fetch('/api/properties', {
-        method: 'POST',
+      const url = property ? `/api/properties/${property.id}` : '/api/properties'
+      const method = property ? 'PUT' : 'POST'
+
+      await fetch(url, {
+        method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name: formData.name,
@@ -107,15 +110,17 @@ export function ModalWrapper() {
       })
 
       setShowForm(false)
-      setFormData({
-        name: '',
-        type: '',
-        address: '',
-        purchaseValue: '',
-        depreciationRate: '10',
-        purchaseDate: '',
-        description: '',
-      })
+      if (!property) {
+        setFormData({
+          name: '',
+          type: '',
+          address: '',
+          purchaseValue: '',
+          depreciationRate: '10',
+          purchaseDate: '',
+          description: '',
+        })
+      }
       window.location.reload()
     } catch (error) {
       console.error('Error saving property:', error)
@@ -124,58 +129,49 @@ export function ModalWrapper() {
     }
   }
 
-  if (!isMounted) {
-    return (
-      <button
-        className="flex items-center gap-2 px-5 py-2.5 bg-primary text-white dark:text-black font-medium rounded-full hover:bg-gray-800 dark:hover:bg-gray-200 transition-all"
-      >
-        <Plus size={18} />
-        <span>Nuevo Bien</span>
-      </button>
-    )
-  }
+  if (!isMounted) return null
 
   const modalContent = showForm ? (
     <div className="fixed inset-0 z-100 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowForm(false)} />
 
-      <div className="relative w-full max-w-md bg-white dark:bg-slate-800 rounded-lg shadow-2xl overflow-hidden max-h-[90vh] overflow-y-auto">
+      <div className="relative w-full max-w-md bg-white dark:bg-slate-900 rounded-lg shadow-2xl overflow-hidden max-h-[90vh] overflow-y-auto border border-border/10">
         {/* Header */}
-        <div className="p-6 sticky top-0 z-10">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-white/10 dark:bg-black/10 rounded-lg flex items-center justify-center">
-              <Building2 className="w-6 h-6" />
+        <div className="p-8 sticky top-0 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md z-10 border-b border-border/10">
+          <div className="flex items-center gap-4">
+            <div className="w-14 h-14 bg-primary/10 rounded-lg flex items-center justify-center shadow-inner">
+              <Building2 className="w-7 h-7 text-primary" />
             </div>
             <div>
-              <h2 className="text-xl font-bold">Nuevo Bien</h2>
-              <p className="text-sm text-gray-500 dark:text-slate-400">Agregar activo a tu empresa</p>
+              <h2 className="text-2xl font-bold tracking-tight">{property ? 'Editar Bien' : 'Nuevo Bien'}</h2>
+              <p className="text-sm text-muted-foreground">{property ? 'Actualiza los datos de tu activo' : 'Agrega un nuevo activo a tu empresa'}</p>
             </div>
           </div>
         </div>
 
         {/* Body */}
-        <div className="p-6">
-          <form onSubmit={handleSubmit} className="space-y-5">
-            <div>
-              <label className="text-sm font-medium text-gray-700 dark:text-slate-300 mb-2 block">Nombre del Bien</label>
+        <div className="p-8">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="space-y-2">
+              <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground ml-1">Nombre del Bien</label>
               <Input
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 placeholder="Ej: Camioneta Ford"
-                className="h-12"
+                className="h-12 rounded-lg"
                 required
               />
             </div>
 
-            <div>
-              <label className="text-sm font-medium text-gray-700 dark:text-slate-300 mb-2 block">Tipo de Activo</label>
+            <div className="space-y-2">
+              <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground ml-1">Tipo de Activo</label>
               <Select value={formData.type} onValueChange={(v) => setFormData({ ...formData, type: v })}>
-                <SelectTrigger className="h-12">
+                <SelectTrigger className="h-12 rounded-lg">
                   <SelectValue placeholder="Seleccionar tipo" />
                 </SelectTrigger>
                 <SelectContent>
                   {PROPERTY_TYPES.map((type) => (
-                    <SelectItem key={type.value} value={type.value}>
+                    <SelectItem key={type.value} value={type.value} className="rounded-lg">
                       {type.label} ({type.depreciation}% anual)
                     </SelectItem>
                   ))}
@@ -183,34 +179,34 @@ export function ModalWrapper() {
               </Select>
             </div>
 
-            <div>
-              <label className="text-sm font-medium text-gray-700 dark:text-slate-300 mb-2 block">Dirección / Ubicación</label>
+            <div className="space-y-2">
+              <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground ml-1">Dirección / Ubicación</label>
               <Input
                 value={formData.address}
                 onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                 placeholder="Ej: Av. Principal 123"
-                className="h-12"
+                className="h-12 rounded-lg"
               />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="text-sm font-medium text-gray-700 dark:text-slate-300 mb-2 block">Valor de Compra</label>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground ml-1">Valor de Compra</label>
                 <div className="relative">
-                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">$</span>
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground font-bold">$</span>
                   <Input
                     type="number"
                     step="0.01"
                     value={formData.purchaseValue}
                     onChange={(e) => setFormData({ ...formData, purchaseValue: e.target.value })}
                     placeholder="0.00"
-                    className="h-12 pl-8"
+                    className="h-12 pl-10 rounded-lg"
                     required
                   />
                 </div>
               </div>
-              <div>
-                <label className="text-sm font-medium text-gray-700 dark:text-slate-300 mb-2 block">Fecha de Adquisición</label>
+              <div className="space-y-2">
+                <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground ml-1">Fecha de Adquisición</label>
                 <DatePicker
                   value={formData.purchaseDate}
                   onChange={(date) => setFormData({ ...formData, purchaseDate: date })}
@@ -221,22 +217,22 @@ export function ModalWrapper() {
             </div>
 
             {/* Toggle depreciación personalizada */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3 p-1">
               <input
                 type="checkbox"
                 id="customDep"
                 checked={customDepreciation}
                 onChange={(e) => setCustomDepreciation(e.target.checked)}
-                className="w-4 h-4 rounded border-gray-300"
+                className="w-5 h-5 rounded-lg border-border/50 text-primary focus:ring-primary/20 cursor-pointer"
               />
-              <label htmlFor="customDep" className="text-sm text-gray-600 dark:text-slate-400">
-                Usar tasa de depreciación diferente
+              <label htmlFor="customDep" className="text-sm font-medium text-muted-foreground cursor-pointer hover:text-foreground transition-colors">
+                Usar tasa de depreciación personalizada
               </label>
             </div>
 
             {customDepreciation && (
-              <div>
-                <label className="text-sm font-medium text-gray-700 dark:text-slate-300 mb-2 block">Tasa de Depreciación Anual (%)</label>
+              <div className="space-y-2 animate-in slide-in-from-top-2 duration-300">
+                <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground ml-1">Tasa Anual (%)</label>
                 <Input
                   type="number"
                   step="0.1"
@@ -245,63 +241,63 @@ export function ModalWrapper() {
                   value={formData.depreciationRate}
                   onChange={(e) => setFormData({ ...formData, depreciationRate: e.target.value })}
                   placeholder="10"
-                  className="h-12"
+                  className="h-12 rounded-lg"
                 />
               </div>
             )}
 
             {/* Valor calculado */}
             {formData.purchaseValue && formData.purchaseDate && (
-              <div className="bg-gray-50 dark:bg-slate-700/50 rounded-lg p-4 space-y-3">
-                <div className="flex items-center gap-2 text-gray-500 dark:text-slate-400">
-                  <Calculator size={18} />
-                  <span className="text-sm font-medium">Cálculo de Depreciación</span>
+              <div className="bg-primary/5 rounded-lg p-6 space-y-4 border border-primary/10 shadow-inner">
+                <div className="flex items-center gap-3 text-primary">
+                  <Calculator size={20} className="stroke-[2.5]" />
+                  <span className="text-sm font-bold uppercase tracking-widest">Resumen de Valoración</span>
                 </div>
-                <div className="grid grid-cols-2 gap-3 text-sm">
+                <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <p className="text-gray-500 dark:text-slate-500">Años transcurridos</p>
-                    <p className="font-medium text-gray-700 dark:text-slate-300">{yearsElapsed.toFixed(1)} años</p>
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Tiempo Transcurrido</p>
+                    <p className="text-lg font-bold text-foreground">{yearsElapsed.toFixed(1)} años</p>
                   </div>
                   <div>
-                    <p className="text-gray-500 dark:text-slate-500">Tasa aplicada</p>
-                    <p className="font-medium text-gray-700 dark:text-slate-300">
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Depreciación Aplicada</p>
+                    <p className="text-lg font-bold text-foreground">
                       {customDepreciation ? `${formData.depreciationRate}%` : `${defaultDepreciation}%`}
                     </p>
                   </div>
                 </div>
-                <div className="pt-2 border-t border-gray-200 dark:border-slate-600">
-                  <p className="text-gray-500 dark:text-slate-500 text-sm">Valor Actual (calculado)</p>
-                  <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
+                <div className="pt-4 border-t border-primary/10">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-primary/60">Valor Actual Estimado</p>
+                  <p className="text-3xl font-black text-emerald-500 drop-shadow-sm">
                     ${calculatedValue.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </p>
                 </div>
               </div>
             )}
 
-            <div>
-              <label className="text-sm font-medium text-gray-700 dark:text-slate-300 mb-2 block">Descripción (opcional)</label>
+            <div className="space-y-2">
+              <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground ml-1">Descripción</label>
               <textarea
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                placeholder="Detalles adicionales..."
-                className="flex w-full px-4 py-3 text-sm bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-600 rounded-lg transition-all duration-200 resize-none"
-                rows={2}
+                placeholder="Detalles, estado actual, notas..."
+                className="flex w-full px-4 py-3 text-sm bg-background border border-input rounded-lg transition-all duration-200 resize-none focus:ring-2 focus:ring-primary/20 outline-none"
+                rows={3}
               />
             </div>
 
-            <div className="flex gap-3 pt-2">
+            <div className="flex gap-4 pt-4">
               <Button
                 type="submit"
                 disabled={loading}
-                className="flex-1 h-12 bg-black dark:bg-white text-white dark:text-black font-semibold rounded-lg hover:bg-gray-800 dark:hover:bg-gray-200"
+                className="flex-1 h-14 font-bold rounded-lg shadow-lg shadow-primary/20 text-lg"
               >
-                {loading ? 'Guardando...' : 'Agregar Bien'}
+                {loading ? 'Procesando...' : property ? 'Guardar Cambios' : 'Agregar Bien'}
               </Button>
               <Button
                 type="button"
-                variant="secondary"
+                variant="ghost"
                 onClick={() => setShowForm(false)}
-                className="h-12 px-6 bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-slate-300 font-medium rounded-lg hover:bg-gray-200 dark:hover:bg-slate-600"
+                className="h-14 px-8 font-bold rounded-lg text-muted-foreground hover:bg-muted"
               >
                 Cancelar
               </Button>
@@ -312,9 +308,9 @@ export function ModalWrapper() {
         {/* Close button */}
         <button
           onClick={() => setShowForm(false)}
-          className="absolute top-4 right-4 p-2 rounded-full bg-white/10 dark:bg-black/10 hover:bg-white/20 dark:hover:bg-black/20 transition-colors"
+          className="absolute top-8 right-8 p-2.5 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
         >
-          <X className="w-5 h-5 text-white dark:text-black" />
+          <X className="w-5 h-5 text-muted-foreground" />
         </button>
       </div>
     </div>
@@ -322,10 +318,21 @@ export function ModalWrapper() {
 
   return (
     <>
-      <Button onClick={() => setShowForm(true)} className="flex items-center gap-2 px-5 py-2.5 bg-primary font-medium rounded-lg">
-        <Plus size={18} />
-        <span>Nuevo Bien</span>
-      </Button>
+      {property ? (
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => setShowForm(true)}
+          className="w-9 h-9 rounded-lg hover:bg-primary/10 hover:text-primary transition-all"
+        >
+          <Edit2 className="w-4 h-4" />
+        </Button>
+      ) : (
+        <Button onClick={() => setShowForm(true)} className="flex items-center gap-3 px-8 h-14 bg-primary font-bold rounded-lg shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all">
+          <Plus size={22} className="stroke-[3]" />
+          <span>Nuevo Bien</span>
+        </Button>
+      )}
 
       {createPortal(modalContent, document.body)}
     </>

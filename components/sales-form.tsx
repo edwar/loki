@@ -70,7 +70,7 @@ export function NewSaleForm({ products, customers }: { products: Product[]; cust
       <Card className="rounded-lg border-primary/20 bg-primary/2 shadow-xl overflow-hidden backdrop-blur-md">
         <CardHeader className="px-6 py-4 flex flex-row items-center justify-between border-b border-border/10">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/20">
+            <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center shadow-lg shadow-primary/20">
               <ShoppingBag size={20} className="text-white" />
             </div>
             <CardTitle className="text-xl">Nueva Venta</CardTitle>
@@ -83,10 +83,10 @@ export function NewSaleForm({ products, customers }: { products: Product[]; cust
               <div className="flex-1 flex flex-col justify-end gap-1.5 h-full">
                 <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground ml-1">Producto</label>
                 <Select value={selectedProductId} onValueChange={setSelectedProductId}>
-                  <SelectTrigger className="h-11 rounded-xl bg-background/60 border-primary/5 hover:border-primary/20 transition-all shadow-sm">
+                  <SelectTrigger className="h-11 rounded-lg bg-background/60 border-primary/5 hover:border-primary/20 transition-all shadow-sm">
                     <SelectValue placeholder="Seleccionar producto" />
                   </SelectTrigger>
-                  <SelectContent className="rounded-xl border-primary/10">
+                  <SelectContent className="rounded-lg border-primary/10">
                     <SelectGroup>
                       <SelectLabel className="text-[10px] uppercase tracking-widest text-muted-foreground/50 px-2 py-1.5">Tus Productos</SelectLabel>
                       {products.map(p => {
@@ -113,7 +113,7 @@ export function NewSaleForm({ products, customers }: { products: Product[]; cust
 
               <div className="flex flex-col justify-end gap-1.5 h-full">
                 <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground ml-1">Cant.</label>
-                <div className="flex items-center bg-background/60 rounded-xl border border-primary/5 p-1 h-11 shadow-sm">
+                <div className="flex items-center bg-background/60 rounded-lg border border-primary/5 p-1 h-11 shadow-sm">
                   <Button
                     disabled={quantity === 0}
                     type="button"
@@ -162,7 +162,7 @@ export function NewSaleForm({ products, customers }: { products: Product[]; cust
             </div>
 
             {selectedProduct && (
-              <div className="p-3 bg-primary/5 rounded-xl border border-primary/10 animate-in fade-in slide-in-from-top-1 duration-300">
+              <div className="p-3 bg-primary/5 rounded-lg border border-primary/10 animate-in fade-in slide-in-from-top-1 duration-300">
                 <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-primary/60 mb-1.5 ml-1">Insumos Requeridos</p>
                 <div className="flex flex-wrap gap-1.5">
                   {selectedProduct.recipeItems.length === 0 ? (
@@ -215,7 +215,7 @@ export function NewSaleForm({ products, customers }: { products: Product[]; cust
           {/* Checkout Section */}
           {items.length > 0 && (
             <div className="p-6 pt-0 space-y-4">
-              <div className="p-4 bg-primary rounded-2xl shadow-xl shadow-primary/20 text-white flex justify-between items-end relative overflow-hidden">
+              <div className="p-4 bg-primary rounded-lg shadow-xl shadow-primary/20 text-white flex justify-between items-end relative overflow-hidden">
                 {/* Background Decoration */}
                 <div className="absolute right-0 bottom-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mb-16 blur-2xl" />
 
@@ -234,10 +234,10 @@ export function NewSaleForm({ products, customers }: { products: Product[]; cust
                     <User size={18} />
                   </div>
                   <Select name="customerId" defaultValue="none">
-                    <SelectTrigger className="h-12 pl-10 rounded-xl bg-background border-border/40 hover:border-primary/20 transition-all">
+                    <SelectTrigger className="h-12 pl-10 rounded-lg bg-background border-border/40 hover:border-primary/20 transition-all">
                       <SelectValue placeholder="Venta General / Consumidor" />
                     </SelectTrigger>
-                    <SelectContent className="rounded-xl">
+                    <SelectContent className="rounded-lg">
                       <SelectItem value="none">Venta General (Sin Cliente)</SelectItem>
                       <SelectGroup>
                         <SelectLabel className="text-[10px] uppercase tracking-widest text-muted-foreground/50 px-2 py-1.5">Tipos Comunes</SelectLabel>
@@ -257,7 +257,7 @@ export function NewSaleForm({ products, customers }: { products: Product[]; cust
                 <Button
                   type="submit"
                   disabled={isPending}
-                  className="md:col-span-1 h-12 rounded-xl text-md font-bold shadow-lg shadow-primary/10 hover:shadow-primary/20 transition-all active:scale-95 bg-primary text-white"
+                  className="md:col-span-1 h-12 rounded-lg text-md font-bold shadow-lg shadow-primary/10 hover:shadow-primary/20 transition-all active:scale-95 bg-primary text-white"
                 >
                   {isPending ? 'Vendiendo...' : 'Vender'}
                 </Button>

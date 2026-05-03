@@ -29,7 +29,7 @@ export function ExpenseTable({ expenses }: { expenses: any[] }) {
             <TableRow>
               <TableCell colSpan={5} className="text-center py-20">
                 <div className="flex flex-col items-center gap-4">
-                  <div className="w-16 h-16 rounded-3xl bg-accent/50 flex items-center justify-center opacity-50">
+                  <div className="w-16 h-16 rounded-lg bg-accent/50 flex items-center justify-center opacity-50">
                     <Wallet size={32} />
                   </div>
                   <p className="text-muted-foreground font-medium">No hay gastos registrados</p>
@@ -58,16 +58,16 @@ export function ExpenseTable({ expenses }: { expenses: any[] }) {
                 </TableCell>
                 <TableCell>
                   <div className="flex justify-end gap-2">
-                    <Button 
+                    <Button
                       onClick={() => setEditingExpense(expense)}
-                      variant="ghost" 
-                      size="sm" 
-                      className="h-10 w-10 p-0 rounded-xl hover:bg-primary/10 hover:text-primary transition-colors"
+                      variant="ghost"
+                      size="sm"
+                      className="h-10 w-10 p-0 rounded-lg hover:bg-primary/10 hover:text-primary transition-colors"
                     >
                       <Edit2 size={18} />
                     </Button>
                     <form action={deleteExpense.bind(null, expense.id)}>
-                      <Button type="submit" variant="ghost" size="sm" className="h-10 w-10 p-0 rounded-xl hover:bg-rose-500/10 hover:text-rose-500 transition-colors">
+                      <Button type="submit" variant="ghost" size="sm" className="h-10 w-10 p-0 rounded-lg hover:bg-rose-500/10 hover:text-rose-500 transition-colors">
                         <Trash2 size={18} />
                       </Button>
                     </form>
@@ -79,15 +79,15 @@ export function ExpenseTable({ expenses }: { expenses: any[] }) {
         </TableBody>
       </Table>
 
-      <Dialog 
-        isOpen={!!editingExpense} 
+      <Dialog
+        isOpen={!!editingExpense}
         onClose={() => setEditingExpense(null)}
         title="Editar Gasto"
       >
         <div className="mt-4">
-          <ExpenseForm 
-            expense={editingExpense} 
-            onSuccess={() => setEditingExpense(null)} 
+          <ExpenseForm
+            expense={editingExpense}
+            onSuccess={() => setEditingExpense(null)}
           />
         </div>
       </Dialog>

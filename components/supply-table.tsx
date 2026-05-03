@@ -9,10 +9,10 @@ import { deleteSupply } from '@/lib/actions/supplies'
 import { Dialog } from '@/components/ui/dialog'
 import { SupplyForm } from './supply-forms'
 
-export function SupplyTable({ 
-  supplies, 
-  suppliers 
-}: { 
+export function SupplyTable({
+  supplies,
+  suppliers
+}: {
   supplies: any[]
   suppliers: any[]
 }) {
@@ -36,7 +36,7 @@ export function SupplyTable({
             <TableRow>
               <TableCell colSpan={6} className="text-center py-20">
                 <div className="flex flex-col items-center gap-4">
-                  <div className="w-16 h-16 rounded-3xl bg-accent/50 flex items-center justify-center opacity-50">
+                  <div className="w-16 h-16 rounded-lg bg-accent/50 flex items-center justify-center opacity-50">
                     <Package size={32} />
                   </div>
                   <p className="text-muted-foreground font-medium">No hay insumos registrados</p>
@@ -83,16 +83,16 @@ export function SupplyTable({
                   </TableCell>
                   <TableCell>
                     <div className="flex justify-end gap-2">
-                      <Button 
+                      <Button
                         onClick={() => setEditingSupply(supply)}
-                        variant="ghost" 
-                        size="sm" 
-                        className="h-10 w-10 p-0 rounded-xl hover:bg-primary/10 hover:text-primary transition-colors"
+                        variant="ghost"
+                        size="sm"
+                        className="h-10 w-10 p-0 rounded-lg hover:bg-primary/10 hover:text-primary transition-colors"
                       >
                         <Edit2 size={18} />
                       </Button>
                       <form action={deleteSupply.bind(null, supply.id)}>
-                        <Button type="submit" variant="ghost" size="sm" className="h-10 w-10 p-0 rounded-xl hover:bg-rose-500/10 hover:text-rose-500 transition-colors">
+                        <Button type="submit" variant="ghost" size="sm" className="h-10 w-10 p-0 rounded-lg hover:bg-rose-500/10 hover:text-rose-500 transition-colors">
                           <Trash2 size={18} />
                         </Button>
                       </form>
@@ -105,16 +105,16 @@ export function SupplyTable({
         </TableBody>
       </Table>
 
-      <Dialog 
-        isOpen={!!editingSupply} 
+      <Dialog
+        isOpen={!!editingSupply}
         onClose={() => setEditingSupply(null)}
         title="Editar Insumo"
       >
         <div className="mt-4">
-          <SupplyForm 
-            supply={editingSupply} 
+          <SupplyForm
+            supply={editingSupply}
             suppliers={suppliers}
-            onSuccess={() => setEditingSupply(null)} 
+            onSuccess={() => setEditingSupply(null)}
           />
         </div>
       </Dialog>
