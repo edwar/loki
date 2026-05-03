@@ -159,7 +159,7 @@ export default async function DashboardPage() {
           <p className="text-muted-foreground font-medium mt-1">Sincronización en tiempo real de tu operación.</p>
         </div>
         <div className="flex items-center gap-3">
-          <Link href="/ventas/nueva">
+          <Link href="/ventas">
             <Button className="rounded-lg h-12 px-6 font-bold shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 active:scale-95 transition-all">
               <Plus size={20} className="mr-2" />
               Nueva Venta

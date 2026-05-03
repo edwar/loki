@@ -3,7 +3,7 @@ import { getSuppliers } from '@/lib/actions/suppliers'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { formatCurrency, cn } from '@/lib/utils'
 import { Package, Plus, Search, TrendingUp, AlertCircle } from 'lucide-react'
-import { SupplyForm } from '@/components/supply-forms'
+import { NewSupplySection } from '@/components/new-supply-section'
 import { SupplyTable } from '@/components/supply-table'
 
 export const dynamic = 'force-dynamic'
@@ -93,26 +93,14 @@ export default async function InsumosPage() {
       </div>
 
       {/* New Supply Dialog/Card */}
-      <Card className="rounded-lg border-primary/20 bg-primary/[0.02]">
-        <CardHeader className="p-8 pb-0">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center shadow-lg shadow-primary/20">
-              <Plus size={20} className="text-white" />
-            </div>
-            <CardTitle>Agregar Nuevo Insumo</CardTitle>
-          </div>
-        </CardHeader>
-        <CardContent className="p-8">
-          <SupplyForm suppliers={suppliers} />
-        </CardContent>
-      </Card>
+      <NewSupplySection suppliers={suppliers} />
 
       {/* Table Section */}
-      <Card className="rounded-lg border-border/40 bg-card/30 backdrop-blur-md overflow-hidden">
-        <CardHeader className="p-8 pb-0 flex flex-row items-center justify-between">
-          <CardTitle className="text-2xl">Detalle de Existencias</CardTitle>
+      <Card className="rounded-lg border-border/40 bg-card/30 backdrop-blur-md overflow-hidden p-0">
+        <CardHeader className="px-8 py-6 mb-0 flex flex-row items-center justify-between border-b border-border/30 bg-primary/5">
+          <CardTitle className="text-xl">Detalle de Existencias</CardTitle>
         </CardHeader>
-        <CardContent className="p-8">
+        <CardContent className="p-0 [&>div]:border-0 [&>div]:shadow-none [&>div]:rounded-none [&>div]:bg-transparent">
           <SupplyTable supplies={supplies} suppliers={suppliers} />
         </CardContent>
       </Card>

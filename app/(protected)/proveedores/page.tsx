@@ -1,7 +1,7 @@
 import { getSuppliers } from '@/lib/actions/suppliers'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Plus, Building2, Truck, Handshake } from 'lucide-react'
-import { SupplierForm } from '@/components/supplier-forms'
+import { NewSupplierSection } from '@/components/new-supplier-section'
 import { SupplierTable } from '@/components/supplier-table'
 
 export const dynamic = 'force-dynamic'
@@ -51,26 +51,14 @@ export default async function ProveedoresPage() {
       </div>
 
       {/* New Supplier Form */}
-      <Card className="rounded-lg border-primary/20 bg-primary/[0.02]">
-        <CardHeader className="p-8 pb-0">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center shadow-lg shadow-primary/20">
-              <Plus size={20} className="text-white" />
-            </div>
-            <CardTitle>Vincular Nuevo Proveedor</CardTitle>
-          </div>
-        </CardHeader>
-        <CardContent className="p-8">
-          <SupplierForm />
-        </CardContent>
-      </Card>
+      <NewSupplierSection />
 
       {/* Table Section */}
-      <Card className="rounded-lg border-border/40 bg-card/30 backdrop-blur-md overflow-hidden">
-        <CardHeader className="p-8 pb-0 flex flex-row items-center justify-between">
-          <CardTitle className="text-2xl">Lista de Proveedores</CardTitle>
+      <Card className="rounded-lg border-border/40 bg-card/30 backdrop-blur-md overflow-hidden p-0">
+        <CardHeader className="px-8 py-6 mb-0 flex flex-row items-center justify-between border-b border-border/30 bg-primary/5">
+          <CardTitle className="text-xl">Lista de Proveedores</CardTitle>
         </CardHeader>
-        <CardContent className="p-8">
+        <CardContent className="p-0 [&>div]:border-0 [&>div]:shadow-none [&>div]:rounded-none [&>div]:bg-transparent">
           <SupplierTable suppliers={suppliers} />
         </CardContent>
       </Card>

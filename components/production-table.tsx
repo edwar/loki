@@ -54,14 +54,14 @@ export function ProductionTable({ logs }: { logs: any[] }) {
 
   return (
     <>
-      <Card className="rounded-xl border-border/40 bg-card/30 backdrop-blur-md overflow-hidden">
-        <CardHeader className="border-b border-border/30 bg-primary/5 py-4">
+      <Card className="rounded-xl border-border/40 bg-card/30 backdrop-blur-md overflow-hidden p-0">
+        <CardHeader className="border-b border-border/30 bg-primary/5 px-5 py-4 mb-0">
           <CardTitle className="text-lg font-bold flex items-center gap-2">
             <Factory className="w-5 h-5 text-primary" />
             Historial de Producción
           </CardTitle>
         </CardHeader>
-        <CardContent className="p-0">
+        <CardContent className="p-0 [&>div]:border-0 [&>div]:shadow-none [&>div]:rounded-none [&>div]:bg-transparent">
           <Table>
             <TableHeader>
               <TableRow className="bg-accent/5 hover:bg-accent/5">
@@ -104,7 +104,7 @@ export function ProductionTable({ logs }: { logs: any[] }) {
                       </div>
                     </TableCell>
                     <TableCell className="py-4 text-right">
-                      <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="flex justify-end gap-2">
                         <Button
                           onClick={() => handleEdit(log)}
                           variant="ghost"

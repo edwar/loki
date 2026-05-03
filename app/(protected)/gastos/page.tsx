@@ -2,7 +2,7 @@ import { getExpenses } from '@/lib/actions/expenses'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { formatCurrency } from '@/lib/utils'
 import { Plus, Wallet, TrendingDown, Calendar, Receipt } from 'lucide-react'
-import { ExpenseForm } from '@/components/expense-forms'
+import { NewExpenseSection } from '@/components/new-expense-section'
 import { ExpenseTable } from '@/components/expense-table'
 
 export const dynamic = 'force-dynamic'
@@ -61,26 +61,14 @@ export default async function GastosPage() {
       </div>
 
       {/* New Expense Form */}
-      <Card className="rounded-lg border-rose-500/20 bg-rose-500/[0.02]">
-        <CardHeader className="p-8 pb-0">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-rose-500 flex items-center justify-center shadow-lg shadow-rose-500/20">
-              <Plus size={20} className="text-white" />
-            </div>
-            <CardTitle>Registrar Nuevo Gasto</CardTitle>
-          </div>
-        </CardHeader>
-        <CardContent className="p-8">
-          <ExpenseForm />
-        </CardContent>
-      </Card>
+      <NewExpenseSection />
 
       {/* Table Section */}
-      <Card className="rounded-lg border-border/40 bg-card/30 backdrop-blur-md overflow-hidden">
-        <CardHeader className="p-8 pb-0 flex flex-row items-center justify-between">
-          <CardTitle className="text-2xl">Historial de Gastos</CardTitle>
+      <Card className="rounded-lg border-border/40 bg-card/30 backdrop-blur-md overflow-hidden p-0">
+        <CardHeader className="px-8 py-6 mb-0 flex flex-row items-center justify-between border-b border-border/30 bg-primary/5">
+          <CardTitle className="text-xl">Historial de Gastos</CardTitle>
         </CardHeader>
-        <CardContent className="p-8">
+        <CardContent className="p-0 [&>div]:border-0 [&>div]:shadow-none [&>div]:rounded-none [&>div]:bg-transparent">
           <ExpenseTable expenses={expenses} />
         </CardContent>
       </Card>

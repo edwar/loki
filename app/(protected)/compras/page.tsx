@@ -389,8 +389,8 @@ export default function ComprasPage() {
                 </div>
                 {i < arr.length - 1 && (
                   <div className={`flex-1 h-0.5 mx-2 ${isManual
-                      ? (step === 'success' ? 'bg-emerald-500' : 'bg-gray-200 dark:bg-slate-700')
-                      : (['processing', 'review', 'success'].includes(step) && i < (step === 'processing' ? 0 : step === 'review' ? 1 : step === 'success' ? 2 : -1) ? 'bg-emerald-500' : 'bg-gray-200 dark:bg-slate-700')
+                    ? (step === 'success' ? 'bg-emerald-500' : 'bg-gray-200 dark:bg-slate-700')
+                    : (['processing', 'review', 'success'].includes(step) && i < (step === 'processing' ? 0 : step === 'review' ? 1 : step === 'success' ? 2 : -1) ? 'bg-emerald-500' : 'bg-gray-200 dark:bg-slate-700')
                     }`} />
                 )}
               </div>
@@ -491,7 +491,7 @@ export default function ComprasPage() {
                   setImagePreview(null)
                   setError(null)
                 }}
-                variant="secondary"
+                variant="primary"
                 className="h-10 rounded-md"
               >
                 <FileText className="w-4 h-4 mr-2" />
@@ -780,7 +780,7 @@ export default function ComprasPage() {
             </Button>
             <Button
               onClick={handleSavePurchase}
-              className="flex-1 h-12 bg-black dark:bg-white text-white dark:text-black font-semibold rounded-md"
+              className="flex-1 h-12 font-semibold"
             >
               GUARDAR COMPRA
             </Button>
