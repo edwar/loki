@@ -51,35 +51,35 @@ export default async function BienesPage() {
 
       {/* Stats */}
       <div className="grid gap-4 md:grid-cols-3">
-        <Card className="bg-white dark:bg-slate-800 rounded-[24px] p-6">
+        <Card className="bg-white dark:bg-slate-800 rounded p-6">
           <CardContent className="p-0">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs font-medium text-gray-400 dark:text-slate-500 uppercase">Total Bienes</p>
                 <p className="text-3xl font-bold text-black dark:text-white mt-1">{propertyCount}</p>
               </div>
-              <div className="w-12 h-12 rounded-2xl bg-gray-100 dark:bg-slate-700 flex items-center justify-center">
+              <div className="w-12 h-12 rounded bg-gray-100 dark:bg-slate-700 flex items-center justify-center">
                 <Building2 className="w-6 h-6 text-gray-500 dark:text-slate-400" />
               </div>
             </div>
           </CardContent>
         </Card>
         
-        <Card className="bg-white dark:bg-slate-800 rounded-[24px] p-6">
+        <Card className="bg-white dark:bg-slate-800 rounded p-6">
           <CardContent className="p-0">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs font-medium text-gray-400 dark:text-slate-500 uppercase">Valor Total</p>
                 <p className="text-3xl font-bold text-black dark:text-white mt-1">{formatCurrency(totalValue)}</p>
               </div>
-              <div className="w-12 h-12 rounded-2xl bg-emerald-50 dark:bg-emerald-900/20 flex items-center justify-center">
+              <div className="w-12 h-12 rounded bg-emerald-50 dark:bg-emerald-900/20 flex items-center justify-center">
                 <span className="text-2xl">$</span>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-white dark:bg-slate-800 rounded-[24px] p-6">
+        <Card className="bg-white dark:bg-slate-800 rounded p-6">
           <CardContent className="p-0 flex items-center justify-center h-full">
             <ModalWrapper />
           </CardContent>
@@ -87,7 +87,7 @@ export default async function BienesPage() {
       </div>
 
       {/* Properties Table */}
-      <Card className="bg-white dark:bg-slate-800 rounded-[24px] p-6">
+      <Card className="bg-white dark:bg-slate-800 rounded p-6">
         <CardHeader className="px-0 pt-0">
           <CardTitle className="text-lg font-semibold text-black dark:text-white">Lista de Bienes</CardTitle>
         </CardHeader>

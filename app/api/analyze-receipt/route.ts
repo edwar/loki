@@ -6,37 +6,28 @@ const OPENROUTER_API_URL = 'https://openrouter.ai/api/v1/chat/completions'
 export async function POST(request: Request) {
   try {
     if (!OPENROUTER_API_KEY) {
-      return NextResponse.json({ error: 'API key de OpenRouter no configurada' }, { status: 500 })
+      return NextResponse.json({ error: 'API key no configurada' }, { status: 500 })
     }
 
     const { imageBase64, mimeType } = await request.json()
 
     const prompt = `
-Eres un experto en OCR de receipts y facturas.
+Eres un experto en extraer datos de receipts y facturas.
 
-Analiza esta imagen buscando:
-- Nombre de tienda/proveedor
-- Fecha de la transacción
-- Lista de productos con precios
+Analiza la imagen y extrae:
+- Nombre del proveedor/tienda
+- Fecha (formato YYYY-MM-DD)
+- Lista de items con cantidad, precio unitario y subtotal
+- Subtotal (antes de descuentos e impuestos)
+- Porcentaje de descuento (ej: 10 para 10%)
+- Porcentaje de impuesto/IVA (ej: 21 para 21%)
 - Total de la compra
 
-Si la imagen NO contiene un receipt o factura (es otra cosa), responde:
-{"error": "NO_ES_RECIBO", "mensaje": "La imagen no parece ser un receipt o factura"}
+Responde SOLO con JSON válido (sin markdown, sin texto extra):
+{"nombreProveedor":"nombre","fecha":"2024-01-01","subtotal":100.00,"descuentoPorcentaje":0,"impuestoPorcentaje":21,"total":121.00,"items":[{"nombre":"producto","cantidad":2,"precioUnitario":50.00,"subtotal":100.00}]}
 
-Si es un receipt válido, responde SOLO con JSON válido (sin markdown, sin texto extra):
-{
-  "nombreProveedor": "Nombre de la tienda",
-  "fecha": "2024-01-15",
-  "total": 150.00,
-  "items": [
-    {"nombre": "Producto 1", "cantidad": 2, "precioUnitario": 25.00, "subtotal": 50.00}
-  ]
-}
-
-IMPORTANTE: 
-- Devuelve SOLO JSON válido
-- No uses backticks ni markdown
-- Si no puedes leer algo, usa valores por defecto razonables
+Si no es un receipt, responde:
+{"error":"NO_ES_RECIBO"}
 `
 
     const response = await fetch(OPENROUTER_API_URL, {
@@ -48,22 +39,14 @@ IMPORTANTE:
         'X-Title': 'Loki'
       },
       body: JSON.stringify({
-        model: 'google/gemini-flash-8b',
+        //model: 'openrouter/free',
+        model: 'google/gemma-3-4b-it:free',
         messages: [
-          {
-            role: 'system',
-            content: 'Respondes ÚNICAMENTE con JSON válido. Sin texto adicional.'
-          },
           {
             role: 'user',
             content: [
               { type: 'text', text: prompt },
-              { 
-                type: 'image_url', 
-                image_url: { 
-                  url: `data:${mimeType};base64,${imageBase64}` 
-                } 
-              }
+              { type: 'image_url', image_url: { url: `data:${mimeType};base64,${imageBase64}` } }
             ]
           }
         ],
@@ -74,46 +57,44 @@ IMPORTANTE:
 
     if (!response.ok) {
       const errorText = await response.text()
-      throw new Error(`OpenRouter API error: ${response.status} - ${errorText}`)
+      throw new Error(`API error: ${response.status} - ${errorText}`)
     }
 
     const data = await response.json()
-    console.log('OpenRouter response:', JSON.stringify(data, null, 2))
-    
+    console.log('API response:', JSON.stringify(data, null, 2))
+
     if (!data.choices || !data.choices[0]?.message?.content) {
       throw new Error('No se pudo procesar la imagen')
     }
 
     const jsonText = data.choices[0].message.content
-    console.log('Content:', jsonText)
-    
+
     let parsed
     try {
       parsed = JSON.parse(jsonText)
     } catch {
-      const jsonMatch = jsonText.match(/\{[\s\S]*\}/)
-      if (!jsonMatch) {
-        throw new Error('No se encontró JSON en la respuesta: ' + jsonText.substring(0, 200))
-      }
-      parsed = JSON.parse(jsonMatch[0])
+      const match = jsonText.match(/\{[\s\S]*\}/)
+      if (!match) throw new Error('No se encontró JSON')
+      parsed = JSON.parse(match[0])
     }
-    
+
     if (parsed.error === 'NO_ES_RECIBO') {
-      return NextResponse.json({ 
-        error: 'La imagen no parece ser un receipt. Por favor, tomá una foto clara de un recibo o factura.' 
-      }, { status: 400 })
+      return NextResponse.json({ error: 'La imagen no parece ser un receipt' }, { status: 400 })
     }
-    
+
     return NextResponse.json({
       nombreProveedor: parsed.nombreProveedor || 'Proveedor desconocido',
       fecha: parsed.fecha || new Date().toISOString().split('T')[0],
+      subtotal: parseFloat(parsed.subtotal) || 0,
+      descuentoPorcentaje: parseFloat(parsed.descuentoPorcentaje) || 0,
+      impuestoPorcentaje: parseFloat(parsed.impuestoPorcentaje) || 0,
       total: parseFloat(parsed.total) || 0,
       items: Array.isArray(parsed.items) ? parsed.items : []
     })
   } catch (error) {
-    console.error('Error analyzing receipt:', error)
+    console.error('Error:', error)
     return NextResponse.json({ 
-      error: error instanceof Error ? error.message : 'Error al procesar la imagen' 
+      error: error instanceof Error ? error.message : 'Error al procesar' 
     }, { status: 500 })
   }
 }

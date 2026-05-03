@@ -114,6 +114,9 @@ model PurchaseOrder {
   id              String    @id @default(uuid())
   supplierId      String?
   totalAmount     Decimal   @default(0) @db.Decimal(12, 2)
+  subtotal        Decimal   @default(0) @db.Decimal(12, 2)
+  discountPercentage Decimal @default(0) @db.Decimal(5, 2)
+  taxPercentage    Decimal   @default(0) @db.Decimal(5, 2)
   status          String    @default("pending")
   attachmentUrl   String?
   aiExtractedData Json?

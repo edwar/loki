@@ -59,7 +59,7 @@ export default function ProtectedLayout({
       <div className="lg:hidden fixed top-4 left-4 z-50">
         <button
           onClick={() => setMobileOpen(!mobileOpen)}
-          className="p-2.5 rounded-2xl bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-all"
+          className="p-2.5 rounded bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-all"
         >
           {mobileOpen ? <X size={20} className="text-black dark:text-white" /> : <Menu size={20} className="text-black dark:text-white" />}
         </button>
@@ -74,7 +74,7 @@ export default function ProtectedLayout({
         <div className="flex flex-col h-full">
           <div className="p-6 border-b border-gray-100 dark:border-slate-700">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-black flex items-center justify-center">
+              <div className="w-10 h-10 rounded bg-black flex items-center justify-center">
                 <ChefHat size={22} className="text-white" />
               </div>
               <div>
@@ -85,7 +85,7 @@ export default function ProtectedLayout({
           </div>
           
           {session?.user && (
-            <div className="p-4 mx-4 mt-4 mb-2 rounded-xl bg-gray-50 dark:bg-slate-700/50">
+            <div className="p-4 mx-4 mt-4 mb-2 rounded bg-gray-50 dark:bg-slate-700/50">
               <div className="flex items-center gap-3">
                 <div className="w-9 h-9 rounded-full bg-gray-200 dark:bg-slate-600 flex items-center justify-center">
                   <User size={18} className="text-gray-600 dark:text-slate-300" />
@@ -112,7 +112,7 @@ export default function ProtectedLayout({
                   href={item.href}
                   onClick={() => setMobileOpen(false)}
                   className={cn(
-                    'flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200',
+                    'flex items-center gap-3 px-4 py-2.5 rounded text-sm font-medium transition-all duration-200',
                     isActive
                       ? 'bg-black dark:bg-white text-white dark:text-black'
                       : 'text-gray-500 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-700 hover:text-black dark:hover:text-white'
@@ -132,7 +132,7 @@ export default function ProtectedLayout({
             </div>
             <button
               onClick={handleSignOut}
-              className="flex items-center gap-3 w-full px-4 py-2.5 rounded-xl text-sm font-medium text-gray-500 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-700 hover:text-black dark:hover:text-white transition-colors"
+              className="flex items-center gap-3 w-full px-4 py-2.5 rounded text-sm font-medium text-gray-500 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-700 hover:text-black dark:hover:text-white transition-colors"
             >
               <LogOut size={18} />
               Cerrar Sesión

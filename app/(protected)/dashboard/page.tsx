@@ -60,7 +60,7 @@ function StatCard({ title, value, subtitle, change, index }: {
   index: number
 }) {
   return (
-    <div className={cn('bg-white dark:bg-slate-800 rounded-[24px] p-6 animate-fade-in', `stagger-${index}`)}>
+    <div className={cn('bg-white dark:bg-slate-800 rounded p-6 animate-fade-in', `stagger-${index}`)}>
       <div className="flex justify-between items-start mb-4">
         <span className="text-xs font-medium text-gray-400 dark:text-slate-500 uppercase tracking-wide">{title}</span>
       </div>
@@ -167,7 +167,7 @@ export default async function DashboardPage() {
       {/* Two Column Layout */}
       <div className="grid grid-cols-2 gap-6">
         {/* Sales Card */}
-        <div className="bg-white dark:bg-slate-800 rounded-[24px] p-6 animate-fade-in">
+        <div className="bg-white dark:bg-slate-800 rounded p-6 animate-fade-in">
           <div className="flex items-center justify-between mb-6">
             <div>
               <h2 className="text-lg font-semibold text-black dark:text-white">Ventas Recientes</h2>
@@ -191,7 +191,7 @@ export default async function DashboardPage() {
         </div>
 
         {/* Expenses Card */}
-        <div className="bg-white dark:bg-slate-800 rounded-[24px] p-6 animate-fade-in">
+        <div className="bg-white dark:bg-slate-800 rounded p-6 animate-fade-in">
           <div className="flex items-center justify-between mb-6">
             <div>
               <h2 className="text-lg font-semibold text-black dark:text-white">Gastos Recientes</h2>
@@ -217,7 +217,7 @@ export default async function DashboardPage() {
 
       {/* Low Stock Alert */}
       {lowStock.length > 0 && (
-        <div className="bg-white dark:bg-slate-800 rounded-[24px] p-6 border border-amber-200 dark:border-amber-800 animate-fade-in">
+        <div className="bg-white dark:bg-slate-800 rounded p-6 border border-amber-200 dark:border-amber-800 animate-fade-in">
           <div className="flex items-center gap-3 mb-4">
             <div className="w-10 h-10 rounded-full bg-amber-50 dark:bg-amber-900/30 flex items-center justify-center">
               <AlertTriangle size={18} className="text-amber-500" />
@@ -229,7 +229,7 @@ export default async function DashboardPage() {
           </div>
           <div className="grid grid-cols-3 gap-4">
             {lowStock.map((supply: any) => (
-              <div key={supply.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
+              <div key={supply.id} className="flex items-center justify-between p-3 bg-gray-50 rounded">
                 <div className="flex items-center gap-2">
                   <Package size={16} className="text-gray-400" />
                   <span className="text-sm font-medium text-black">{supply.name}</span>
