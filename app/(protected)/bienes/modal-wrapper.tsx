@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/select'
 import { Plus, X, Building2, Calculator } from 'lucide-react'
 import { createPortal } from 'react-dom'
+import { DatePicker } from '@/components/ui/date-picker'
 
 const PROPERTY_TYPES = [
   { value: 'terreno', label: 'Terreno', depreciation: 0 },
@@ -192,7 +193,7 @@ export function ModalWrapper() {
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="text-sm font-medium text-gray-700 dark:text-slate-300 mb-2 block">Valor de Compra</label>
                 <div className="relative">
@@ -210,12 +211,11 @@ export function ModalWrapper() {
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-700 dark:text-slate-300 mb-2 block">Fecha de Adquisición</label>
-                <Input
-                  type="date"
+                <DatePicker
                   value={formData.purchaseDate}
-                  onChange={(e) => setFormData({ ...formData, purchaseDate: e.target.value })}
-                  className="h-12"
+                  onChange={(date) => setFormData({ ...formData, purchaseDate: date })}
                   required
+                  side="top"
                 />
               </div>
             </div>
