@@ -39,8 +39,7 @@ Si no es un receipt, responde:
         'X-Title': 'Loki'
       },
       body: JSON.stringify({
-        //model: 'openrouter/free',
-        model: 'google/gemma-3-4b-it:free',
+        model: 'openrouter/free',
         messages: [
           {
             role: 'user',
