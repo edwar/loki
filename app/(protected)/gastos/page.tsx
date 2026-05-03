@@ -128,7 +128,7 @@ export default async function GastosPage() {
                   </TableCell>
                 </TableRow>
               ) : (
-                expenses.map((expense) => (
+                expenses.map((expense: any) => (
                   <TableRow key={expense.id}>
                     <TableCell>{formatDate(expense.date)}</TableCell>
                     <TableCell>

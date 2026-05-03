@@ -183,7 +183,7 @@ export default async function DashboardPage() {
             </div>
           ) : (
             <div>
-              {recentSales.map((sale) => (
+              {recentSales.map((sale: any) => (
                 <SaleRow key={sale.id} sale={sale} />
               ))}
             </div>
@@ -207,7 +207,7 @@ export default async function DashboardPage() {
             </div>
           ) : (
             <div>
-              {recentExpenses.map((expense) => (
+              {recentExpenses.map((expense: any) => (
                 <ExpenseRow key={expense.id} expense={expense} />
               ))}
             </div>
@@ -228,7 +228,7 @@ export default async function DashboardPage() {
             </div>
           </div>
           <div className="grid grid-cols-3 gap-4">
-            {lowStock.map((supply) => (
+            {lowStock.map((supply: any) => (
               <div key={supply.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
                 <div className="flex items-center gap-2">
                   <Package size={16} className="text-gray-400" />

@@ -76,7 +76,7 @@ export default async function ProveedoresPage() {
                   </TableCell>
                 </TableRow>
               ) : (
-                suppliers.map((supplier) => (
+                suppliers.map((supplier: any) => (
                   <TableRow key={supplier.id}>
                     <TableCell className="font-medium">{supplier.name}</TableCell>
                     <TableCell>

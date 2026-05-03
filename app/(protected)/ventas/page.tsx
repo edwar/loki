@@ -60,13 +60,13 @@ export default async function VentasPage() {
                   </TableCell>
                 </TableRow>
               ) : (
-                sales.map((sale) => (
+                sales.map((sale: any) => (
                   <TableRow key={sale.id}>
                     <TableCell>{formatDate(sale.createdAt)}</TableCell>
                     <TableCell>{sale.customer?.name || '-'}</TableCell>
                     <TableCell>
                       <div className="text-sm">
-                        {sale.saleItems.map(si => `${si.quantity}x ${si.product.name}`).join(', ')}
+                        {sale.saleItems.map((si: any) => `${si.quantity}x ${si.product.name}`).join(', ')}
                       </div>
                     </TableCell>
                     <TableCell className="font-medium">{formatCurrency(Number(sale.totalAmount))}</TableCell>

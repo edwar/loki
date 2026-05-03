@@ -110,7 +110,7 @@ export default async function ProductosPage() {
       </Card>
 
       <div className="space-y-4">
-        {products.map((product) => (
+        {products.map((product: any) => (
           <Card key={product.id}>
             <CardHeader className="flex flex-row items-center justify-between">
               <div>
@@ -134,7 +134,7 @@ export default async function ProductosPage() {
               ) : (
                 <Table>
                   <TableBody>
-                    {product.recipeItems.map((item) => (
+                    {product.recipeItems.map((item: any) => (
                       <TableRow key={item.id} className="h-8">
                         <TableCell className="py-1">{item.supply.name}</TableCell>
                         <TableCell className="py-1">{Number(item.quantityRequired)} {item.unit}</TableCell>

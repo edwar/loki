@@ -180,7 +180,7 @@ export default async function InsumosPage() {
                   </TableCell>
                 </TableRow>
               ) : (
-                supplies.map((supply) => {
+                supplies.map((supply: any) => {
                   const isLowStock = Number(supply.currentStock) < Number(supply.minStock)
                   return (
                     <TableRow key={supply.id} className="hover:bg-[var(--accent)]/50">
