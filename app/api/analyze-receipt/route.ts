@@ -12,28 +12,24 @@ export async function POST(request: Request) {
     const { imageBase64, mimeType } = await request.json()
 
     const prompt = `
-Eres un asistente que extrae información de receipts/facturas de compras. 
-Analiza la imagen de un receipt y extrae los datos en formato JSON.
+Eres un asistente especializado en extraer información de receipts/facturas de compras.
+SOLO analiza imágenes que sean receipts o facturas. Si la imagen NO es un receipt, 
+responde con este EXACTO JSON (sin texto adicional):
+{"error": "NO_ES_RECIBO", "mensaje": "La imagen no parece ser un receipt o factura"}
 
-Responde EXACTAMENTE con este formato JSON (sin texto adicional):
+Si la imagen ES un receipt, extrae los datos en este formato JSON:
 {
   "nombreProveedor": "nombre del proveedor o tienda",
-  "fecha": "YYYY-MM-DD (formato ISO)",
+  "fecha": "YYYY-MM-DD",
   "total": 0.00,
   "items": [
-    {
-      "nombre": "nombre del producto",
-      "cantidad": 1,
-      "precioUnitario": 0.00,
-      "subtotal": 0.00
-    }
+    {"nombre": "nombre del producto", "cantidad": 1, "precioUnitario": 0.00, "subtotal": 0.00}
   ]
 }
 
 Reglas:
-- Si no puedes leer la fecha, usa la fecha de hoy
+- Si la imagen no es legible como receipt, responde con el JSON de error
 - Los precios deben ser números
-- Ignora campos vacíos o ilegibles
 - Si no hay items, devuelve array vacío
 - El total debe ser la suma de los subtotales
 `
@@ -95,6 +91,12 @@ Reglas:
         throw new Error('No se encontró JSON en la respuesta: ' + jsonText.substring(0, 200))
       }
       parsed = JSON.parse(jsonMatch[0])
+    }
+    
+    if (parsed.error === 'NO_ES_RECIBO') {
+      return NextResponse.json({ 
+        error: 'La imagen no parece ser un receipt. Por favor, tomá una foto clara de un recibo o factura.' 
+      }, { status: 400 })
     }
     
     return NextResponse.json({

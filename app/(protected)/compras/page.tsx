@@ -303,8 +303,8 @@ export default function ComprasPage() {
             {/* Camera Preview */}
             {cameraActive ? (
               <div className="space-y-4">
-                <div className="relative aspect-video bg-black rounded-xl overflow-hidden">
-<video 
+<div className="relative aspect-[9/16] md:aspect-video bg-black rounded-xl overflow-hidden">
+                  <video 
                       ref={videoRef} 
                       autoPlay 
                       playsInline 
