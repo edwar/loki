@@ -18,6 +18,16 @@ const outfit = Outfit({
 export const metadata: Metadata = {
   title: "Loki - Gestión de Negocios",
   description: "Plataforma de administración de negocios",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Loki",
+  },
+};
+
+export const viewport = {
+  themeColor: "#6366f1",
 };
 
 export default function RootLayout({

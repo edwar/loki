@@ -8,6 +8,7 @@ import { formatCurrency, cn } from '@/lib/utils'
 import { Plus, Minus, Trash2, ShoppingBag, User } from 'lucide-react'
 import { createSale, updateSale } from '@/lib/actions/sales'
 import { ConfirmationModal } from '@/components/ui/confirmation-modal'
+import { sileo as toast } from 'sileo'
 
 type Product = {
   id: string
@@ -88,19 +89,43 @@ export function SaleForm({
   const total = items.reduce((sum, item) => sum + item.quantity * item.unitPrice, 0)
 
   const handleSubmit = async (formData: FormData) => {
-    formData.set('items', JSON.stringify(items.map(i => ({
+    const itemsJson = JSON.stringify(items.map(i => ({
       productId: i.productId,
       quantity: i.quantity,
       unitPrice: i.unitPrice
-    }))))
+    })))
+    formData.set('items', itemsJson)
 
     if (sale) {
       startTransition(async () => {
+        if (!navigator.onLine) {
+          toast.error({ title: 'No puedes editar ventas en modo offline' })
+          return
+        }
         await updateSale(sale.id, formData)
         onSuccess?.()
       })
     } else {
       startTransition(async () => {
+        if (!navigator.onLine) {
+          try {
+            const { savePendingSale } = await import('@/lib/offline-sync')
+            await savePendingSale({
+              customerId: formData.get('customerId') as string,
+              items: itemsJson
+            })
+            toast.warning({ 
+              title: 'Venta Guardada Localmente', 
+              description: 'Se sincronizará automáticamente cuando vuelva la conexión a internet.' 
+            })
+            setItems([])
+            onSuccess?.()
+          } catch (error) {
+            toast.error({ title: 'Error al guardar localmente' })
+          }
+          return
+        }
+
         await createSale(formData)
         setItems([])
         onSuccess?.()

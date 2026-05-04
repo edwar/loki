@@ -26,6 +26,7 @@ import {
 import { useState, useEffect } from 'react'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { getLowStockCount } from '@/lib/actions/alerts'
+import { SyncManager } from '@/components/sync-manager'
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
@@ -196,6 +197,8 @@ export default function ProtectedLayout({
           </div>
         </div>
       </main>
+      
+      <SyncManager />
     </div>
   )
 }
