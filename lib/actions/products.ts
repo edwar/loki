@@ -112,7 +112,7 @@ export async function prepareProduct(productId: string, batches: number, actualY
   const expectedYield = yieldAmount * batches
 
   // 1. Verificar disponibilidad y preparar deducciones
-  const supplyUpdates = []
+  const supplyUpdates: { id: string; quantity: number; unitCost: number }[] = []
   for (const item of product.recipeItems) {
     const totalRequired = Number(item.quantityRequired) * batches
     const supply = await prisma.supply.findUnique({ where: { id: item.supplyId } })
