@@ -70,8 +70,8 @@ export function ConfirmationModal({
             <AlertTriangle className="w-10 h-10" />
           </div>
 
-          <h3 className="text-2xl font-bold tracking-tight mb-2">{title}</h3>
-          <p className="text-muted-foreground text-sm leading-relaxed mb-8">
+          <h3 className="text-2xl font-bold tracking-tight mb-2 text-foreground">{title}</h3>
+          <p className="text-foreground/70 text-sm leading-relaxed mb-8">
             {description}
           </p>
 
@@ -89,7 +89,7 @@ export function ConfirmationModal({
               variant="ghost"
               onClick={onClose}
               disabled={loading}
-              className="h-12 font-bold rounded-lg text-muted-foreground hover:bg-muted"
+              className="h-12 font-bold rounded-lg text-foreground/60 hover:text-foreground hover:bg-muted"
             >
               {cancelText}
             </Button>

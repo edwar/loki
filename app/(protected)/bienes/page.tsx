@@ -74,7 +74,7 @@ export default async function BienesPage() {
                 <span className="text-2xl text-white">$</span>
               </div>
               <div>
-                <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-600">Valor Total</p>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-600 dark:text-emerald-400">Valor Total</p>
                 <p className="text-3xl font-extrabold">{formatCurrency(totalValue)}</p>
               </div>
             </div>

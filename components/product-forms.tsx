@@ -38,12 +38,12 @@ export function ProductForm({
     >
       <div className="grid gap-6 grid-cols-1">
         <div className="space-y-2">
-          <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Nombre del Producto</label>
+          <label className="text-xs font-bold uppercase tracking-widest text-foreground/60">Nombre del Producto</label>
           <Input name="name" defaultValue={product?.name} required placeholder="Ej: Empanada de Carne" className="h-12" />
         </div>
         <div className="grid gap-6 md:grid-cols-2">
           <div className="space-y-2">
-            <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Categoría</label>
+            <label className="text-xs font-bold uppercase tracking-widest text-foreground/60">Categoría</label>
             <Input
               name="category"
               defaultValue={product?.category ?? ''}
@@ -56,7 +56,7 @@ export function ProductForm({
             </datalist>
           </div>
           <div className="space-y-2">
-            <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Precio de Venta</label>
+            <label className="text-xs font-bold uppercase tracking-widest text-foreground/60">Precio de Venta</label>
             <NumericInput
               value={salePrice}
               onChange={setSalePrice}
@@ -66,7 +66,7 @@ export function ProductForm({
             <input type="hidden" name="salePrice" value={salePrice?.toString() || "0"} />
           </div>
           <div className="space-y-2">
-            <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Rendimiento (Porción/Lote)</label>
+            <label className="text-xs font-bold uppercase tracking-widest text-foreground/60">Rendimiento (Porción/Lote)</label>
             <NumericInput
               value={yieldAmount}
               onChange={setYieldAmount}

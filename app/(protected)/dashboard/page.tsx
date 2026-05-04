@@ -268,8 +268,8 @@ export default async function DashboardPage() {
                     <AlertTriangle size={24} className="text-amber-500" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-lg">Reposición</h3>
-                    <p className="text-xs text-amber-600/80 font-bold uppercase tracking-wider">Acción Requerida</p>
+                    <h3 className="font-bold text-lg text-foreground">Reposición</h3>
+                    <p className="text-xs text-amber-600 dark:text-amber-400 font-bold uppercase tracking-wider">Acción Requerida</p>
                   </div>
                 </div>
                 <div className="space-y-3">
@@ -279,14 +279,14 @@ export default async function DashboardPage() {
                         <Package size={14} className="text-muted-foreground" />
                         <span className="text-sm font-bold">{supply.name}</span>
                       </div>
-                      <span className="text-[10px] font-extrabold px-2 py-1 bg-rose-500/10 text-rose-600 rounded-lg">
+                      <span className="text-[10px] font-extrabold px-2 py-1 bg-rose-500/10 text-rose-600 dark:text-rose-400 rounded-lg">
                         {Number(supply.currentStock)} {supply.unit}
                       </span>
                     </div>
                   ))}
                 </div>
                 <Link href="/insumos" className="block">
-                  <Button variant="outline" className="w-full rounded-lg border-amber-500/30 text-amber-700 hover:bg-amber-500/10 h-11 font-bold">
+                  <Button variant="outline" className="w-full rounded-lg border-amber-500/30 text-amber-700 dark:text-amber-400 hover:bg-amber-500/10 h-11 font-bold">
                     Gestionar Inventario
                   </Button>
                 </Link>

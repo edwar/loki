@@ -273,7 +273,7 @@ export function ProductCard({
             <label className="text-xs font-bold uppercase tracking-widest text-foreground">
               Unidades Reales Obtenidas
             </label>
-            <p className="text-xs text-muted-foreground mb-2">
+            <p className="text-xs text-foreground/60 mb-2">
               Ajusta este valor si salieron más (excedente) o menos (merma) unidades de las esperadas por la receta.
             </p>
             <NumericInput

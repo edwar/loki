@@ -42,7 +42,7 @@ export default async function ClientesPage() {
                 <Target className="w-6 h-6 text-white" />
               </div>
               <div>
-                <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-600">Clientes Activos</p>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-600 dark:text-emerald-400">Clientes Activos</p>
                 <p className="text-3xl font-extrabold">{customers.filter(c => c._count.sales > 0).length}</p>
               </div>
             </div>

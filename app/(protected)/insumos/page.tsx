@@ -58,7 +58,7 @@ export default async function InsumosPage() {
                 <TrendingUp className="w-6 h-6 text-white" />
               </div>
               <div>
-                <p className="text-[10px] font-bold uppercase tracking-widest text-violet-600">Valor de Inventario</p>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-violet-600 dark:text-violet-400">Valor de Inventario</p>
                 <p className="text-3xl font-extrabold">{formatCurrency(totalValue)}</p>
               </div>
             </div>
@@ -81,7 +81,7 @@ export default async function InsumosPage() {
               <div>
                 <p className={cn(
                   "text-[10px] font-bold uppercase tracking-widest",
-                  lowStockCount > 0 ? "text-amber-600" : "text-emerald-600"
+                  lowStockCount > 0 ? "text-amber-600 dark:text-amber-400" : "text-emerald-600 dark:text-emerald-400"
                 )}>
                   {lowStockCount > 0 ? 'Stock Bajo' : 'Inventario Óptimo'}
                 </p>

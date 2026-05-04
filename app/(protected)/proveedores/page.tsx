@@ -42,7 +42,7 @@ export default async function ProveedoresPage() {
                 <Handshake className="w-6 h-6 text-white" />
               </div>
               <div>
-                <p className="text-[10px] font-bold uppercase tracking-widest text-amber-600">Aliados Comerciales</p>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-amber-600 dark:text-amber-400">Aliados Comerciales</p>
                 <p className="text-3xl font-extrabold">{suppliers.filter(s => s._count.purchases > 0).length}</p>
               </div>
             </div>

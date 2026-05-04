@@ -91,14 +91,14 @@ export default function RegisterPage() {
   const passwordsMatch = password === confirmPassword && confirmPassword.length > 0
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[var(--background)] p-4">
+    <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <div className="w-full max-w-md space-y-8 animate-fade-in">
         <div className="flex flex-col items-center">
-          <div className="w-16 h-16 rounded-lg bg-[var(--primary)] flex items-center justify-center mb-4 shadow-lg">
-            <ChefHat size={32} className="text-[var(--primary-foreground)]" />
+          <div className="w-16 h-16 rounded-lg bg-primary flex items-center justify-center mb-4 shadow-lg">
+            <ChefHat size={32} className="text-primary-foreground" />
           </div>
-          <h1 className="text-2xl font-bold text-[var(--foreground)]">Loki</h1>
-          <p className="text-[var(--muted-foreground)]">Gestión de negocios</p>
+          <h1 className="text-2xl font-bold text-foreground">Loki</h1>
+          <p className="text-muted-foreground">Gestión de negocios</p>
         </div>
 
         <Card>
@@ -109,7 +109,7 @@ export default function RegisterPage() {
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               {error && (
-                <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-600">
+                <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-lg text-sm text-destructive font-medium">
                   {error}
                 </div>
               )}
@@ -155,7 +155,7 @@ export default function RegisterPage() {
                   placeholder="••••••••"
                 />
                 {confirmPassword.length > 0 && !passwordsMatch && (
-                  <p className="text-xs text-red-500 mt-1">Las contraseñas no coinciden</p>
+                  <p className="text-xs text-destructive mt-1 font-medium">Las contraseñas no coinciden</p>
                 )}
               </div>
               <div>
@@ -178,9 +178,9 @@ export default function RegisterPage() {
           </CardContent>
         </Card>
 
-        <p className="text-center text-sm text-[var(--muted-foreground)]">
+        <p className="text-center text-sm text-muted-foreground">
           ¿Ya tienes cuenta?{' '}
-          <Link href="/login" className="text-[var(--foreground)] font-medium hover:underline">
+          <Link href="/login" className="text-foreground font-medium hover:underline">
             Iniciar Sesión
           </Link>
         </p>

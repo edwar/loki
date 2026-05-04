@@ -33,30 +33,30 @@ export function SupplyForm({
     >
       <div className="grid gap-6 md:grid-cols-2">
         <div className="space-y-2">
-          <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Nombre del Insumo</label>
+          <label className="text-xs font-bold uppercase tracking-widest text-foreground/60">Nombre del Insumo</label>
           <Input name="name" defaultValue={supply?.name} required placeholder="Ej: Harina de Trigo" />
         </div>
         <div className="space-y-2">
-          <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Categoría</label>
+          <label className="text-xs font-bold uppercase tracking-widest text-foreground/60">Categoría</label>
           <Input name="category" defaultValue={supply?.category ?? ''} placeholder="Ej: Abarrotes" />
         </div>
         <div className="space-y-2">
-          <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Stock Actual</label>
+          <label className="text-xs font-bold uppercase tracking-widest text-foreground/60">Stock Actual</label>
           <NumericInput value={currentStock} onChange={setCurrentStock} />
           <input type="hidden" name="currentStock" value={currentStock} />
         </div>
         <div className="space-y-2">
-          <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Stock Mínimo</label>
+          <label className="text-xs font-bold uppercase tracking-widest text-foreground/60">Stock Mínimo</label>
           <NumericInput value={minStock} onChange={setMinStock} />
           <input type="hidden" name="minStock" value={minStock} />
         </div>
         <div className="space-y-2">
-          <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Precio de Compra</label>
+          <label className="text-xs font-bold uppercase tracking-widest text-foreground/60">Precio de Compra</label>
           <NumericInput value={purchasePrice} onChange={setPurchasePrice} />
           <input type="hidden" name="purchasePrice" value={purchasePrice} />
         </div>
         <div className="space-y-2">
-          <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Unidad</label>
+          <label className="text-xs font-bold uppercase tracking-widest text-foreground/60">Unidad</label>
           <Select name="unit" defaultValue={supply?.unit ?? 'unidad'}>
             <SelectTrigger>
               <SelectValue placeholder="Unidad" />
@@ -69,7 +69,7 @@ export function SupplyForm({
           </Select>
         </div>
         <div className="space-y-2 md:col-span-2">
-          <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Proveedor Predeterminado</label>
+          <label className="text-xs font-bold uppercase tracking-widest text-foreground/60">Proveedor Predeterminado</label>
           <Select name="supplierId" defaultValue={supply?.supplierId ?? 'none'}>
             <SelectTrigger>
               <SelectValue placeholder="Seleccionar proveedor" />

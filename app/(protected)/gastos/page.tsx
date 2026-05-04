@@ -37,7 +37,7 @@ export default async function GastosPage() {
                 <TrendingDown className="w-6 h-6 text-white" />
               </div>
               <div>
-                <p className="text-[10px] font-bold uppercase tracking-widest text-rose-600">Total Gastos del Mes</p>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-rose-600 dark:text-rose-400">Total Gastos del Mes</p>
                 <p className="text-3xl font-extrabold">{formatCurrency(totalExpenses)}</p>
               </div>
             </div>
@@ -52,7 +52,7 @@ export default async function GastosPage() {
                 <Receipt className="w-6 h-6 text-white" />
               </div>
               <div>
-                <p className="text-[10px] font-bold uppercase tracking-widest text-blue-600">Registros Recientes</p>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-blue-600 dark:text-blue-400">Registros Recientes</p>
                 <p className="text-3xl font-extrabold">{expenses.length}</p>
               </div>
             </div>

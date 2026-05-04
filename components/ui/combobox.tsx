@@ -75,14 +75,14 @@ export function Combobox({
   const dropdownContent = open && createPortal(
     <div
       ref={dropdownRef}
-      className="fixed z-[10000] bg-white dark:bg-slate-900 border border-border/50 rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200"
+      className="fixed z-10000 bg-white dark:bg-slate-900 border border-border/50 rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200"
       style={{
         top: coords.top + 8,
         left: coords.left,
         width: coords.width,
       }}
     >
-      <div className="p-3 border-b border-border/50 flex items-center gap-2 bg-slate-50/50 dark:bg-slate-800/50">
+      <div className="p-3 border-b border-border/50 flex items-center gap-2">
         <Search className="w-4 h-4 text-muted-foreground" />
         <input
           autoFocus

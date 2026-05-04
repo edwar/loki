@@ -149,7 +149,7 @@ export function ProductionTable({ logs }: { logs: any[] }) {
           </div>
 
           <div className="space-y-2">
-            <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
+            <label className="text-xs font-bold uppercase tracking-widest text-foreground/90">
               Rendimiento Real Obtenido
             </label>
             <NumericInput
@@ -157,16 +157,16 @@ export function ProductionTable({ logs }: { logs: any[] }) {
               onChange={setNewYield}
               className="h-12 text-lg font-black"
             />
-            <p className="text-[10px] text-muted-foreground">
+            <p className="text-[10px] text-foreground/70">
               Al guardar, se ajustará automáticamente el inventario del producto final para reflejar este cambio.
             </p>
           </div>
 
-          <div className="flex justify-end gap-3 pt-4">
-            <Button variant="outline" onClick={() => setEditingLog(null)} disabled={isPending}>
+          <div className="flex justify-end gap-3 pt-4 border-t border-border/20">
+            <Button variant="ghost" onClick={() => setEditingLog(null)} disabled={isPending}>
               Cancelar
             </Button>
-            <Button onClick={handleConfirmEdit} disabled={isPending || newYield <= 0}>
+            <Button variant="primary" onClick={handleConfirmEdit} disabled={isPending || newYield <= 0} className="px-8">
               {isPending ? 'Guardando...' : 'Guardar Cambio'}
             </Button>
           </div>

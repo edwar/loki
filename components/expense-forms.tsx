@@ -40,7 +40,7 @@ export function ExpenseForm({
     >
       <div className="grid gap-6 md:grid-cols-2">
         <div className="space-y-2">
-          <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Tipo de Gasto</label>
+          <label className="text-xs font-bold uppercase tracking-widest text-foreground/60">Tipo de Gasto</label>
           <Select name="type" defaultValue={expense?.type ?? 'Otros'}>
             <SelectTrigger className="h-12">
               <SelectValue placeholder="Seleccionar tipo" />
@@ -53,12 +53,12 @@ export function ExpenseForm({
           </Select>
         </div>
         <div className="space-y-2">
-          <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Monto</label>
+          <label className="text-xs font-bold uppercase tracking-widest text-foreground/60">Monto</label>
           <NumericInput value={amount} onChange={setAmount} className="h-12" />
           <input type="hidden" name="amount" value={amount} />
         </div>
         <div className="space-y-2">
-          <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Fecha</label>
+          <label className="text-xs font-bold uppercase tracking-widest text-foreground/60">Fecha</label>
           <DatePicker 
             name="date"
             value={date}
@@ -66,7 +66,7 @@ export function ExpenseForm({
           />
         </div>
         <div className="space-y-2">
-          <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Descripción (Opcional)</label>
+          <label className="text-xs font-bold uppercase tracking-widest text-foreground/60">Descripción (Opcional)</label>
           <Input 
             name="description" 
             defaultValue={expense?.description ?? ''} 

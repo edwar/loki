@@ -404,7 +404,7 @@ export default function ComprasPage() {
 
       {/* Upload Step */}
       {step === 'upload' && (
-        <Card className="bg-white dark:bg-slate-800 rounded-lg p-8">
+        <Card className="rounded-lg p-8">
           <CardContent className="p-0">
             {/* Camera Preview */}
             {cameraActive ? (
@@ -513,7 +513,7 @@ export default function ComprasPage() {
 
       {/* Processing Step */}
       {step === 'processing' && (
-        <Card className="bg-white dark:bg-slate-800 rounded-lg p-8">
+        <Card className="rounded-lg p-8">
           <CardContent className="p-0 text-center py-12">
             <div className="w-20 h-20 bg-black dark:bg-white rounded-full flex items-center justify-center mx-auto mb-6">
               <Loader2 className="w-10 h-10 text-white dark:text-black animate-spin" />
@@ -543,7 +543,7 @@ export default function ComprasPage() {
         <div className="space-y-6">
           {/* Image Preview - Only show if there's an image */}
           {imagePreview && (
-            <Card className="bg-white dark:bg-slate-800 rounded-lg p-4">
+            <Card className="rounded-lg p-4">
               <CardContent className="p-0">
                 <div className="flex items-center gap-4">
                   <img
@@ -561,7 +561,7 @@ export default function ComprasPage() {
           )}
 
           {/* Supplier */}
-          <Card className="bg-white dark:bg-slate-800 rounded-lg p-6">
+          <Card className="rounded-lg p-6">
             <CardHeader className="px-0 pt-0">
               <CardTitle className="text-lg font-semibold text-black dark:text-white">
                 Datos del Proveedor
@@ -592,7 +592,7 @@ export default function ComprasPage() {
           </Card>
 
           {/* Items */}
-          <Card className="bg-white dark:bg-slate-800 rounded-lg p-6">
+          <Card className="rounded-lg p-6">
             <CardHeader className="px-0 pt-0 flex flex-row items-center justify-between">
               <CardTitle className="text-lg font-semibold text-black dark:text-white">
                 Items de la Compra
@@ -701,7 +701,7 @@ export default function ComprasPage() {
                 <div className="flex justify-between items-center">
                   <div className="flex items-center gap-2">
                     <span className="text-gray-600 dark:text-slate-400">Descuento</span>
-                    <div className="flex items-center bg-gray-100 dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-0.5">
+                    <div className="flex items-center rounded-lg border border-gray-200 dark:border-slate-700 p-0.5">
                       <button
                         onClick={() => handleDiscountChange(Math.max(0, extractedData.descuentoPorcentaje - 1))}
                         className="w-7 h-7 flex items-center justify-center hover:bg-white dark:hover:bg-slate-700 rounded-lg transition-all active:scale-90 disabled:opacity-30"
@@ -733,7 +733,7 @@ export default function ComprasPage() {
                 <div className="flex justify-between items-center">
                   <div className="flex items-center gap-2">
                     <span className="text-gray-600 dark:text-slate-400">Impuesto/IVA</span>
-                    <div className="flex items-center bg-gray-100 dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-0.5">
+                    <div className="flex items-center rounded-lg border border-gray-200 dark:border-slate-700 p-0.5">
                       <button
                         onClick={() => handleTaxChange(Math.max(0, extractedData.impuestoPorcentaje - 1))}
                         className="w-7 h-7 flex items-center justify-center hover:bg-white dark:hover:bg-slate-700 rounded-lg transition-all active:scale-90 disabled:opacity-30"
@@ -793,7 +793,7 @@ export default function ComprasPage() {
 
       {/* Success Step */}
       {step === 'success' && (
-        <Card className="bg-white dark:bg-slate-800 rounded-lg p-8">
+        <Card className="rounded-lg p-8">
           <CardContent className="p-0 text-center py-12">
             <div className="w-20 h-20 bg-emerald-500 rounded-full flex items-center justify-center mx-auto mb-6">
               <Check className="w-10 h-10 text-white" />

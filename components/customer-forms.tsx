@@ -24,19 +24,19 @@ export function CustomerForm({
     >
       <div className="grid gap-6 md:grid-cols-2">
         <div className="space-y-2">
-          <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Nombre Completo</label>
+          <label className="text-xs font-bold uppercase tracking-widest text-foreground/60">Nombre Completo</label>
           <Input name="name" defaultValue={customer?.name} required placeholder="Ej: Juan Pérez" className="h-12" />
         </div>
         <div className="space-y-2">
-          <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Correo Electrónico</label>
+          <label className="text-xs font-bold uppercase tracking-widest text-foreground/60">Correo Electrónico</label>
           <Input name="email" type="email" defaultValue={customer?.email ?? ''} placeholder="juan@ejemplo.com" className="h-12" />
         </div>
         <div className="space-y-2">
-          <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Teléfono</label>
+          <label className="text-xs font-bold uppercase tracking-widest text-foreground/60">Teléfono</label>
           <PhoneInput name="phone" defaultValue={customer?.phone ?? ''} placeholder="300 000 0000" className="h-12" />
         </div>
         <div className="space-y-2">
-          <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Dirección</label>
+          <label className="text-xs font-bold uppercase tracking-widest text-foreground/60">Dirección</label>
           <Input name="address" defaultValue={customer?.address ?? ''} placeholder="Ej: Calle 123 #45-67" className="h-12" />
         </div>
       </div>

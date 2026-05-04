@@ -132,7 +132,7 @@ export function PropertyForm({
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-2">
-          <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground ml-1">Nombre del Bien</label>
+          <label className="text-xs font-bold uppercase tracking-widest text-foreground/60 ml-1">Nombre del Bien</label>
           <Input
             value={formData.name}
             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
@@ -143,7 +143,7 @@ export function PropertyForm({
         </div>
 
         <div className="space-y-2">
-          <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground ml-1">Tipo de Activo</label>
+          <label className="text-xs font-bold uppercase tracking-widest text-foreground/60 ml-1">Tipo de Activo</label>
           <Select value={formData.type} onValueChange={(v) => setFormData({ ...formData, type: v })}>
             <SelectTrigger className="h-12 rounded-lg">
               <SelectValue placeholder="Seleccionar tipo" />
@@ -160,7 +160,7 @@ export function PropertyForm({
       </div>
 
       <div className="space-y-2">
-        <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground ml-1">Dirección / Ubicación</label>
+        <label className="text-xs font-bold uppercase tracking-widest text-foreground/60 ml-1">Dirección / Ubicación</label>
         <Input
           value={formData.address}
           onChange={(e) => setFormData({ ...formData, address: e.target.value })}
@@ -171,9 +171,9 @@ export function PropertyForm({
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-2">
-          <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground ml-1">Valor de Compra</label>
+          <label className="text-xs font-bold uppercase tracking-widest text-foreground/60 ml-1">Valor de Compra</label>
           <div className="relative">
-            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground font-bold">$</span>
+            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-foreground/60 font-bold">$</span>
             <Input
               type="number"
               step="0.01"
@@ -186,7 +186,7 @@ export function PropertyForm({
           </div>
         </div>
         <div className="space-y-2">
-          <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground ml-1">Fecha de Adquisición</label>
+          <label className="text-xs font-bold uppercase tracking-widest text-foreground/60 ml-1">Fecha de Adquisición</label>
           <DatePicker
             value={formData.purchaseDate}
             onChange={(date) => setFormData({ ...formData, purchaseDate: date })}
@@ -203,14 +203,14 @@ export function PropertyForm({
           onChange={(e) => setCustomDepreciation(e.target.checked)}
           className="w-5 h-5 rounded border-border/50 text-primary focus:ring-primary/20 cursor-pointer"
         />
-        <label htmlFor="customDep" className="text-sm font-medium text-muted-foreground cursor-pointer hover:text-foreground transition-colors">
+        <label htmlFor="customDep" className="text-sm font-medium text-foreground/60 cursor-pointer hover:text-foreground transition-colors">
           Usar tasa de depreciación personalizada
         </label>
       </div>
 
       {customDepreciation && (
         <div className="space-y-2 animate-in slide-in-from-top-2 duration-300">
-          <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground ml-1">Tasa Anual (%)</label>
+          <label className="text-xs font-bold uppercase tracking-widest text-foreground/60 ml-1">Tasa Anual (%)</label>
           <Input
             type="number"
             step="0.1"
@@ -232,11 +232,11 @@ export function PropertyForm({
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Tiempo Transcurrido</p>
+              <p className="text-[10px] font-bold uppercase tracking-wider text-foreground/60">Tiempo Transcurrido</p>
               <p className="text-lg font-bold text-foreground">{yearsElapsed.toFixed(1)} años</p>
             </div>
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Depreciación Aplicada</p>
+              <p className="text-[10px] font-bold uppercase tracking-wider text-foreground/60">Depreciación Aplicada</p>
               <p className="text-lg font-bold text-foreground">
                 {customDepreciation ? `${formData.depreciationRate}%` : `${defaultDepreciation}%`}
               </p>
@@ -252,7 +252,7 @@ export function PropertyForm({
       )}
 
       <div className="space-y-2">
-        <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground ml-1">Descripción</label>
+        <label className="text-xs font-bold uppercase tracking-widest text-foreground/60 ml-1">Descripción</label>
         <textarea
           value={formData.description}
           onChange={(e) => setFormData({ ...formData, description: e.target.value })}

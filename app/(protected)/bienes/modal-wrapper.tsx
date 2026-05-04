@@ -22,15 +22,15 @@ export function ModalWrapper({ property }: { property?: any }) {
     <div className="fixed inset-0 z-100 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300" onClick={() => setShowForm(false)} />
 
-      <div className="relative w-full max-w-2xl bg-white dark:bg-slate-900 rounded-xl shadow-2xl overflow-hidden max-h-[90vh] overflow-y-auto border border-border/10 animate-in zoom-in-95 duration-300">
+      <div className="relative w-full max-w-2xl bg-card backdrop-blur-xl rounded-lg shadow-2xl overflow-hidden max-h-[90vh] overflow-y-auto border border-border/50 animate-in zoom-in-95 duration-300">
         {/* Header */}
-        <div className="p-8 sticky top-0 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md z-10 border-b border-border/10">
+        <div className="p-8 sticky top-0 bg-card/80 backdrop-blur-md z-10 border-b border-border/30">
           <div className="flex items-center gap-4">
             <div className="w-14 h-14 bg-primary/10 rounded-lg flex items-center justify-center shadow-inner">
               <Building2 className="w-7 h-7 text-primary" />
             </div>
             <div>
-              <h2 className="text-2xl font-bold tracking-tight">Editar Información del Bien</h2>
+              <h2 className="text-2xl font-bold tracking-tight text-foreground">Editar Información del Bien</h2>
               <p className="text-sm text-muted-foreground font-medium">Actualiza los detalles técnicos y de valoración de tu activo</p>
             </div>
           </div>
