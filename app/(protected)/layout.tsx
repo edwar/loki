@@ -58,7 +58,7 @@ export default function ProtectedLayout({
   }
 
   return (
-    <div className="min-h-screen bg-background font-sans selection:bg-primary/20 transition-colors duration-500">
+    <div className="min-h-screen bg-background font-sans selection:bg-primary/20 transition-colors duration-500 overflow-x-hidden">
       {/* Background Decorative Elements */}
       <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/5 blur-[120px] rounded-full" />
@@ -173,8 +173,8 @@ export default function ProtectedLayout({
 
       {/* Main Content */}
       <main className="lg:ml-72 min-h-screen relative">
-        <div className="max-w-7xl mx-auto p-6 lg:p-10 pb-20">
-          <div className="animate-fade-in transition-all duration-500">
+        <div className="max-w-7xl mx-auto p-4 md:p-10 pb-20">
+          <div className="transition-all duration-500">
             {children}
           </div>
         </div>

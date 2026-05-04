@@ -128,14 +128,14 @@ export function ProductCard({
             <div className="space-y-4">
               {product.recipeItems.length > 0 && (
                 <div className={cn(
-                  "flex items-center justify-between p-4 rounded-lg border",
+                  "flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-lg border gap-4",
                   product.maxPossibleBatches > 0
                     ? "bg-amber-500/10 border-amber-500/20"
                     : "bg-muted/50 border-border/40"
                 )}>
                   <div className="flex items-center gap-3">
                     <div className={cn(
-                      "w-10 h-10 rounded-lg flex items-center justify-center",
+                      "w-10 h-10 rounded-lg shrink-0 flex items-center justify-center",
                       product.maxPossibleBatches > 0
                         ? "bg-amber-500/20 text-amber-600"
                         : "bg-muted text-muted-foreground"
@@ -154,8 +154,8 @@ export function ProductCard({
                         product.maxPossibleBatches > 0 ? "text-amber-700/70 dark:text-amber-400/70" : "text-muted-foreground"
                       )}>
                         {product.maxPossibleBatches > 0
-                          ? `Tienes suficientes insumos para preparar ${product.maxPossibleBatches} lote(s).`
-                          : "No tienes suficientes insumos en inventario para preparar un lote de esta receta."}
+                          ? `Suficientes insumos para ${product.maxPossibleBatches} lote(s).`
+                          : "Insumos insuficientes para esta receta."}
                       </p>
                     </div>
                   </div>
@@ -163,7 +163,7 @@ export function ProductCard({
                     onClick={handleOpenProduce}
                     disabled={product.maxPossibleBatches <= 0}
                     className={cn(
-                      "font-bold shadow-lg",
+                      "w-full sm:w-auto font-bold shadow-lg",
                       product.maxPossibleBatches > 0
                         ? "bg-amber-500 hover:bg-amber-600 text-white shadow-amber-500/20"
                         : "bg-muted-foreground/20 text-muted-foreground cursor-not-allowed shadow-none"

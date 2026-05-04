@@ -47,7 +47,7 @@ export function EditSaleModal({ sale, products, customers }: EditSaleModalProps)
           />
 
           <div className="relative w-full max-w-2xl bg-card rounded-lg shadow-2xl overflow-hidden border border-border/10 animate-in zoom-in-95 duration-200">
-            <div className="p-8">
+            <div className="p-4 sm:p-8">
               <div className="flex items-center gap-4 mb-8">
                 <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center text-primary group">
                   <Edit2 className='w-4 h-4 group-hover:text-primary' />

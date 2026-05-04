@@ -3,8 +3,8 @@ import { cn } from '@/lib/utils'
 
 const Table = React.forwardRef<HTMLTableElement, React.HTMLAttributes<HTMLTableElement>>(
   ({ className, ...props }, ref) => (
-    <div className="w-full overflow-hidden rounded-lg border border-border/50 bg-card/30 backdrop-blur-sm shadow-sm">
-      <table ref={ref} className={cn('w-full caption-bottom text-sm', className)} {...props} />
+    <div className="relative w-full overflow-x-auto rounded-lg border border-border/50 bg-card/30 backdrop-blur-sm shadow-sm scrollbar-thin">
+      <table ref={ref} className={cn('w-full border-separate border-spacing-0 text-sm', className)} {...props} />
     </div>
   )
 )
@@ -43,7 +43,7 @@ const TableHead = React.forwardRef<HTMLTableCellElement, React.ThHTMLAttributes<
     <th
       ref={ref}
       className={cn(
-        'h-14 px-6 text-left text-[10px] font-bold uppercase tracking-[0.1em] text-muted-foreground/60 border-b border-border/30',
+        'h-14 px-3 sm:px-6 text-left text-[10px] font-bold uppercase tracking-[0.1em] text-muted-foreground/60 border-b border-border/30 bg-accent/5 transition-colors',
         className
       )}
       {...props}
@@ -54,7 +54,7 @@ TableHead.displayName = 'TableHead'
 
 const TableCell = React.forwardRef<HTMLTableCellElement, React.TdHTMLAttributes<HTMLTableCellElement>>(
   ({ className, ...props }, ref) => (
-    <td ref={ref} className={cn('px-6 py-4 text-foreground font-medium transition-colors group-hover:text-primary', className)} {...props} />
+    <td ref={ref} className={cn('px-3 sm:px-6 py-4 text-foreground font-medium transition-colors group-hover:text-primary border-b border-border/10', className)} {...props} />
   )
 )
 TableCell.displayName = 'TableCell'

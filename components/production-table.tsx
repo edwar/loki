@@ -63,14 +63,14 @@ export function ProductionTable({ logs }: { logs: any[] }) {
           </CardTitle>
         </CardHeader>
         <CardContent className="p-0 [&>div]:border-0 [&>div]:shadow-none [&>div]:rounded-none [&>div]:bg-transparent">
-          <Table>
+          <Table className="min-w-[800px]">
             <TableHeader>
               <TableRow className="bg-accent/5 hover:bg-accent/5">
                 <TableHead className="text-xs uppercase tracking-widest font-bold">Fecha</TableHead>
                 <TableHead className="text-xs uppercase tracking-widest font-bold">Producto</TableHead>
                 <TableHead className="text-xs uppercase tracking-widest font-bold">Lotes</TableHead>
                 <TableHead className="text-xs uppercase tracking-widest font-bold">Rendimiento</TableHead>
-                <TableHead className="text-xs uppercase tracking-widest font-bold text-right">Acciones</TableHead>
+                <TableHead className="text-xs uppercase tracking-widest font-bold text-right sticky right-0 bg-card z-20 shadow-[-8px_0_8px_-8px_rgba(0,0,0,0.1)] border-l border-border/10 px-4 w-24">Acciones</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -104,7 +104,7 @@ export function ProductionTable({ logs }: { logs: any[] }) {
                         </span>
                       </div>
                     </TableCell>
-                    <TableCell className="py-4 text-right">
+                    <TableCell className="py-4 text-right sticky right-0 bg-card z-10 shadow-[-8px_0_8px_-8px_rgba(0,0,0,0.1)] border-l border-border/10 px-4 w-24">
                       <div className="flex justify-end gap-2">
                         <Button
                           onClick={() => handleEdit(log)}

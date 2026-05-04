@@ -611,80 +611,95 @@ export default function ComprasPage() {
                 <p className="text-center text-gray-400 py-8">No se detectaron items</p>
               ) : (
                 <div className="space-y-3">
-                  {/* Header */}
-                  <div className="grid grid-cols-12 gap-2 text-xs font-medium text-gray-500 uppercase px-2">
+                  {/* Header - Hidden on mobile */}
+                  <div className="hidden md:grid grid-cols-12 gap-2 text-xs font-medium text-gray-500 uppercase px-2">
                     <div className="col-span-3">Producto</div>
                     <div className="col-span-2">Cantidad</div>
                     <div className="col-span-2">Unidad</div>
                     <div className="col-span-2">Precio</div>
-                    <div className="col-span-1">Total</div>
+                    <div className="col-span-2 text-right">Total</div>
                     <div className="col-span-1"></div>
                   </div>
-
                   {extractedData.items.map((item, index) => (
-                    <div key={index} className="grid grid-cols-12 gap-2 items-center p-2 bg-gray-50 dark:bg-slate-700/50 rounded-lg">
-                      <div className="col-span-3">
+                    <div key={index} className="flex flex-col md:grid md:grid-cols-12 gap-3 md:gap-2 items-start md:items-center p-4 md:p-2 bg-gray-50 dark:bg-slate-700/50 rounded-lg relative">
+                      {/* Product Name */}
+                      <div className="w-full md:col-span-3">
+                        <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1 block md:hidden">Producto</label>
                         <Input
                           value={item.nombre}
                           onChange={(e) => handleItemChange(index, 'nombre', e.target.value)}
-                          className="h-9"
+                          className="h-10 md:h-9"
                           placeholder="Producto"
                         />
                       </div>
-                      <div className="col-span-2">
-                        <Input
-                          type="text"
-                          inputMode="numeric"
-                          value={item.cantidad.toLocaleString('es-CO')}
-                          onChange={(e) => {
-                            const raw = e.target.value.replace(/\./g, '')
-                            const val = parseInt(raw, 10) || 0
-                            handleItemChange(index, 'cantidad', val)
-                          }}
-                          onFocus={(e) => e.target.select()}
-                          className="h-9 text-right"
-                        />
+
+                      {/* Middle row on mobile */}
+                      <div className="grid grid-cols-2 md:contents w-full gap-3">
+                        <div className="md:col-span-2">
+                          <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1 block md:hidden">Cantidad</label>
+                          <Input
+                            type="text"
+                            inputMode="numeric"
+                            value={item.cantidad.toLocaleString('es-CO')}
+                            onChange={(e) => {
+                              const raw = e.target.value.replace(/\./g, '')
+                              const val = parseInt(raw, 10) || 0
+                              handleItemChange(index, 'cantidad', val)
+                            }}
+                            onFocus={(e) => e.target.select()}
+                            className="h-10 md:h-9 text-right"
+                          />
+                        </div>
+                        <div className="md:col-span-2">
+                          <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1 block md:hidden">Unidad</label>
+                          <Select
+                            value={item.unidad || 'unidad'}
+                            onValueChange={(value) => handleItemChange(index, 'unidad', value)}
+                          >
+                            <SelectTrigger className="h-10 md:h-9">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {UNIDADES.map(u => (
+                                <SelectItem key={u} value={u}>{u}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
                       </div>
-                      <div className="col-span-2">
-                        <Select
-                          value={item.unidad || 'unidad'}
-                          onValueChange={(value) => handleItemChange(index, 'unidad', value)}
-                        >
-                          <SelectTrigger className="h-9">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {UNIDADES.map(u => (
-                              <SelectItem key={u} value={u}>{u}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+
+                      {/* Bottom row on mobile */}
+                      <div className="grid grid-cols-2 md:contents w-full gap-3">
+                        <div className="md:col-span-2">
+                          <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1 block md:hidden">Precio Unit.</label>
+                          <Input
+                            type="text"
+                            inputMode="numeric"
+                            value={item.precioUnitario.toLocaleString('es-CO')}
+                            onChange={(e) => {
+                              const raw = e.target.value.replace(/\./g, '')
+                              const val = parseFloat(raw) || 0
+                              handleItemChange(index, 'precioUnitario', val)
+                            }}
+                            onFocus={(e) => e.target.select()}
+                            className="h-10 md:h-9 text-right font-medium"
+                          />
+                        </div>
+                        <div className="md:col-span-2 flex flex-col justify-end md:justify-center">
+                          <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1 block md:hidden">Subtotal</label>
+                          <div className="h-10 md:h-9 flex items-center justify-end md:pr-2 font-black text-primary md:text-black md:dark:text-white">
+                            {formatCurrency(item.subtotal)}
+                          </div>
+                        </div>
                       </div>
-                      <div className="col-span-2">
-                        <Input
-                          type="text"
-                          inputMode="numeric"
-                          value={item.precioUnitario.toLocaleString('es-CO')}
-                          onChange={(e) => {
-                            const raw = e.target.value.replace(/\./g, '')
-                            const val = parseFloat(raw) || 0
-                            handleItemChange(index, 'precioUnitario', val)
-                          }}
-                          onFocus={(e) => e.target.select()}
-                          className="h-9 text-right font-medium"
-                        />
-                      </div>
-                      <div className="col-span-1 text-right font-medium text-black dark:text-white">
-                        {formatCurrency(item.subtotal)}
-                      </div>
-                      <div className="col-span-1 flex justify-end">
-                        <button
-                          onClick={() => setIndexToRemove(index)}
-                          className="p-2 hover:bg-rose-100 dark:hover:bg-rose-900/30 rounded-lg transition-colors"
-                        >
-                          <Trash2 className="w-4 h-4 text-rose-500" />
-                        </button>
-                      </div>
+
+                      {/* Remove Button */}
+                      <button
+                        onClick={() => setIndexToRemove(index)}
+                        className="absolute top-2 right-2 md:relative md:top-0 md:right-0 p-2 hover:bg-rose-100 dark:hover:bg-rose-900/30 rounded-lg transition-colors md:col-span-1 flex justify-end"
+                      >
+                        <Trash2 className="w-4 h-4 text-rose-500" />
+                      </button>
                     </div>
                   ))}
                 </div>

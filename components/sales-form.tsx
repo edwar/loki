@@ -114,9 +114,9 @@ export function SaleForm({
         // Edit mode: flat layout inside the modal, no Card wrapper
         <div className="space-y-6">
           {/* Item Adder Section */}
-          <div className="space-y-2">
-            <div className="flex items-end gap-3 h-[64px]">
-              <div className="flex-1 flex flex-col justify-end gap-1.5 h-full">
+          <div className="space-y-4">
+            <div className="flex flex-col md:flex-row md:items-end gap-3">
+              <div className="flex-1 space-y-1.5">
                 <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground ml-1">Producto</label>
                 <Select value={selectedProductId} onValueChange={setSelectedProductId}>
                   <SelectTrigger className="h-11 rounded-lg bg-background/60 border-primary/5 hover:border-primary/20 transition-all shadow-sm">
@@ -147,44 +147,44 @@ export function SaleForm({
                 </Select>
               </div>
 
-              <div className="flex flex-col justify-end gap-1.5 h-full">
-                <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground ml-1">Cant.</label>
-                <div className="flex items-center bg-background/60 rounded-lg border border-primary/5 p-1 h-11 shadow-sm">
-                  <Button
-                    disabled={quantity === 0}
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => setQuantity(Math.max(0, quantity - 1))}
-                    className="h-9 w-9 rounded-lg hover:bg-primary/10 hover:text-primary transition-all active:scale-90"
-                  >
-                    <Minus size={14} />
-                  </Button>
-                  <input
-                    type="text"
-                    inputMode="numeric"
-                    value={quantity === 0 ? '0' : quantity.toString()}
-                    onChange={(e) => {
-                      const val = e.target.value.replace(/\D/g, '')
-                      const parsed = parseInt(val, 10)
-                      setQuantity(isNaN(parsed) ? 0 : parsed)
-                    }}
-                    className="w-12 text-center font-bold text-sm bg-transparent border-none focus:outline-none focus:ring-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                    onFocus={(e) => e.target.select()}
-                  />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => setQuantity(quantity + 1)}
-                    className="h-9 w-9 rounded-lg hover:bg-primary/10 hover:text-primary transition-all active:scale-90"
-                  >
-                    <Plus size={14} />
-                  </Button>
+              <div className="flex items-end gap-3">
+                <div className="flex-1 md:flex-initial space-y-1.5">
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground ml-1">Cant.</label>
+                  <div className="flex items-center bg-background/60 rounded-lg border border-primary/5 p-1 h-11 shadow-sm">
+                    <Button
+                      disabled={quantity === 0}
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => setQuantity(Math.max(0, quantity - 1))}
+                      className="h-9 w-9 rounded-lg hover:bg-primary/10 hover:text-primary transition-all active:scale-90"
+                    >
+                      <Minus size={14} />
+                    </Button>
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      value={quantity === 0 ? '0' : quantity.toString()}
+                      onChange={(e) => {
+                        const val = e.target.value.replace(/\D/g, '')
+                        const parsed = parseInt(val, 10)
+                        setQuantity(isNaN(parsed) ? 0 : parsed)
+                      }}
+                      className="w-12 text-center font-bold text-sm bg-transparent border-none focus:outline-none focus:ring-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                      onFocus={(e) => e.target.select()}
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => setQuantity(quantity + 1)}
+                      className="h-9 w-9 rounded-lg hover:bg-primary/10 hover:text-primary transition-all active:scale-90"
+                    >
+                      <Plus size={14} />
+                    </Button>
+                  </div>
                 </div>
-              </div>
 
-              <div className="flex flex-col justify-end h-full">
                 <Button
                   type="button"
                   onClick={addItem}
@@ -315,8 +315,8 @@ export function SaleForm({
           <CardContent className="p-0">
             {/* Item Adder Section */}
             <div className="p-6 space-y-2">
-              <div className="flex items-end gap-3 h-[64px]">
-                <div className="flex-1 flex flex-col justify-end gap-1.5 h-full">
+              <div className="flex flex-col md:flex-row md:items-end gap-3">
+                <div className="flex-1 space-y-1.5">
                   <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground ml-1">Producto</label>
                   <Select value={selectedProductId} onValueChange={setSelectedProductId}>
                     <SelectTrigger className="h-11 rounded-lg bg-background/60 border-primary/5 hover:border-primary/20 transition-all shadow-sm">
@@ -343,19 +343,19 @@ export function SaleForm({
                     </SelectContent>
                   </Select>
                 </div>
-                <div className="flex flex-col justify-end gap-1.5 h-full">
-                  <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground ml-1">Cant.</label>
-                  <div className="flex items-center bg-background/60 rounded-lg border border-primary/5 p-1 h-11 shadow-sm">
-                    <Button disabled={quantity === 0} type="button" variant="ghost" size="icon" onClick={() => setQuantity(Math.max(0, quantity - 1))} className="h-9 w-9 rounded-lg hover:bg-primary/10 hover:text-primary transition-all active:scale-90">
-                      <Minus size={14} />
-                    </Button>
-                    <input type="text" inputMode="numeric" value={quantity === 0 ? '0' : quantity.toString()} onChange={(e) => { const val = e.target.value.replace(/\D/g, ''); const parsed = parseInt(val, 10); setQuantity(isNaN(parsed) ? 0 : parsed) }} className="w-12 text-center font-bold text-sm bg-transparent border-none focus:outline-none focus:ring-0" onFocus={(e) => e.target.select()} />
-                    <Button type="button" variant="ghost" size="icon" onClick={() => setQuantity(quantity + 1)} className="h-9 w-9 rounded-lg hover:bg-primary/10 hover:text-primary transition-all active:scale-90">
-                      <Plus size={14} />
-                    </Button>
+                <div className="flex items-end gap-3">
+                  <div className="flex-1 md:flex-initial space-y-1.5">
+                    <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground ml-1">Cant.</label>
+                    <div className="flex items-center bg-background/60 rounded-lg border border-primary/5 p-1 h-11 shadow-sm">
+                      <Button disabled={quantity === 0} type="button" variant="ghost" size="icon" onClick={() => setQuantity(Math.max(0, quantity - 1))} className="h-9 w-9 rounded-lg hover:bg-primary/10 hover:text-primary transition-all active:scale-90">
+                        <Minus size={14} />
+                      </Button>
+                      <input type="text" inputMode="numeric" value={quantity === 0 ? '0' : quantity.toString()} onChange={(e) => { const val = e.target.value.replace(/\D/g, ''); const parsed = parseInt(val, 10); setQuantity(isNaN(parsed) ? 0 : parsed) }} className="w-12 text-center font-bold text-sm bg-transparent border-none focus:outline-none focus:ring-0" onFocus={(e) => e.target.select()} />
+                      <Button type="button" variant="ghost" size="icon" onClick={() => setQuantity(quantity + 1)} className="h-9 w-9 rounded-lg hover:bg-primary/10 hover:text-primary transition-all active:scale-90">
+                        <Plus size={14} />
+                      </Button>
+                    </div>
                   </div>
-                </div>
-                <div className="flex flex-col justify-end h-full">
                   <Button type="button" onClick={addItem} variant="secondary" size="icon" className="h-11 w-11 rounded-lg shadow-lg shadow-primary/5 hover:shadow-primary/20 transition-all active:scale-95 shrink-0">
                     <Plus size={20} strokeWidth={3} />
                   </Button>

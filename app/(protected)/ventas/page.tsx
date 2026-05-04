@@ -76,7 +76,7 @@ export default async function VentasPage() {
       {/* Main Grid: Form and History */}
       <div className="grid lg:grid-cols-12 gap-6 items-start">
         {/* Left Column: Form */}
-        <div className="lg:col-span-5">
+        <div className="lg:col-span-5 min-w-0">
           {products.length === 0 ? (
             <Card variant="glass" className="py-12 border-dashed border-primary/20">
               <CardContent className="text-center space-y-4">
@@ -95,9 +95,9 @@ export default async function VentasPage() {
         </div>
 
         {/* Right Column: History */}
-        <div className="lg:col-span-7 space-y-6">
+        <div className="lg:col-span-7 space-y-6 min-w-0">
           <Card className="rounded-lg border-border/40 bg-card/30 backdrop-blur-md overflow-hidden shadow-sm">
-            <CardHeader className="px-6 py-4 flex flex-row items-center justify-between border-b border-border/10">
+            <CardHeader className="px-4 sm:px-6 py-4 flex flex-row items-center justify-between border-b border-border/10">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-lg bg-accent/50 flex items-center justify-center">
                   <History size={20} className="text-primary" />
@@ -106,13 +106,13 @@ export default async function VentasPage() {
               </div>
             </CardHeader>
             <CardContent className="p-0">
-              <Table>
+              <Table className="min-w-[800px]">
                 <TableHeader>
                   <TableRow className="bg-accent/5 hover:bg-accent/5 border-none">
-                    <TableHead className="h-10 text-[10px] uppercase tracking-widest font-bold pl-6">Fecha</TableHead>
+                    <TableHead className="h-10 text-[10px] uppercase tracking-widest font-bold pl-4 sm:pl-6">Fecha</TableHead>
                     <TableHead className="h-10 text-[10px] uppercase tracking-widest font-bold">Cliente</TableHead>
                     <TableHead className="h-10 text-[10px] uppercase tracking-widest font-bold">Total</TableHead>
-                    <TableHead className="h-10 text-[10px] uppercase tracking-widest font-bold text-right pr-6">Acción</TableHead>
+                    <TableHead className="h-10 text-[10px] uppercase tracking-widest font-bold text-right pr-4 sticky right-0 bg-card z-20 shadow-[-8px_0_8px_-8px_rgba(0,0,0,0.1)] border-l border-border/10 w-24">Acción</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -130,7 +130,7 @@ export default async function VentasPage() {
                   ) : (
                     sales.map((sale: any) => (
                       <TableRow key={sale.id} className="group hover:bg-accent/5 transition-colors border-border/10">
-                        <TableCell className="py-4 pl-6">
+                        <TableCell className="py-4 pl-4 sm:pl-6">
                           <p className="text-xs font-bold text-foreground">{formatDate(sale.createdAt).split(',')[0]}</p>
                           <p className="text-[10px] text-muted-foreground font-medium mt-0.5">{formatDate(sale.createdAt).split(',')[1]}</p>
                         </TableCell>
@@ -147,7 +147,7 @@ export default async function VentasPage() {
                             {formatCurrency(Number(sale.totalAmount))}
                           </span>
                         </TableCell>
-                        <TableCell className="py-4 text-right pr-6">
+                        <TableCell className="py-4 text-right pr-4 sticky right-0 bg-card z-10 shadow-[-8px_0_8px_-8px_rgba(0,0,0,0.1)] border-l border-border/10 w-24">
                           <div className="flex justify-end gap-2">
                             <EditSaleModal sale={sale} products={products} customers={customers} />
                             <DeleteSaleButton id={sale.id} />

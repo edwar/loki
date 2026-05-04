@@ -27,7 +27,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es">
-      <body className={`${inter.variable} ${outfit.variable} min-h-full antialiased font-sans`}>
+      <body className={`${inter.variable} ${outfit.variable} min-h-full antialiased font-sans overflow-x-hidden`}>
         <Providers>{children}</Providers>
       </body>
     </html>

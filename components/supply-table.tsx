@@ -36,7 +36,7 @@ export function SupplyTable({
 
   return (
     <>
-      <Table>
+      <Table className="min-w-[900px]">
         <TableHeader>
           <TableRow className="hover:bg-transparent">
             <TableHead className="font-semibold uppercase text-[10px] tracking-widest text-muted-foreground">Nombre</TableHead>
@@ -44,7 +44,7 @@ export function SupplyTable({
             <TableHead className="font-semibold uppercase text-[10px] tracking-widest text-muted-foreground">Stock</TableHead>
             <TableHead className="font-semibold uppercase text-[10px] tracking-widest text-muted-foreground">Precio</TableHead>
             <TableHead className="font-semibold uppercase text-[10px] tracking-widest text-muted-foreground">Valor Total</TableHead>
-            <TableHead className="font-semibold uppercase text-[10px] tracking-widest text-muted-foreground text-right">Acciones</TableHead>
+            <TableHead className="font-semibold uppercase text-[10px] tracking-widest text-muted-foreground text-right sticky right-0 bg-card z-20 shadow-[-8px_0_8px_-8px_rgba(0,0,0,0.1)] border-l border-border/10 w-28 pr-4">Acciones</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -97,7 +97,7 @@ export function SupplyTable({
                   <TableCell className="font-bold text-primary">
                     {formatCurrency(Number(supply.currentStock) * Number(supply.purchasePrice))}
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="sticky right-0 bg-card z-10 shadow-[-8px_0_8px_-8px_rgba(0,0,0,0.1)] border-l border-border/10 w-28 pr-4">
                     <div className="flex justify-end gap-2">
                       <Button
                         onClick={() => setEditingSupply(supply)}
