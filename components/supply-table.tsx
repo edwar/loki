@@ -4,10 +4,11 @@ import { useState } from 'react'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Button } from '@/components/ui/button'
 import { formatCurrency, cn } from '@/lib/utils'
-import { Trash2, Edit2, AlertTriangle, Package } from 'lucide-react'
+import { Trash2, Edit2, Package } from 'lucide-react'
 import { deleteSupply } from '@/lib/actions/supplies'
 import { Dialog } from '@/components/ui/dialog'
 import { SupplyForm } from './supply-forms'
+import { ConfirmationModal } from './ui/confirmation-modal'
 
 export function SupplyTable({
   supplies,
@@ -17,6 +18,21 @@ export function SupplyTable({
   suppliers: any[]
 }) {
   const [editingSupply, setEditingSupply] = useState<any>(null)
+  const [deletingSupply, setDeletingSupply] = useState<any>(null)
+  const [isDeleting, setIsDeleting] = useState(false)
+
+  const handleDelete = async () => {
+    if (!deletingSupply) return
+    setIsDeleting(true)
+    try {
+      await deleteSupply(deletingSupply.id)
+      setDeletingSupply(null)
+    } catch (error) {
+      console.error("Error deleting supply:", error)
+    } finally {
+      setIsDeleting(false)
+    }
+  }
 
   return (
     <>
@@ -87,15 +103,20 @@ export function SupplyTable({
                         onClick={() => setEditingSupply(supply)}
                         variant="ghost"
                         size="sm"
-                        className="h-10 w-10 p-0 rounded-lg hover:bg-primary/10 hover:text-primary transition-colors"
+                        className="h-10 w-10 p-0 rounded-lg hover:bg-primary/10 hover:text-primary transition-colors group"
                       >
-                        <Edit2 size={18} />
+                        <Edit2 className='w-4 h-4 group-hover:text-primary' />
                       </Button>
-                      <form action={deleteSupply.bind(null, supply.id)}>
-                        <Button type="submit" variant="ghost" size="sm" className="h-10 w-10 p-0 rounded-lg hover:bg-rose-500/10 hover:text-rose-500 transition-colors">
-                          <Trash2 size={18} />
-                        </Button>
-                      </form>
+
+                      <Button
+                        onClick={() => setDeletingSupply(supply)}
+                        variant="ghost"
+                        size="sm"
+                        className="h-10 w-10 p-0 rounded-lg hover:bg-rose-500/10 hover:text-rose-500 transition-colors group"
+                      >
+                        <Trash2 className='w-4 h-4 group-hover:text-rose-500' />
+                      </Button>
+
                     </div>
                   </TableCell>
                 </TableRow>
@@ -104,7 +125,6 @@ export function SupplyTable({
           )}
         </TableBody>
       </Table>
-
       <Dialog
         isOpen={!!editingSupply}
         onClose={() => setEditingSupply(null)}
@@ -118,6 +138,17 @@ export function SupplyTable({
           />
         </div>
       </Dialog>
+      {/* Delete Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={!!deletingSupply}
+        onClose={() => setDeletingSupply(null)}
+        onConfirm={handleDelete}
+        title="Eliminar Insumo"
+        description={`¿Estás seguro de que deseas eliminar "${deletingSupply?.name}"? Esta acción no se puede deshacer.`}
+        confirmText="Eliminar Insumo"
+        variant="danger"
+        loading={isDeleting}
+      />
     </>
   )
 }

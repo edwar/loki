@@ -27,9 +27,9 @@ export function DeleteButton({ id }: { id: string }) {
     <>
       <button
         onClick={() => setShowConfirm(true)}
-        className="p-2 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-lg transition-colors"
+        className="p-2 hover:bg-rose-50 rounded-lg transition-colors group"
       >
-        <Trash2 className="w-4 h-4 text-rose-500" />
+        <Trash2 className="w-4 h-4 group-hover:text-rose-500" />
       </button>
 
       <ConfirmationModal

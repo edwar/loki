@@ -63,9 +63,9 @@ export function ModalWrapper({ property }: { property?: any }) {
         variant="ghost"
         size="icon"
         onClick={() => setShowForm(true)}
-        className="w-9 h-9 rounded-lg hover:bg-primary/10 hover:text-primary transition-all"
+        className="w-9 h-9 rounded-lg hover:bg-primary/10 hover:text-primary transition-all group"
       >
-        <Edit2 className="w-4 h-4" />
+        <Edit2 className='w-4 h-4 group-hover:text-primary' />
       </Button>
 
       {createPortal(modalContent, document.body)}

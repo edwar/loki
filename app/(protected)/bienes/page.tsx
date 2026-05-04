@@ -45,9 +45,9 @@ export default async function BienesPage() {
 
   return (
     <div className="space-y-8 animate-fade-in">
-      <div className="flex flex-col gap-1">
-        <h1 className="text-3xl font-bold text-black dark:text-white tracking-tight">Bienes</h1>
-        <p className="text-gray-500 dark:text-slate-400">Gestiona los activos de tu empresa</p>
+      <div>
+        <h1 className="text-4xl font-extrabold tracking-tight font-display">Bienes y Activos</h1>
+        <p className="text-muted-foreground font-medium mt-1">Gestiona los activos de tu empresa y su valoración.</p>
       </div>
       {/* Stats */}
       <div className="grid gap-6 md:grid-cols-2">

@@ -8,6 +8,7 @@ import { Dialog } from './ui/dialog'
 import { NumericInput } from './ui/numeric-input'
 import { Edit2, Trash2, ArrowUpRight, ArrowDownRight, Factory, History } from 'lucide-react'
 import { updateProductionYield, deleteProductionLog } from '@/lib/actions/production'
+import { ConfirmationModal } from './ui/confirmation-modal'
 
 export function ProductionTable({ logs }: { logs: any[] }) {
   const [editingLog, setEditingLog] = useState<any>(null)
@@ -38,9 +39,9 @@ export function ProductionTable({ logs }: { logs: any[] }) {
 
   if (logs.length === 0) {
     return (
-      <Card className="rounded-xl border-border/40 bg-card/30 backdrop-blur-md">
+      <Card className="rounded-lg border-border/40 bg-card/30 backdrop-blur-md">
         <CardContent className="flex flex-col items-center justify-center py-20 text-center">
-          <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mb-4">
+          <div className="w-16 h-16 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
             <History className="w-8 h-8 text-primary/50" />
           </div>
           <h3 className="text-xl font-bold mb-2">No hay historial de producción</h3>
@@ -54,7 +55,7 @@ export function ProductionTable({ logs }: { logs: any[] }) {
 
   return (
     <>
-      <Card className="rounded-xl border-border/40 bg-card/30 backdrop-blur-md overflow-hidden p-0">
+      <Card className="rounded-lg border-border/40 bg-card/30 backdrop-blur-md overflow-hidden p-0">
         <CardHeader className="border-b border-border/30 bg-primary/5 px-5 py-4 mb-0">
           <CardTitle className="text-lg font-bold flex items-center gap-2">
             <Factory className="w-5 h-5 text-primary" />
@@ -109,17 +110,17 @@ export function ProductionTable({ logs }: { logs: any[] }) {
                           onClick={() => handleEdit(log)}
                           variant="ghost"
                           size="icon"
-                          className="w-8 h-8 hover:bg-primary/10 hover:text-primary rounded-lg"
+                          className="w-8 h-8 hover:bg-primary/10 hover:text-primary rounded-lg group"
                         >
-                          <Edit2 className="w-4 h-4" />
+                          <Edit2 className="w-4 h-4 group-hover:text-primary" />
                         </Button>
                         <Button
                           onClick={() => setDeletingLog(log)}
                           variant="ghost"
                           size="icon"
-                          className="w-8 h-8 hover:bg-rose-500/10 hover:text-rose-500 rounded-lg"
+                          className="w-8 h-8 hover:bg-rose-500/10 hover:text-rose-500 rounded-lg group"
                         >
-                          <Trash2 className="w-4 h-4" />
+                          <Trash2 className="w-4 h-4 group-hover:text-rose-500" />
                         </Button>
                       </div>
                     </TableCell>
@@ -173,37 +174,15 @@ export function ProductionTable({ logs }: { logs: any[] }) {
       </Dialog>
 
       {/* Delete Confirmation Modal */}
-      <Dialog
+      <ConfirmationModal
         isOpen={!!deletingLog}
         onClose={() => setDeletingLog(null)}
+        onConfirm={handleConfirmDelete}
         title="Eliminar Registro de Producción"
-      >
-        <div className="mt-4 space-y-4">
-          <div className="p-4 bg-rose-500/10 text-rose-600 rounded-lg flex items-start gap-3">
-            <Trash2 className="w-5 h-5 mt-0.5 shrink-0" />
-            <div className="text-sm font-medium">
-              <p>¿Estás seguro de que deseas eliminar este registro de producción?</p>
-              <ul className="mt-2 list-disc list-inside space-y-1">
-                <li>Se descontarán <strong>{Number(deletingLog?.actualYield)} unidades</strong> del inventario de {deletingLog?.product.name}.</li>
-                <li>Se devolverán los insumos consumidos a tu bodega automáticamente.</li>
-              </ul>
-            </div>
-          </div>
-
-          <div className="flex justify-end gap-3 pt-2">
-            <Button variant="outline" onClick={() => setDeletingLog(null)} disabled={isPending}>
-              Cancelar
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={handleConfirmDelete}
-              disabled={isPending}
-            >
-              {isPending ? 'Eliminando...' : 'Sí, Eliminar Registro'}
-            </Button>
-          </div>
-        </div>
-      </Dialog>
+        description="¿Estás seguro de que deseas eliminar este registro de producción?"
+        confirmText="Eliminar Registro"
+        variant="danger"
+      />
     </>
   )
 }

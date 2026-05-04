@@ -78,17 +78,17 @@ export function ExpenseTable({ expenses }: { expenses: any[] }) {
                       onClick={() => setEditingExpense(expense)}
                       variant="ghost"
                       size="sm"
-                      className="h-10 w-10 p-0 rounded-lg hover:bg-primary/10 hover:text-primary transition-colors"
+                      className="h-10 w-10 p-0 rounded-lg hover:bg-primary/10 hover:text-primary transition-colors group"
                     >
-                      <Edit2 size={18} />
+                      <Edit2 className='w-4 h-4 group-hover:text-primary' />
                     </Button>
-                    <Button 
+                    <Button
                       onClick={() => setDeletingId(expense.id)}
-                      variant="ghost" 
-                      size="sm" 
-                      className="h-10 w-10 p-0 rounded-lg hover:bg-rose-500/10 hover:text-rose-500 transition-colors"
+                      variant="ghost"
+                      size="sm"
+                      className="h-10 w-10 p-0 rounded-lg hover:bg-rose-500/10 hover:text-rose-500 transition-colors group"
                     >
-                      <Trash2 size={18} />
+                      <Trash2 className='w-4 h-4 group-hover:text-rose-500' />
                     </Button>
                   </div>
                 </TableCell>

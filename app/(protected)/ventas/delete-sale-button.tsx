@@ -24,13 +24,13 @@ export function DeleteSaleButton({ id }: { id: string }) {
 
   return (
     <>
-      <Button 
+      <Button
         onClick={() => setShowConfirm(true)}
-        variant="ghost" 
-        size="sm" 
-        className="h-8 w-8 p-0 rounded-lg transition-all text-muted-foreground hover:bg-rose-500/10 hover:text-rose-500"
+        variant="ghost"
+        size="sm"
+        className="h-8 w-8 p-0 rounded-lg transition-all text-muted-foreground hover:bg-rose-500/10 hover:text-rose-500 group"
       >
-        <Trash2 size={16} />
+        <Trash2 className='w-4 h-4 group-hover:text-rose-500' />
       </Button>
 
       <ConfirmationModal

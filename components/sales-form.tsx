@@ -28,14 +28,14 @@ interface SaleItem {
   unitPrice: number
 }
 
-export function SaleForm({ 
-  products, 
-  customers, 
-  sale, 
-  onSuccess 
-}: { 
-  products: Product[]; 
-  customers: Customer[]; 
+export function SaleForm({
+  products,
+  customers,
+  sale,
+  onSuccess
+}: {
+  products: Product[];
+  customers: Customer[];
   sale?: any;
   onSuccess?: () => void;
 }) {
@@ -93,7 +93,7 @@ export function SaleForm({
       quantity: i.quantity,
       unitPrice: i.unitPrice
     }))))
-    
+
     if (sale) {
       startTransition(async () => {
         await updateSale(sale.id, formData)
@@ -237,9 +237,9 @@ export function SaleForm({
                         variant="ghost"
                         size="sm"
                         onClick={() => setIndexToRemove(index)}
-                        className="h-7 w-7 p-0 rounded-md transition-all hover:bg-rose-500/10 hover:text-rose-500"
+                        className="h-7 w-7 p-0 rounded-md transition-all hover:bg-rose-500/10 hover:text-rose-500 group"
                       >
-                        <Trash2 size={14} />
+                        <Trash2 className='w-4 h-4 group-hover:text-rose-500' />
                       </Button>
                     </div>
                   </div>
@@ -392,8 +392,8 @@ export function SaleForm({
                       </div>
                       <div className="flex items-center gap-4">
                         <p className="text-sm font-bold text-primary">{formatCurrency(item.quantity * item.unitPrice)}</p>
-                        <Button type="button" variant="ghost" size="sm" onClick={() => setIndexToRemove(index)} className="h-7 w-7 p-0 rounded-lg transition-all hover:bg-rose-500/10 hover:text-rose-500">
-                          <Trash2 size={14} />
+                        <Button type="button" variant="ghost" size="sm" onClick={() => setIndexToRemove(index)} className="h-7 w-7 p-0 rounded-lg transition-all hover:bg-rose-500/10 hover:text-rose-500 group">
+                          <Trash2 className='w-4 h-4 group-hover:text-rose-500' />
                         </Button>
                       </div>
                     </div>

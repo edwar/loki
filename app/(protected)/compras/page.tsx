@@ -24,6 +24,7 @@ import {
 import { formatCurrency } from '@/lib/utils'
 import { useRouter } from 'next/navigation'
 import { Combobox } from '@/components/ui/combobox'
+import { ConfirmationModal } from '@/components/ui/confirmation-modal'
 
 interface ExtractedItem {
   nombre: string
@@ -60,6 +61,7 @@ export default function ComprasPage() {
   const [error, setError] = useState<string | null>(null)
   const [cameraActive, setCameraActive] = useState(false)
   const [suppliers, setSuppliers] = useState<{ id: string; name: string }[]>([])
+  const [indexToRemove, setIndexToRemove] = useState<number | null>(null)
   const streamRef = useRef<MediaStream | null>(null)
 
   useEffect(() => {
@@ -230,9 +232,9 @@ export default function ComprasPage() {
     return subtotalConDescuento + impuesto
   }
 
-  const handleRemoveItem = (index: number) => {
-    if (!extractedData) return
-    const newItems = extractedData.items.filter((_, i) => i !== index)
+  const handleRemoveItem = () => {
+    if (!extractedData || indexToRemove === null) return
+    const newItems = extractedData.items.filter((_, i) => i !== indexToRemove)
     const newTotal = calculateTotal(newItems, extractedData.descuentoPorcentaje, extractedData.impuestoPorcentaje)
     const newSubtotal = newItems.reduce((sum, item) => sum + item.subtotal, 0)
     setExtractedData({
@@ -241,6 +243,7 @@ export default function ComprasPage() {
       subtotal: newSubtotal,
       total: newTotal
     })
+    setIndexToRemove(null)
   }
 
   const handleItemChange = (index: number, field: keyof ExtractedItem, value: string | number) => {
@@ -344,9 +347,9 @@ export default function ComprasPage() {
 
   return (
     <div className="space-y-8 animate-fade-in">
-      <div className="flex flex-col gap-1">
-        <h1 className="text-3xl font-bold text-black dark:text-white tracking-tight">Nueva Compra</h1>
-        <p className="text-gray-500 dark:text-slate-400">Escanea un receipt para extraer los datos automáticamente</p>
+      <div>
+        <h1 className="text-4xl font-extrabold tracking-tight font-display">Abastecimiento</h1>
+        <p className="text-muted-foreground font-medium mt-1">Escanea facturas y actualiza tu inventario automáticamente con IA.</p>
       </div>
 
       {/* Step indicator */}
@@ -401,12 +404,12 @@ export default function ComprasPage() {
 
       {/* Upload Step */}
       {step === 'upload' && (
-        <Card className="bg-white dark:bg-slate-800 rounded-md p-8">
+        <Card className="bg-white dark:bg-slate-800 rounded-lg p-8">
           <CardContent className="p-0">
             {/* Camera Preview */}
             {cameraActive ? (
               <div className="space-y-4">
-                <div className="relative aspect-9/16 md:aspect-video bg-black rounded-md overflow-hidden">
+                <div className="relative aspect-9/16 md:aspect-video bg-black rounded-lg overflow-hidden">
                   <video
                     ref={videoRef}
                     autoPlay
@@ -419,7 +422,7 @@ export default function ComprasPage() {
                 <div className="flex gap-4">
                   <Button
                     onClick={capturePhoto}
-                    className="flex-1 h-12 bg-emerald-500 hover:bg-emerald-600 text-white rounded-md"
+                    className="flex-1 h-12 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg"
                   >
                     <Camera className="w-5 h-5 mr-2" />
                     Capturar
@@ -427,7 +430,7 @@ export default function ComprasPage() {
                   <Button
                     onClick={stopCamera}
                     variant="secondary"
-                    className="h-12 rounded-md"
+                    className="h-12 rounded-lg"
                   >
                     Cancelar
                   </Button>
@@ -438,9 +441,9 @@ export default function ComprasPage() {
                 <div className="grid grid-cols-2 gap-4 mb-6">
                   <button
                     onClick={startCamera}
-                    className="border-2 border-dashed border-gray-300 dark:border-slate-600 rounded-md p-6 text-center hover:border-cyan-500 hover:bg-cyan-50 dark:hover:bg-cyan-900/20 transition-colors"
+                    className="border-2 border-dashed border-gray-300 dark:border-slate-600 rounded-lg p-6 text-center hover:border-cyan-500 hover:bg-cyan-50 dark:hover:bg-cyan-900/20 transition-colors"
                   >
-                    <div className="w-12 h-12 bg-cyan-100 dark:bg-cyan-900/30 rounded-md-full flex items-center justify-center mx-auto mb-3">
+                    <div className="w-12 h-12 bg-cyan-100 dark:bg-cyan-900/30 rounded-full flex items-center justify-center mx-auto mb-3">
                       <Camera className="w-6 h-6 text-cyan-600 dark:text-cyan-400" />
                     </div>
                     <span className="text-sm font-medium text-gray-700 dark:text-slate-300">
@@ -450,9 +453,9 @@ export default function ComprasPage() {
 
                   <button
                     onClick={() => fileInputRef.current?.click()}
-                    className="border-2 border-dashed border-gray-300 dark:border-slate-600 rounded-md p-6 text-center hover:border-black dark:hover:border-white transition-colors"
+                    className="border-2 border-dashed border-gray-300 dark:border-slate-600 rounded-lg p-6 text-center hover:border-black dark:hover:border-white transition-colors"
                   >
-                    <div className="w-12 h-12 bg-gray-100 dark:bg-slate-700 rounded-md-full flex items-center justify-center mx-auto mb-3">
+                    <div className="w-12 h-12 bg-gray-100 dark:bg-slate-700 rounded-full flex items-center justify-center mx-auto mb-3">
                       <Upload className="w-6 h-6 text-gray-500" />
                     </div>
                     <span className="text-sm font-medium text-gray-700 dark:text-slate-300">
@@ -492,7 +495,7 @@ export default function ComprasPage() {
                   setError(null)
                 }}
                 variant="primary"
-                className="h-10 rounded-md"
+                className="h-10 rounded-lg"
               >
                 <FileText className="w-4 h-4 mr-2" />
                 Registrar compra manualmente
@@ -500,7 +503,7 @@ export default function ComprasPage() {
             </div>
 
             {error && (
-              <div className="mt-4 p-4 bg-rose-50 dark:bg-rose-900/20 text-rose-600 dark:text-rose-400 rounded-md">
+              <div className="mt-4 p-4 bg-rose-50 dark:bg-rose-900/20 text-rose-600 dark:text-rose-400 rounded-lg">
                 {error}
               </div>
             )}
@@ -510,9 +513,9 @@ export default function ComprasPage() {
 
       {/* Processing Step */}
       {step === 'processing' && (
-        <Card className="bg-white dark:bg-slate-800 rounded-md p-8">
+        <Card className="bg-white dark:bg-slate-800 rounded-lg p-8">
           <CardContent className="p-0 text-center py-12">
-            <div className="w-20 h-20 bg-black dark:bg-white rounded-md-full flex items-center justify-center mx-auto mb-6">
+            <div className="w-20 h-20 bg-black dark:bg-white rounded-full flex items-center justify-center mx-auto mb-6">
               <Loader2 className="w-10 h-10 text-white dark:text-black animate-spin" />
             </div>
             <h3 className="text-xl font-semibold text-black dark:text-white mb-2">
@@ -527,7 +530,7 @@ export default function ComprasPage() {
                 <img
                   src={imagePreview}
                   alt="Receipt"
-                  className="rounded-md border border-gray-200 dark:border-slate-600"
+                  className="rounded-lg border border-gray-200 dark:border-slate-600"
                 />
               </div>
             )}
@@ -540,13 +543,13 @@ export default function ComprasPage() {
         <div className="space-y-6">
           {/* Image Preview - Only show if there's an image */}
           {imagePreview && (
-            <Card className="bg-white dark:bg-slate-800 rounded-md p-4">
+            <Card className="bg-white dark:bg-slate-800 rounded-lg p-4">
               <CardContent className="p-0">
                 <div className="flex items-center gap-4">
                   <img
                     src={imagePreview}
                     alt="Receipt"
-                    className="w-24 h-24 object-cover rounded-md border border-gray-200"
+                    className="w-24 h-24 object-cover rounded-lg border border-gray-200"
                   />
                   <div>
                     <p className="text-sm text-gray-500">Receipt escaneado</p>
@@ -558,7 +561,7 @@ export default function ComprasPage() {
           )}
 
           {/* Supplier */}
-          <Card className="bg-white dark:bg-slate-800 rounded-md p-6">
+          <Card className="bg-white dark:bg-slate-800 rounded-lg p-6">
             <CardHeader className="px-0 pt-0">
               <CardTitle className="text-lg font-semibold text-black dark:text-white">
                 Datos del Proveedor
@@ -589,7 +592,7 @@ export default function ComprasPage() {
           </Card>
 
           {/* Items */}
-          <Card className="bg-white dark:bg-slate-800 rounded-md p-6">
+          <Card className="bg-white dark:bg-slate-800 rounded-lg p-6">
             <CardHeader className="px-0 pt-0 flex flex-row items-center justify-between">
               <CardTitle className="text-lg font-semibold text-black dark:text-white">
                 Items de la Compra
@@ -597,7 +600,7 @@ export default function ComprasPage() {
               <Button
                 onClick={handleAddItem}
                 variant="secondary"
-                className="h-10 rounded-md"
+                className="h-10 rounded-lg"
               >
                 <Plus className="w-4 h-4 mr-2" />
                 Agregar Item
@@ -619,7 +622,7 @@ export default function ComprasPage() {
                   </div>
 
                   {extractedData.items.map((item, index) => (
-                    <div key={index} className="grid grid-cols-12 gap-2 items-center p-2 bg-gray-50 dark:bg-slate-700/50 rounded-md">
+                    <div key={index} className="grid grid-cols-12 gap-2 items-center p-2 bg-gray-50 dark:bg-slate-700/50 rounded-lg">
                       <div className="col-span-3">
                         <Input
                           value={item.nombre}
@@ -676,8 +679,8 @@ export default function ComprasPage() {
                       </div>
                       <div className="col-span-1 flex justify-end">
                         <button
-                          onClick={() => handleRemoveItem(index)}
-                          className="p-2 hover:bg-rose-100 dark:hover:bg-rose-900/30 rounded-md-lg transition-colors"
+                          onClick={() => setIndexToRemove(index)}
+                          className="p-2 hover:bg-rose-100 dark:hover:bg-rose-900/30 rounded-lg transition-colors"
                         >
                           <Trash2 className="w-4 h-4 text-rose-500" />
                         </button>
@@ -774,13 +777,13 @@ export default function ComprasPage() {
             <Button
               onClick={resetForm}
               variant="secondary"
-              className="flex-1 h-12 rounded-md"
+              className="flex-1 h-12 rounded-lg"
             >
               ESCANEAR OTRO
             </Button>
             <Button
               onClick={handleSavePurchase}
-              className="flex-1 h-12 font-semibold"
+              className="flex-1 h-12 font-semibold rounded-lg"
             >
               GUARDAR COMPRA
             </Button>
@@ -790,9 +793,9 @@ export default function ComprasPage() {
 
       {/* Success Step */}
       {step === 'success' && (
-        <Card className="bg-white dark:bg-slate-800 rounded-md p-8">
+        <Card className="bg-white dark:bg-slate-800 rounded-lg p-8">
           <CardContent className="p-0 text-center py-12">
-            <div className="w-20 h-20 bg-emerald-500 rounded-md-full flex items-center justify-center mx-auto mb-6">
+            <div className="w-20 h-20 bg-emerald-500 rounded-full flex items-center justify-center mx-auto mb-6">
               <Check className="w-10 h-10 text-white" />
             </div>
             <h3 className="text-xl font-semibold text-black dark:text-white mb-2">
@@ -803,13 +806,21 @@ export default function ComprasPage() {
             </p>
             <Button
               onClick={() => router.push('/insumos')}
-              className="bg-black dark:bg-white text-white dark:text-black rounded-md"
+              className="bg-black dark:bg-white text-white dark:text-black rounded-lg"
             >
               VER INVENTARIO
             </Button>
           </CardContent>
         </Card>
       )}
+
+      <ConfirmationModal
+        isOpen={indexToRemove !== null}
+        onClose={() => setIndexToRemove(null)}
+        onConfirm={handleRemoveItem}
+        title="¿Quitar producto de la lista?"
+        description="Este item será removido de la orden de compra actual."
+      />
     </div>
   )
 }

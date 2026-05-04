@@ -5,11 +5,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { formatCurrency, cn } from '@/lib/utils'
-import { Trash2, X, ShoppingBag, Edit2, ChevronDown, Plus } from 'lucide-react'
+import { Trash2, ShoppingBag, Edit2, ChevronDown, Plus } from 'lucide-react'
 import { deleteProduct, deleteRecipeItem, prepareProduct } from '@/lib/actions/products'
 import { ProductForm, RecipeForm } from './product-forms'
 import { Dialog } from './ui/dialog'
 import { NumericInput } from './ui/numeric-input'
+import { ConfirmationModal } from './ui/confirmation-modal'
 import { useTransition } from 'react'
 
 export function ProductCard({
@@ -26,6 +27,8 @@ export function ProductCard({
   const [isEditing, setIsEditing] = useState(false)
   const [isExpanded, setIsExpanded] = useState(false)
   const [isProducing, setIsProducing] = useState(false)
+  const [recipeItemToDelete, setRecipeItemToDelete] = useState<string | null>(null)
+  const [productToDelete, setProductToDelete] = useState<string | null>(null)
   const [actualYield, setActualYield] = useState<number>(0)
   const [isPending, startTransition] = useTransition()
 
@@ -97,15 +100,19 @@ export function ProductCard({
                 onClick={() => setIsEditing(true)}
                 variant="ghost"
                 size="sm"
-                className="h-8 w-8 p-0 rounded-lg hover:bg-primary/10 hover:text-primary transition-colors"
+                className="h-8 w-8 p-0 rounded-lg hover:bg-primary/10 hover:text-primary transition-colors group"
               >
-                <Edit2 size={14} />
+                <Edit2 className='w-4 h-4 group-hover:text-primary' />
               </Button>
-              <form action={deleteProduct.bind(null, product.id)}>
-                <Button type="submit" variant="ghost" size="sm" className="h-8 w-8 p-0 rounded-lg hover:bg-rose-500/10 hover:text-rose-500 transition-colors">
-                  <Trash2 size={14} />
-                </Button>
-              </form>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => setProductToDelete(product.id)}
+                className="h-8 w-8 p-0 rounded-lg hover:bg-rose-500/10 hover:text-rose-500 transition-colors group"
+              >
+                <Trash2 className='w-4 h-4 group-hover:text-rose-500' />
+              </Button>
             </div>
             <Button variant="ghost" size="sm" className="h-8 w-8 p-0 rounded-lg group-hover/header:bg-accent transition-all">
               <ChevronDown
@@ -121,16 +128,16 @@ export function ProductCard({
             <div className="space-y-4">
               {product.recipeItems.length > 0 && (
                 <div className={cn(
-                  "flex items-center justify-between p-4 rounded-xl border",
-                  product.maxPossibleBatches > 0 
-                    ? "bg-amber-500/10 border-amber-500/20" 
+                  "flex items-center justify-between p-4 rounded-lg border",
+                  product.maxPossibleBatches > 0
+                    ? "bg-amber-500/10 border-amber-500/20"
                     : "bg-muted/50 border-border/40"
                 )}>
                   <div className="flex items-center gap-3">
                     <div className={cn(
                       "w-10 h-10 rounded-lg flex items-center justify-center",
-                      product.maxPossibleBatches > 0 
-                        ? "bg-amber-500/20 text-amber-600" 
+                      product.maxPossibleBatches > 0
+                        ? "bg-amber-500/20 text-amber-600"
                         : "bg-muted text-muted-foreground"
                     )}>
                       <Plus size={20} />
@@ -146,8 +153,8 @@ export function ProductCard({
                         "text-xs",
                         product.maxPossibleBatches > 0 ? "text-amber-700/70 dark:text-amber-400/70" : "text-muted-foreground"
                       )}>
-                        {product.maxPossibleBatches > 0 
-                          ? `Tienes suficientes insumos para preparar ${product.maxPossibleBatches} lote(s).` 
+                        {product.maxPossibleBatches > 0
+                          ? `Tienes suficientes insumos para preparar ${product.maxPossibleBatches} lote(s).`
                           : "No tienes suficientes insumos en inventario para preparar un lote de esta receta."}
                       </p>
                     </div>
@@ -157,8 +164,8 @@ export function ProductCard({
                     disabled={product.maxPossibleBatches <= 0}
                     className={cn(
                       "font-bold shadow-lg",
-                      product.maxPossibleBatches > 0 
-                        ? "bg-amber-500 hover:bg-amber-600 text-white shadow-amber-500/20" 
+                      product.maxPossibleBatches > 0
+                        ? "bg-amber-500 hover:bg-amber-600 text-white shadow-amber-500/20"
                         : "bg-muted-foreground/20 text-muted-foreground cursor-not-allowed shadow-none"
                     )}
                   >
@@ -195,11 +202,15 @@ export function ProductCard({
                             </span>
                           </TableCell>
                           <TableCell className="py-2.5 text-right">
-                            <form action={deleteRecipeItem.bind(null, item.id)}>
-                              <Button type="submit" variant="ghost" size="sm" className="h-6 w-6 p-0 rounded-md hover:bg-rose-500/10 hover:text-rose-500">
-                                <X size={10} />
-                              </Button>
-                            </form>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setRecipeItemToDelete(item.id)}
+                              className="h-6 w-6 p-0 rounded-lg hover:bg-rose-500/10 hover:text-rose-500 transition-colors group"
+                            >
+                              <Trash2 className='w-4 h-4 group-hover:text-rose-500' />
+                            </Button>
                           </TableCell>
                         </TableRow>
                       ))}
@@ -226,6 +237,22 @@ export function ProductCard({
         </div>
       </Dialog>
 
+      <ConfirmationModal
+        isOpen={productToDelete !== null}
+        onClose={() => setProductToDelete(null)}
+        onConfirm={() => {
+          if (!productToDelete) return
+          startTransition(async () => {
+            await deleteProduct(productToDelete)
+            setProductToDelete(null)
+          })
+        }}
+        title="¿Eliminar producto?"
+        description="Este producto será removido. Esta acción no se puede deshacer."
+        confirmText="Eliminar Producto"
+        variant="danger"
+      />
+
       <Dialog
         isOpen={isProducing}
         onClose={() => setIsProducing(false)}
@@ -241,7 +268,7 @@ export function ProductCard({
               <span className="text-sm font-black text-amber-500">{product.yield} unidades</span>
             </div>
           </div>
-          
+
           <div className="space-y-3">
             <label className="text-xs font-bold uppercase tracking-widest text-foreground">
               Unidades Reales Obtenidas
@@ -274,6 +301,22 @@ export function ProductCard({
           </div>
         </div>
       </Dialog>
+
+      <ConfirmationModal
+        isOpen={recipeItemToDelete !== null}
+        onClose={() => setRecipeItemToDelete(null)}
+        onConfirm={() => {
+          if (!recipeItemToDelete) return
+          startTransition(async () => {
+            await deleteRecipeItem(recipeItemToDelete)
+            setRecipeItemToDelete(null)
+          })
+        }}
+        title="¿Quitar insumo de la receta?"
+        description="Este insumo será removido de la receta del producto. Esta acción no se puede deshacer."
+        confirmText="Quitar Insumo"
+        variant="danger"
+      />
     </>
   )
 }

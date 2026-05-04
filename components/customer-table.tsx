@@ -8,8 +8,25 @@ import { deleteCustomer } from '@/lib/actions/customers'
 import { Dialog } from '@/components/ui/dialog'
 import { CustomerForm } from './customer-forms'
 
+import { ConfirmationModal } from './ui/confirmation-modal'
+
 export function CustomerTable({ customers }: { customers: any[] }) {
   const [editingCustomer, setEditingCustomer] = useState<any>(null)
+  const [deletingCustomer, setDeletingCustomer] = useState<any>(null)
+  const [isDeleting, setIsDeleting] = useState(false)
+
+  const handleDelete = async () => {
+    if (!deletingCustomer) return
+    setIsDeleting(true)
+    try {
+      await deleteCustomer(deletingCustomer.id)
+      setDeletingCustomer(null)
+    } catch (error) {
+      console.error("Error deleting customer:", error)
+    } finally {
+      setIsDeleting(false)
+    }
+  }
 
   return (
     <>
@@ -70,15 +87,18 @@ export function CustomerTable({ customers }: { customers: any[] }) {
                       onClick={() => setEditingCustomer(customer)}
                       variant="ghost"
                       size="sm"
-                      className="h-10 w-10 p-0 rounded-lg hover:bg-primary/10 hover:text-primary transition-colors"
+                      className="h-10 w-10 p-0 rounded-lg hover:bg-primary/10 hover:text-primary transition-colors group"
                     >
-                      <Edit2 size={18} />
+                      <Edit2 className='w-4 h-4 group-hover:text-primary' />
                     </Button>
-                    <form action={deleteCustomer.bind(null, customer.id)}>
-                      <Button type="submit" variant="ghost" size="sm" className="h-10 w-10 p-0 rounded-lg hover:bg-rose-500/10 hover:text-rose-500 transition-colors">
-                        <Trash2 size={18} />
-                      </Button>
-                    </form>
+                    <Button
+                      onClick={() => setDeletingCustomer(customer)}
+                      variant="ghost"
+                      size="sm"
+                      className="h-10 w-10 p-0 rounded-lg hover:bg-rose-500/10 hover:text-rose-500 transition-colors group"
+                    >
+                      <Trash2 className='w-4 h-4 group-hover:text-rose-500' />
+                    </Button>
                   </div>
                 </TableCell>
               </TableRow>
@@ -99,6 +119,16 @@ export function CustomerTable({ customers }: { customers: any[] }) {
           />
         </div>
       </Dialog>
+      <ConfirmationModal
+        isOpen={!!deletingCustomer}
+        onClose={() => setDeletingCustomer(null)}
+        onConfirm={handleDelete}
+        title="Eliminar Cliente"
+        description={`¿Estás seguro de que deseas eliminar a "${deletingCustomer?.name}"? Esta acción no se puede deshacer.`}
+        confirmText="Eliminar Cliente"
+        variant="danger"
+        loading={isDeleting}
+      />
     </>
   )
 }

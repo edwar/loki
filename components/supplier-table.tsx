@@ -8,8 +8,25 @@ import { deleteSupplier } from '@/lib/actions/suppliers'
 import { Dialog } from '@/components/ui/dialog'
 import { SupplierForm } from './supplier-forms'
 
+import { ConfirmationModal } from './ui/confirmation-modal'
+
 export function SupplierTable({ suppliers }: { suppliers: any[] }) {
   const [editingSupplier, setEditingSupplier] = useState<any>(null)
+  const [deletingSupplier, setDeletingSupplier] = useState<any>(null)
+  const [isDeleting, setIsDeleting] = useState(false)
+
+  const handleDelete = async () => {
+    if (!deletingSupplier) return
+    setIsDeleting(true)
+    try {
+      await deleteSupplier(deletingSupplier.id)
+      setDeletingSupplier(null)
+    } catch (error) {
+      console.error("Error deleting supplier:", error)
+    } finally {
+      setIsDeleting(false)
+    }
+  }
 
   return (
     <>
@@ -72,15 +89,18 @@ export function SupplierTable({ suppliers }: { suppliers: any[] }) {
                       onClick={() => setEditingSupplier(supplier)}
                       variant="ghost"
                       size="sm"
-                      className="h-10 w-10 p-0 rounded-lg hover:bg-primary/10 hover:text-primary transition-colors"
+                      className="h-10 w-10 p-0 rounded-lg hover:bg-primary/10 hover:text-primary transition-colors group"
                     >
-                      <Edit2 size={18} />
+                      <Edit2 className='w-4 h-4 group-hover:text-primary' />
                     </Button>
-                    <form action={deleteSupplier.bind(null, supplier.id)}>
-                      <Button type="submit" variant="ghost" size="sm" className="h-10 w-10 p-0 rounded-lg hover:bg-rose-500/10 hover:text-rose-500 transition-colors">
-                        <Trash2 size={18} />
-                      </Button>
-                    </form>
+                    <Button
+                      onClick={() => setDeletingSupplier(supplier)}
+                      variant="ghost"
+                      size="sm"
+                      className="h-10 w-10 p-0 rounded-lg hover:bg-rose-500/10 hover:text-rose-500 transition-colors group"
+                    >
+                      <Trash2 className='w-4 h-4 group-hover:text-rose-500' />
+                    </Button>
                   </div>
                 </TableCell>
               </TableRow>
@@ -101,6 +121,16 @@ export function SupplierTable({ suppliers }: { suppliers: any[] }) {
           />
         </div>
       </Dialog>
+      <ConfirmationModal
+        isOpen={!!deletingSupplier}
+        onClose={() => setDeletingSupplier(null)}
+        onConfirm={handleDelete}
+        title="Eliminar Proveedor"
+        description={`¿Estás seguro de que deseas eliminar a "${deletingSupplier?.name}"? Esta acción no se puede deshacer.`}
+        confirmText="Eliminar Proveedor"
+        variant="danger"
+        loading={isDeleting}
+      />
     </>
   )
 }

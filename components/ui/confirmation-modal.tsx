@@ -58,25 +58,26 @@ export function ConfirmationModal({
   }
 
   return createPortal(
-    <div className="fixed inset-0 z-[10001] flex items-center justify-center p-4">
-      <div 
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300" 
-        onClick={onClose} 
+    <div className="fixed inset-0 z-10001 flex items-center justify-center p-4">
+      <div
+        className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300"
+        onClick={onClose}
       />
-      
+
       <div className="relative w-full max-w-sm bg-card rounded-lg shadow-2xl overflow-hidden border border-border/10 animate-in zoom-in-95 duration-200">
         <div className="p-8 flex flex-col items-center text-center">
           <div className={cn("w-16 h-16 rounded-lg flex items-center justify-center mb-6 shadow-inner", iconStyles[variant])}>
             <AlertTriangle className="w-10 h-10" />
           </div>
-          
+
           <h3 className="text-2xl font-bold tracking-tight mb-2">{title}</h3>
           <p className="text-muted-foreground text-sm leading-relaxed mb-8">
             {description}
           </p>
-          
+
           <div className="flex flex-col w-full gap-3">
             <Button
+              type="button"
               onClick={onConfirm}
               disabled={loading}
               className={cn("h-12 font-bold rounded-lg shadow-lg transition-all active:scale-95", variantStyles[variant])}
@@ -84,6 +85,7 @@ export function ConfirmationModal({
               {loading ? 'Procesando...' : confirmText}
             </Button>
             <Button
+              type="button"
               variant="ghost"
               onClick={onClose}
               disabled={loading}

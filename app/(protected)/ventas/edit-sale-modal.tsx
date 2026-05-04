@@ -21,9 +21,9 @@ export function EditSaleModal({ sale, products, customers }: EditSaleModalProps)
         onClick={() => setIsOpen(true)}
         variant="ghost"
         size="sm"
-        className="h-8 w-8 p-0 rounded-lg transition-all text-muted-foreground hover:bg-primary/10 hover:text-primary"
+        className="h-8 w-8 p-0 rounded-lg transition-all text-muted-foreground hover:bg-primary/10 hover:text-primary group"
       >
-        <Edit2 size={16} />
+        <Edit2 className='w-4 h-4 group-hover:text-primary' />
       </Button>
     )
   }
@@ -34,9 +34,9 @@ export function EditSaleModal({ sale, products, customers }: EditSaleModalProps)
         onClick={() => setIsOpen(true)}
         variant="ghost"
         size="sm"
-        className="h-8 w-8 p-0 rounded-lg transition-all text-muted-foreground hover:bg-primary/10 hover:text-primary"
+        className="h-8 w-8 p-0 rounded-lg transition-all text-muted-foreground hover:bg-primary/10 hover:text-primary group"
       >
-        <Edit2 size={16} />
+        <Edit2 className='w-4 h-4 group-hover:text-primary' />
       </Button>
 
       {createPortal(
@@ -49,8 +49,8 @@ export function EditSaleModal({ sale, products, customers }: EditSaleModalProps)
           <div className="relative w-full max-w-2xl bg-card rounded-lg shadow-2xl overflow-hidden border border-border/10 animate-in zoom-in-95 duration-200">
             <div className="p-8">
               <div className="flex items-center gap-4 mb-8">
-                <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
-                  <Edit2 size={24} />
+                <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center text-primary group">
+                  <Edit2 className='w-4 h-4 group-hover:text-primary' />
                 </div>
                 <div>
                   <h3 className="text-2xl font-bold tracking-tight">Editar Venta</h3>

@@ -68,8 +68,8 @@ export default async function VentasPage() {
       {/* Header Section */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-extrabold tracking-tight font-display">Ventas</h1>
-          <p className="text-muted-foreground text-sm font-medium mt-0.5">Registro de transacciones en tiempo real.</p>
+          <h1 className="text-4xl font-extrabold tracking-tight font-display">Control de Ventas</h1>
+          <p className="text-muted-foreground font-medium mt-1">Registro de transacciones y facturación en tiempo real.</p>
         </div>
       </div>
 
