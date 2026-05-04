@@ -19,15 +19,26 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { SalesChart } from '@/components/dashboard/sales-chart'
 import { ExpensesChart } from '@/components/dashboard/expenses-chart'
+import { DashboardFilters } from '@/components/dashboard/dashboard-filters'
 import { eachDayOfInterval, subDays, format } from 'date-fns'
 
 export const dynamic = 'force-dynamic'
 
-async function getStats() {
+async function getStats(range: string = '30d') {
   const today = new Date()
   today.setHours(0, 0, 0, 0)
 
-  const [suppliesCount, productsCount, todaySales, todayExpenses, yesterdaySales] = await Promise.all([
+  let startDate = subDays(new Date(), 30)
+  if (range === '7d') startDate = subDays(new Date(), 7)
+  if (range === '90d') startDate = subDays(new Date(), 90)
+  if (range === 'year') {
+    startDate = new Date()
+    startDate.setMonth(0, 1)
+    startDate.setHours(0, 0, 0, 0)
+  }
+  if (range === 'all') startDate = new Date(2000, 0, 1)
+
+  const [suppliesCount, productsCount, todaySales, todayExpenses, yesterdaySales, periodSales, periodExpenses] = await Promise.all([
     prisma.supply.count({ where: { deletedAt: null } }),
     prisma.product.count({ where: { deletedAt: null, isActive: true } }),
     prisma.dailySale.findMany({ where: { deletedAt: null, createdAt: { gte: today } } }),
@@ -40,16 +51,29 @@ async function getStats() {
           lt: today
         }
       }
-    })
+    }),
+    prisma.dailySale.findMany({ where: { deletedAt: null, createdAt: { gte: startDate } } }),
+    prisma.indirectCost.findMany({ where: { deletedAt: null, date: { gte: startDate } } }),
   ])
 
   const salesTotal = todaySales.reduce((sum: number, s: any) => sum + Number(s.totalAmount), 0)
   const expensesTotal = todayExpenses.reduce((sum: number, e: any) => sum + Number(e.amount), 0)
   const yesterdayTotal = yesterdaySales.reduce((sum: number, s: any) => sum + Number(s.totalAmount), 0)
+  
+  const periodSalesTotal = periodSales.reduce((sum: number, s: any) => sum + Number(s.totalAmount), 0)
+  const periodExpensesTotal = periodExpenses.reduce((sum: number, e: any) => sum + Number(e.amount), 0)
 
   const salesChange = yesterdayTotal > 0 ? ((salesTotal - yesterdayTotal) / yesterdayTotal) * 100 : 0
 
-  return { suppliesCount, productsCount, salesTotal, expensesTotal, salesChange }
+  return { 
+    suppliesCount, 
+    productsCount, 
+    salesTotal, 
+    expensesTotal, 
+    salesChange,
+    periodSalesTotal,
+    periodExpensesTotal
+  }
 }
 
 async function getRecentSales() {
@@ -61,8 +85,17 @@ async function getRecentSales() {
   })
 }
 
-async function getHistoricalData() {
-  const thirtyDaysAgo = subDays(new Date(), 30)
+async function getHistoricalData(range: string = '30d') {
+  let thirtyDaysAgo = subDays(new Date(), 30)
+  
+  if (range === '7d') thirtyDaysAgo = subDays(new Date(), 7)
+  if (range === '90d') thirtyDaysAgo = subDays(new Date(), 90)
+  if (range === 'year') {
+    thirtyDaysAgo = new Date()
+    thirtyDaysAgo.setMonth(0, 1)
+    thirtyDaysAgo.setHours(0, 0, 0, 0)
+  }
+  if (range === 'all') thirtyDaysAgo = new Date(2000, 0, 1)
 
   const [sales, expenses] = await Promise.all([
     prisma.dailySale.findMany({
@@ -203,13 +236,26 @@ function RecentItemRow({ title, date, amount, icon: Icon, isNegative }: {
   )
 }
 
-export default async function DashboardPage() {
+export default async function DashboardPage(props: {
+  searchParams: Promise<{ range?: string }>
+}) {
+  const searchParams = await props.searchParams
+  const range = searchParams.range || '30d'
+
   const [stats, recentSales, recentExpenses, historicalData] = await Promise.all([
-    getStats(),
+    getStats(range),
     getRecentSales(),
     getRecentExpenses(),
-    getHistoricalData()
+    getHistoricalData(range)
   ])
+
+  const rangeLabels: Record<string, string> = {
+    '7d': 'últimos 7 días',
+    '30d': 'últimos 30 días',
+    '90d': 'últimos 90 días',
+    'year': 'este año',
+    'all': 'histórico'
+  }
 
   const lowStock = await prisma.supply.findMany({
     where: { deletedAt: null }
@@ -224,6 +270,7 @@ export default async function DashboardPage() {
           <p className="text-muted-foreground font-medium mt-1">Sincronización en tiempo real de tu operación.</p>
         </div>
         <div className="flex items-center gap-3">
+          <DashboardFilters />
           <Link href="/ventas">
             <Button className="rounded-lg h-12 px-6 font-bold shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 active:scale-95 transition-all">
               <Plus size={20} className="mr-2" />
@@ -236,18 +283,18 @@ export default async function DashboardPage() {
       {/* Main Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard
-          title="Ventas de Hoy"
-          value={formatCurrency(stats.salesTotal)}
-          subtitle={`${recentSales.length} transacciones registradas`}
+          title={`Ventas (${rangeLabels[range]})`}
+          value={formatCurrency(stats.periodSalesTotal)}
+          subtitle={`${stats.salesTotal > 0 ? formatCurrency(stats.salesTotal) + ' hoy' : 'Sin ventas hoy'}`}
           change={stats.salesChange}
           icon={TrendingUp}
           color="bg-primary"
           index={1}
         />
         <StatCard
-          title="Inversión Hoy"
-          value={formatCurrency(stats.expensesTotal)}
-          subtitle="Gastos indirectos totales"
+          title={`Inversión (${rangeLabels[range]})`}
+          value={formatCurrency(stats.periodExpensesTotal)}
+          subtitle={`${stats.expensesTotal > 0 ? formatCurrency(stats.expensesTotal) + ' hoy' : 'Sin gastos hoy'}`}
           icon={Receipt}
           color="bg-rose-500"
           index={2}
