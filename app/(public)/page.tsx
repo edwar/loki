@@ -90,6 +90,7 @@ export default async function LandingPage() {
             <a href="#features" className="hover:text-foreground transition-colors">Funciones</a>
             <a href="#benefits" className="hover:text-foreground transition-colors">Beneficios</a>
             <a href="#pricing" className="hover:text-foreground transition-colors">Precios</a>
+            <Link href="/guia" className="hover:text-foreground transition-colors">Guía de Uso</Link>
           </nav>
 
           <div className="flex items-center gap-6">
@@ -319,10 +320,10 @@ export default async function LandingPage() {
           </div>
 
           <div className="flex gap-8 text-sm font-medium text-muted-foreground">
+            <Link href="/guia" className="hover:text-foreground transition-colors">Guía de Uso</Link>
             <a href="#" className="hover:text-foreground transition-colors">Privacidad</a>
             <a href="#" className="hover:text-foreground transition-colors">Términos</a>
             <a href="#" className="hover:text-foreground transition-colors">Soporte</a>
-            <a href="#" className="hover:text-foreground transition-colors">Twitter</a>
           </div>
 
           <p className="text-sm text-muted-foreground">
