@@ -3,6 +3,8 @@ import { ProductionTable } from '@/components/production-table'
 import { Factory } from 'lucide-react'
 import { NewProductionModal } from '@/components/new-production-modal'
 import { getProducts } from '@/lib/actions/products'
+import { ExportButton } from '@/components/ui/export-button'
+import { formatDate } from '@/lib/utils'
 
 export const dynamic = 'force-dynamic'
 
@@ -63,6 +65,18 @@ export default async function ProductionPage() {
     }))
   }))
 
+  const exportData = serializedLogs.map(log => ({
+    'ID Lote': log.id,
+    'Fecha': formatDate(log.date),
+    'Producto': log.product.name,
+    'Lotes Fabricados': log.batches,
+    'Rendimiento Teórico': log.expectedYield,
+    'Rendimiento Real': log.actualYield,
+    'Merma / Excedente': log.actualYield - log.expectedYield,
+    'Costo Insumos ($)': log.items.reduce((acc, item) => acc + (item.quantityConsumed * item.unitCost), 0),
+    'Detalle Insumos': log.items.map(item => `${item.quantityConsumed} ${item.supply.unit} de ${item.supply.name}`).join(' | ')
+  }))
+
   return (
     <div className="space-y-10 animate-fade-in">
       {/* Header */}
@@ -78,7 +92,17 @@ export default async function ProductionPage() {
             </p>
           </div>
         </div>
-        <NewProductionModal products={products} />
+        <div className="flex items-center gap-3">
+          {serializedLogs.length > 0 && (
+            <ExportButton 
+              data={exportData} 
+              filename={`Produccion_${new Date().toISOString().split('T')[0]}`} 
+              variant="outline" 
+              className="h-12 px-6 rounded-lg font-bold" 
+            />
+          )}
+          <NewProductionModal products={products} />
+        </div>
       </div>
 
       <ProductionTable logs={serializedLogs} />

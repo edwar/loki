@@ -9,6 +9,7 @@ import { deleteSale } from '@/lib/actions/sales'
 import { SaleForm } from '@/components/sales-form'
 import { DeleteSaleButton } from './delete-sale-button'
 import { EditSaleModal } from './edit-sale-modal'
+import { ExportButton } from '@/components/ui/export-button'
 
 export const dynamic = 'force-dynamic'
 
@@ -63,6 +64,15 @@ export default async function VentasPage() {
     })) || []
   }))
 
+  const exportData = sales.map((sale: any) => ({
+    'ID Venta': sale.id,
+    'Fecha': formatDate(sale.createdAt),
+    'Cliente': sale.customer?.name || "Venta General",
+    'Monto Total ($)': sale.totalAmount,
+    'Cantidad de Productos': sale.saleItems.reduce((acc: number, item: any) => acc + item.quantity, 0),
+    'Detalle': sale.saleItems.map((si: any) => `${si.quantity}x ${si.product?.name}`).join(', ')
+  }))
+
   return (
     <div className="space-y-8 animate-fade-in">
       {/* Header Section */}
@@ -104,6 +114,14 @@ export default async function VentasPage() {
                 </div>
                 <CardTitle className="text-xl">Historial</CardTitle>
               </div>
+              {sales.length > 0 && (
+                <ExportButton 
+                  data={exportData} 
+                  filename={`Ventas_${new Date().toISOString().split('T')[0]}`} 
+                  variant="outline" 
+                  className="h-9 px-4 rounded-lg text-xs" 
+                />
+              )}
             </CardHeader>
             <CardContent className="p-0">
               <Table className="min-w-[800px]">

@@ -5,6 +5,8 @@ import { formatCurrency, cn } from '@/lib/utils'
 import { Package, TrendingUp, AlertCircle } from 'lucide-react'
 import { NewSupplySection } from '@/components/new-supply-section'
 import { SupplyTable } from '@/components/supply-table'
+import { ExportButton } from '@/components/ui/export-button'
+import { formatDate } from '@/lib/utils'
 
 export const dynamic = 'force-dynamic'
 
@@ -25,12 +27,35 @@ export default async function InsumosPage() {
   const totalValue = supplies.reduce((sum: number, s: any) => sum + Number(s.currentStock) * Number(s.purchasePrice), 0)
   const lowStockCount = supplies.filter((s: any) => Number(s.currentStock) < Number(s.minStock)).length
 
+  const exportData = supplies.map((supply: any) => ({
+    'ID Insumo': supply.id,
+    'Nombre': supply.name,
+    'Categoría': supply.category || 'N/A',
+    'Unidad': supply.unit,
+    'Stock Actual': supply.currentStock,
+    'Stock Mínimo': supply.minStock,
+    'Precio de Compra ($)': supply.purchasePrice,
+    'Valor Total ($)': supply.currentStock * supply.purchasePrice,
+    'Proveedor Default': supply.supplier?.name || 'N/A',
+    'Última Actualización': formatDate(supply.updatedAt)
+  }))
+
   return (
     <div className="space-y-10 animate-fade-in">
       {/* Header */}
-      <div>
-        <h1 className="text-4xl font-extrabold tracking-tight font-display">Gestión de Insumos</h1>
-        <p className="text-muted-foreground font-medium mt-1">Controla tu inventario y niveles de stock en tiempo real.</p>
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div>
+          <h1 className="text-4xl font-extrabold tracking-tight font-display">Gestión de Insumos</h1>
+          <p className="text-muted-foreground font-medium mt-1">Controla tu inventario y niveles de stock en tiempo real.</p>
+        </div>
+        {supplies.length > 0 && (
+          <ExportButton 
+            data={exportData} 
+            filename={`Inventario_${new Date().toISOString().split('T')[0]}`} 
+            variant="outline" 
+            className="h-12 px-6 rounded-lg font-bold" 
+          />
+        )}
       </div>
 
       {/* Stats */}
