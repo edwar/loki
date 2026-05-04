@@ -56,12 +56,12 @@ async function getStats(range: string = '30d') {
     prisma.indirectCost.findMany({ where: { deletedAt: null, date: { gte: startDate } } }),
   ])
 
-  const salesTotal = todaySales.reduce((sum: number, s: any) => sum + Number(s.totalAmount), 0)
-  const expensesTotal = todayExpenses.reduce((sum: number, e: any) => sum + Number(e.amount), 0)
-  const yesterdayTotal = yesterdaySales.reduce((sum: number, s: any) => sum + Number(s.totalAmount), 0)
+  const salesTotal = todaySales.reduce((sum: number, s) => sum + Number(s.totalAmount), 0)
+  const expensesTotal = todayExpenses.reduce((sum: number, e) => sum + Number(e.amount), 0)
+  const yesterdayTotal = yesterdaySales.reduce((sum: number, s) => sum + Number(s.totalAmount), 0)
   
-  const periodSalesTotal = periodSales.reduce((sum: number, s: any) => sum + Number(s.totalAmount), 0)
-  const periodExpensesTotal = periodExpenses.reduce((sum: number, e: any) => sum + Number(e.amount), 0)
+  const periodSalesTotal = periodSales.reduce((sum: number, s) => sum + Number(s.totalAmount), 0)
+  const periodExpensesTotal = periodExpenses.reduce((sum: number, e) => sum + Number(e.amount), 0)
 
   const salesChange = yesterdayTotal > 0 ? ((salesTotal - yesterdayTotal) / yesterdayTotal) * 100 : 0
 
@@ -129,7 +129,7 @@ async function getHistoricalData(range: string = '30d') {
   })
 
   // Process sales by day with gap filling
-  const salesMap = sales.reduce((acc: any, sale) => {
+  const salesMap = sales.reduce((acc: Record<string, number>, sale) => {
     const day = format(sale.createdAt, 'yyyy-MM-dd')
     acc[day] = (acc[day] || 0) + Number(sale.totalAmount)
     return acc
@@ -144,14 +144,17 @@ async function getHistoricalData(range: string = '30d') {
   })
 
   // Process expenses by category
-  const expensesByCategory = expenses.reduce((acc: any, expense) => {
+  const expensesByCategoryMap = expenses.reduce((acc: Record<string, number>, expense) => {
     acc[expense.type] = (acc[expense.type] || 0) + Number(expense.amount)
     return acc
   }, {})
 
   return {
     salesByDay,
-    expensesByCategory: Object.entries(expensesByCategory).map(([name, value]) => ({ name, value }))
+    expensesByCategory: Object.entries(expensesByCategoryMap).map(([name, value]) => ({ 
+      name, 
+      value: Number(value) 
+    }))
   }
 }
 
@@ -259,7 +262,7 @@ export default async function DashboardPage(props: {
 
   const lowStock = await prisma.supply.findMany({
     where: { deletedAt: null }
-  }).then((supplies: any[]) => supplies.filter((s: any) => Number(s.currentStock) < Number(s.minStock)).slice(0, 5))
+  }).then((supplies) => supplies.filter((s) => Number(s.currentStock) < Number(s.minStock)).slice(0, 5))
 
   return (
     <div className="space-y-10">
@@ -348,16 +351,16 @@ export default async function DashboardPage(props: {
                 </div>
               ) : (
                 <div className="space-y-1">
-                  {recentSales.map((sale: any) => (
+                  {recentSales.map((sale) => (
                     <RecentItemRow
                       key={sale.id}
-                      title={sale.saleItems.map((si: any) => si.product.name).join(', ')}
+                      title={sale.saleItems.map((si) => si.product.name).join(', ')}
                       date={sale.createdAt}
                       amount={Number(sale.totalAmount)}
                       icon={DollarSign}
                     />
                   ))}
-                  {recentExpenses.map((expense: any) => (
+                  {recentExpenses.map((expense) => (
                     <RecentItemRow
                       key={expense.id}
                       title={expense.type}
@@ -391,7 +394,7 @@ export default async function DashboardPage(props: {
                   </div>
                 </div>
                 <div className="space-y-3">
-                  {lowStock.map((supply: any) => (
+                  {lowStock.map((supply) => (
                     <div key={supply.id} className="flex items-center justify-between p-3 bg-background/50 rounded-lg border border-amber-500/10 group/item hover:bg-background transition-colors">
                       <div className="flex items-center gap-2">
                         <Package size={14} className="text-muted-foreground" />

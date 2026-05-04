@@ -17,24 +17,24 @@ interface ExpensesChartProps {
 }
 
 const COLORS = [
-  '#6366f1', // Indigo
-  '#ec4899', // Pink
-  '#f59e0b', // Amber
-  '#10b981', // Emerald
-  '#3b82f6', // Blue
-  '#8b5cf6', // Violet
-  '#ef4444', // Red
+  '#6366f1',
+  '#ec4899',
+  '#f59e0b',
+  '#10b981',
+  '#3b82f6',
+  '#8b5cf6',
+  '#ef4444',
 ]
 
 export function ExpensesChart({ data }: ExpensesChartProps) {
-  const hasData = data.length > 0
+  const hasData = data && data.length > 0
 
   return (
     <Card className="rounded-lg border-border/40 bg-card/30 backdrop-blur-md overflow-hidden">
       <CardHeader className="flex flex-row items-center justify-between pb-2">
         <div className="space-y-1">
           <CardTitle className="text-xl font-bold font-display">Distribución de Gastos</CardTitle>
-          <p className="text-xs text-muted-foreground font-medium">Por categoría este mes</p>
+          <p className="text-xs text-muted-foreground font-medium">Por categoría en el periodo seleccionado</p>
         </div>
         <div className="p-2 rounded-lg bg-rose-500/10 text-rose-500">
           <PieIcon size={20} />
@@ -47,7 +47,7 @@ export function ExpensesChart({ data }: ExpensesChartProps) {
               <div className="w-12 h-12 rounded-full bg-accent/50 flex items-center justify-center">
                 <PieIcon className="text-muted-foreground/30" />
               </div>
-              <p className="text-sm text-muted-foreground font-medium">Sin datos de gastos registrados aún.</p>
+              <p className="text-sm text-muted-foreground font-medium">Sin datos de gastos en este periodo.</p>
             </div>
           ) : (
             <ResponsiveContainer width="100%" height="100%">
@@ -61,7 +61,7 @@ export function ExpensesChart({ data }: ExpensesChartProps) {
                   paddingAngle={5}
                   dataKey="value"
                   stroke="none"
-                  animationDuration={1500}
+                  animationDuration={1000}
                 >
                   {data.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
