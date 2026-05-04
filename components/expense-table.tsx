@@ -30,14 +30,14 @@ export function ExpenseTable({ expenses }: { expenses: any[] }) {
 
   return (
     <>
-      <Table>
+      <Table className="min-w-[800px]">
         <TableHeader>
           <TableRow className="hover:bg-transparent">
             <TableHead className="font-semibold uppercase text-[10px] tracking-widest text-muted-foreground">Fecha</TableHead>
             <TableHead className="font-semibold uppercase text-[10px] tracking-widest text-muted-foreground">Tipo</TableHead>
             <TableHead className="font-semibold uppercase text-[10px] tracking-widest text-muted-foreground">Descripción</TableHead>
             <TableHead className="font-semibold uppercase text-[10px] tracking-widest text-muted-foreground">Monto</TableHead>
-            <TableHead className="font-semibold uppercase text-[10px] tracking-widest text-muted-foreground text-right">Acciones</TableHead>
+            <TableHead className="font-semibold uppercase text-[10px] tracking-widest text-muted-foreground text-right sticky right-0 bg-card z-20 shadow-[-8px_0_8px_-8px_rgba(0,0,0,0.1)] border-l border-border/10 w-24 pr-4">Acciones</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -72,7 +72,7 @@ export function ExpenseTable({ expenses }: { expenses: any[] }) {
                 <TableCell className="font-bold text-lg text-rose-500">
                   {formatCurrency(Number(expense.amount))}
                 </TableCell>
-                <TableCell>
+                <TableCell className="sticky right-0 bg-card z-10 shadow-[-8px_0_8px_-8px_rgba(0,0,0,0.1)] border-l border-border/10 w-24 pr-4">
                   <div className="flex justify-end gap-2">
                     <Button
                       onClick={() => setEditingExpense(expense)}
