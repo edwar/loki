@@ -2,6 +2,8 @@
 
 import { SessionProvider } from 'next-auth/react'
 import { useEffect, useState } from 'react'
+import { Toaster } from 'sileo'
+import 'sileo/styles.css'
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const [mounted, setMounted] = useState(false)
@@ -16,5 +18,10 @@ export function Providers({ children }: { children: React.ReactNode }) {
     document.documentElement.classList.add(theme)
   }, [])
 
-  return <SessionProvider>{children}</SessionProvider>
+  return (
+    <SessionProvider>
+      {children}
+      <Toaster />
+    </SessionProvider>
+  )
 }

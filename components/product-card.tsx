@@ -32,6 +32,16 @@ export function ProductCard({
   const [actualYield, setActualYield] = useState<number>(0)
   const [isPending, startTransition] = useTransition()
 
+  const recipeCost = product.recipeItems.reduce((acc: number, item: any) => {
+    const qty = Number(item.quantityRequired) || 0
+    const price = Number(item.supply?.purchasePrice) || 0
+    return acc + (qty * price)
+  }, 0)
+
+  const unitCost = product.yield > 0 ? recipeCost / product.yield : 0
+  const salePrice = Number(product.salePrice) || 0
+  const profitMargin = salePrice > 0 ? ((salePrice - unitCost) / salePrice) * 100 : 0
+
   const handleOpenProduce = () => {
     if (product.maxPossibleBatches <= 0) return
     setActualYield(product.yield || 1)
@@ -174,6 +184,32 @@ export function ProductCard({
                 </div>
               )}
 
+              {product.recipeItems.length > 0 && (
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 rounded-lg border border-border/30 bg-background/50">
+                  <div className="space-y-1">
+                    <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">Costo del Lote</p>
+                    <p className="text-sm font-black text-foreground">{formatCurrency(recipeCost)}</p>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">Costo Unitario</p>
+                    <p className="text-sm font-black text-rose-500">{formatCurrency(unitCost)}</p>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">Precio Venta</p>
+                    <p className="text-sm font-black text-emerald-500">{formatCurrency(salePrice)}</p>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">Margen Bruto</p>
+                    <p className={cn(
+                      "text-sm font-black",
+                      profitMargin > 30 ? "text-emerald-500" : profitMargin > 0 ? "text-amber-500" : "text-rose-500"
+                    )}>
+                      {profitMargin.toFixed(1)}%
+                    </p>
+                  </div>
+                </div>
+              )}
+
               {allSupplies.length > 0 && (
                 <RecipeForm productId={product.id} supplies={allSupplies} />
               )}
@@ -189,31 +225,43 @@ export function ProductCard({
                       <TableRow className="bg-accent/5 hover:bg-accent/5">
                         <TableHead className="h-9 text-[10px] uppercase tracking-widest font-bold">Insumo</TableHead>
                         <TableHead className="h-9 text-[10px] uppercase tracking-widest font-bold">Consumo por Receta ({product.yield} uds)</TableHead>
+                        <TableHead className="h-9 text-[10px] uppercase tracking-widest font-bold text-right">Costo Est.</TableHead>
                         <TableHead className="h-9 text-[10px] uppercase tracking-widest font-bold text-right">Acción</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {product.recipeItems.map((item: any) => (
-                        <TableRow key={item.id} className="group/row hover:bg-accent/5">
-                          <TableCell className="py-2.5 font-semibold text-sm">{item.supply.name}</TableCell>
-                          <TableCell className="py-2.5">
-                            <span className="text-[10px] font-bold px-2 py-0.5 bg-accent/50 text-muted-foreground rounded-md">
-                              {Number(item.quantityRequired)} {item.unit}
-                            </span>
-                          </TableCell>
-                          <TableCell className="py-2.5 text-right">
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => setRecipeItemToDelete(item.id)}
-                              className="h-6 w-6 p-0 rounded-lg hover:bg-rose-500/10 hover:text-rose-500 transition-colors group"
-                            >
-                              <Trash2 className='w-4 h-4 group-hover:text-rose-500' />
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      ))}
+                      {product.recipeItems.map((item: any) => {
+                        const cost = (Number(item.quantityRequired) || 0) * (Number(item.supply?.purchasePrice) || 0)
+                        return (
+                          <TableRow key={item.id} className="group/row hover:bg-accent/5">
+                            <TableCell className="py-2.5 font-semibold text-sm">
+                              {item.supply.name}
+                              <span className="block text-[10px] text-muted-foreground font-normal">
+                                {formatCurrency(Number(item.supply?.purchasePrice) || 0)} / {item.supply?.unit}
+                              </span>
+                            </TableCell>
+                            <TableCell className="py-2.5">
+                              <span className="text-[10px] font-bold px-2 py-0.5 bg-accent/50 text-muted-foreground rounded-md">
+                                {Number(item.quantityRequired)} {item.unit}
+                              </span>
+                            </TableCell>
+                            <TableCell className="py-2.5 text-right font-medium text-xs">
+                              {formatCurrency(cost)}
+                            </TableCell>
+                            <TableCell className="py-2.5 text-right">
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => setRecipeItemToDelete(item.id)}
+                                className="h-6 w-6 p-0 rounded-lg hover:bg-rose-500/10 hover:text-rose-500 transition-colors group"
+                              >
+                                <Trash2 className='w-4 h-4 group-hover:text-rose-500' />
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        )
+                      })}
                     </TableBody>
                   </Table>
                 </div>

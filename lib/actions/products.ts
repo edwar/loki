@@ -162,6 +162,7 @@ export async function prepareProduct(productId: string, batches: number, actualY
     })
   })
 
+  revalidatePath('/produccion')
   revalidatePath('/productos')
   revalidatePath('/insumos')
   revalidatePath('/ventas')

@@ -1,21 +1,26 @@
 import { prisma } from '@/lib/prisma'
 import { ProductionTable } from '@/components/production-table'
 import { Factory } from 'lucide-react'
+import { NewProductionModal } from '@/components/new-production-modal'
+import { getProducts } from '@/lib/actions/products'
 
 export const dynamic = 'force-dynamic'
 
 export default async function ProductionPage() {
-  const logs = await prisma.productionLog.findMany({
-    orderBy: { date: 'desc' },
-    include: {
-      product: true,
-      items: {
-        include: {
-          supply: true
+  const [logs, productsRaw] = await Promise.all([
+    prisma.productionLog.findMany({
+      orderBy: { date: 'desc' },
+      include: {
+        product: true,
+        items: {
+          include: {
+            supply: true
+          }
         }
       }
-    }
-  })
+    }),
+    getProducts()
+  ])
 
   // Convert Decimals to Numbers for Client Component
   const serializedLogs = logs.map(log => ({
@@ -42,10 +47,26 @@ export default async function ProductionPage() {
     }))
   }))
 
+  const products = productsRaw.map(p => ({
+    id: p.id,
+    name: p.name,
+    yield: Number(p.yield),
+    recipeItems: p.recipeItems.map(ri => ({
+      id: ri.id,
+      quantityRequired: Number(ri.quantityRequired),
+      supply: ri.supply ? {
+        id: ri.supply.id,
+        name: ri.supply.name,
+        currentStock: Number(ri.supply.currentStock),
+        unit: ri.supply.unit
+      } : null
+    }))
+  }))
+
   return (
     <div className="space-y-10 animate-fade-in">
       {/* Header */}
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div className="flex items-center gap-4">
           <div className="w-12 h-12 rounded-lg bg-primary flex items-center justify-center shadow-lg shadow-primary/20">
             <Factory size={24} className="text-primary-foreground" />
@@ -57,6 +78,7 @@ export default async function ProductionPage() {
             </p>
           </div>
         </div>
+        <NewProductionModal products={products} />
       </div>
 
       <ProductionTable logs={serializedLogs} />
