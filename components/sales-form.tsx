@@ -344,9 +344,9 @@ export function SaleForm({
                   </Select>
                 </div>
                 <div className="flex items-end gap-3">
-                  <div className="flex-1 md:flex-initial space-y-1.5">
+                  <div className="flex-1 md:flex-initial space-y-1.5 mb-[5px]">
                     <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground ml-1">Cant.</label>
-                    <div className="flex items-center bg-background/60 rounded-lg border border-primary/5 p-1 h-11 shadow-sm">
+                    <div className="flex items-center justify-between bg-background/60 rounded-lg border border-primary/5 p-1 h-11 shadow-sm">
                       <Button disabled={quantity === 0} type="button" variant="ghost" size="icon" onClick={() => setQuantity(Math.max(0, quantity - 1))} className="h-9 w-9 rounded-lg hover:bg-primary/10 hover:text-primary transition-all active:scale-90">
                         <Minus size={14} />
                       </Button>
@@ -356,7 +356,7 @@ export function SaleForm({
                       </Button>
                     </div>
                   </div>
-                  <Button type="button" onClick={addItem} variant="secondary" size="icon" className="h-11 w-11 rounded-lg shadow-lg shadow-primary/5 hover:shadow-primary/20 transition-all active:scale-95 shrink-0">
+                  <Button type="button" onClick={addItem} variant="secondary" size="icon" className="h-11 w-11 mb-[5px] rounded-lg shadow-lg shadow-primary/5 hover:shadow-primary/20 transition-all active:scale-95 shrink-0">
                     <Plus size={20} strokeWidth={3} />
                   </Button>
                 </div>
