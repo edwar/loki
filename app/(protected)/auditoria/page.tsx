@@ -6,6 +6,7 @@ import { ShieldAlert, User, Activity, Monitor } from 'lucide-react'
 import { redirect } from 'next/navigation'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
+import type { AuditLog } from '@prisma/client'
 
 export const dynamic = 'force-dynamic'
 
@@ -59,7 +60,7 @@ export default async function AuditoriaPage() {
                   </TableCell>
                 </TableRow>
               ) : (
-                logs.map((log) => (
+                logs.map((log: AuditLog) => (
                   <TableRow key={log.id} className="group hover:bg-accent/5 transition-colors border-border/10">
                     <TableCell className="py-4 pl-4 sm:pl-6">
                       <p className="text-xs font-bold text-foreground">{formatDate(log.createdAt).split(',')[0]}</p>
