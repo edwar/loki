@@ -3,6 +3,7 @@
 import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
 import bcrypt from 'bcryptjs'
+import { logAction } from './audit'
 
 export async function getUsers() {
   try {
@@ -34,10 +35,11 @@ export async function createUser(data: any) {
     }
 
     const hashedPassword = await bcrypt.hash(data.password, 10)
+    let userId;
 
     if (existing && existing.deletedAt) {
       // Recover logically deleted user
-      await prisma.user.update({
+      const updatedUser = await prisma.user.update({
         where: { id: existing.id },
         data: {
           name: data.name,
@@ -46,8 +48,10 @@ export async function createUser(data: any) {
           deletedAt: null
         }
       })
+      userId = updatedUser.id;
+      await logAction('RECOVER_USER', 'USER', userId, { email: data.email, role: data.role })
     } else {
-      await prisma.user.create({
+      const newUser = await prisma.user.create({
         data: {
           name: data.name,
           email: data.email,
@@ -55,6 +59,8 @@ export async function createUser(data: any) {
           role: data.role
         }
       })
+      userId = newUser.id;
+      await logAction('CREATE', 'USER', userId, { email: data.email, role: data.role })
     }
 
     revalidatePath('/equipo')
@@ -67,11 +73,14 @@ export async function createUser(data: any) {
 
 export async function updateUserRole(id: string, role: string) {
   try {
+    const oldUser = await prisma.user.findUnique({ where: { id } })
     await prisma.user.update({
       where: { id },
       data: { role }
     })
     
+    await logAction('UPDATE_ROLE', 'USER', id, { oldRole: oldUser?.role, newRole: role, email: oldUser?.email })
+
     revalidatePath('/equipo')
     return { success: true }
   } catch (error: any) {
@@ -98,6 +107,8 @@ export async function deleteUser(id: string) {
       data: { deletedAt: new Date() }
     })
     
+    await logAction('DELETE', 'USER', id, { email: user?.email, role: user?.role })
+
     revalidatePath('/equipo')
     return { success: true }
   } catch (error: any) {

@@ -2,6 +2,7 @@
 
 import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
+import { logAction } from './audit'
 
 export async function getSales() {
   return prisma.dailySale.findMany({
@@ -221,6 +222,8 @@ export async function deleteSale(id: string) {
       data: { deletedAt: new Date() }
     })
   })
+
+  await logAction('DELETE', 'SALE', id, { totalAmount: Number(sale.totalAmount), customerId: sale.customerId })
 
   revalidatePath('/ventas')
   revalidatePath('/productos')

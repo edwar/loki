@@ -91,11 +91,16 @@ export async function updateProduct(id: string, formData: FormData) {
   revalidatePath('/productos')
 }
 
+import { logAction } from './audit'
+
 export async function deleteProduct(id: string) {
+  const product = await prisma.product.findUnique({ where: { id } })
   await prisma.product.update({
     where: { id },
     data: { deletedAt: new Date() },
   })
+
+  await logAction('DELETE', 'PRODUCT', id, { name: product?.name })
 
   revalidatePath('/productos')
 }
