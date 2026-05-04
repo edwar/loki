@@ -20,7 +20,8 @@ import {
   Building2,
   ShoppingCart,
   ChevronRight,
-  Factory
+  Factory,
+  Shield
 } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { ThemeToggle } from '@/components/theme-toggle'
@@ -31,12 +32,13 @@ const navigation = [
   { name: 'Ventas', href: '/ventas', icon: TrendingUp },
   { name: 'Productos', href: '/productos', icon: ShoppingBag },
   { name: 'Producción', href: '/produccion', icon: Factory },
-  { name: 'Insumos', href: '/insumos', icon: Package },
-  { name: 'Gastos', href: '/gastos', icon: Receipt },
-  { name: 'Compras', href: '/compras', icon: ShoppingCart },
-  { name: 'Proveedores', href: '/proveedores', icon: Truck },
+  { name: 'Insumos', href: '/insumos', icon: Package, roles: ['admin', 'manager'] },
+  { name: 'Gastos', href: '/gastos', icon: Receipt, roles: ['admin', 'manager'] },
+  { name: 'Compras', href: '/compras', icon: ShoppingCart, roles: ['admin', 'manager'] },
+  { name: 'Proveedores', href: '/proveedores', icon: Truck, roles: ['admin', 'manager'] },
   { name: 'Clientes', href: '/clientes', icon: Users },
-  { name: 'Bienes', href: '/bienes', icon: Building2 },
+  { name: 'Bienes', href: '/bienes', icon: Building2, roles: ['admin'] },
+  { name: 'Equipo', href: '/equipo', icon: Shield, roles: ['admin'] },
 ]
 
 export default function ProtectedLayout({
@@ -107,7 +109,9 @@ export default function ProtectedLayout({
             <div className="px-4 mb-4">
               <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">Menú Principal</p>
             </div>
-            {navigation.map((item, index) => {
+            {navigation
+              .filter(item => !item.roles || item.roles.includes(session?.user?.role as string))
+              .map((item, index) => {
               const isActive = pathname === item.href ||
                 (item.href !== '/dashboard' && pathname.startsWith(item.href))
               return (
