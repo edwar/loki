@@ -2,12 +2,10 @@
 
 import { useState } from 'react'
 import { signIn } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { PasswordInput } from '@/components/ui/password-input'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { ChefHat } from 'lucide-react'
 
@@ -21,7 +19,6 @@ function validatePassword(password: string): { valid: boolean; errors: string[] 
 }
 
 export default function RegisterPage() {
-  const router = useRouter()
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [password, setPassword] = useState('')
@@ -31,8 +28,18 @@ export default function RegisterPage() {
   const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value
     setPassword(value)
-    if (value.length > 0) {
+    if (value.length > 0 && confirmPassword.length > 0) {
       setValidation(validatePassword(value))
+    } else {
+      setValidation(null)
+    }
+  }
+
+  const handleConfirmPasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value
+    setConfirmPassword(value)
+    if (value.length > 0 && password.length > 0) {
+      setValidation(!passwordsMatch ? { ...validation, valid: true, errors: [] } : { ...validation, valid: false, errors: ['Las contraseñas no coinciden'] })
     } else {
       setValidation(null)
     }
@@ -46,7 +53,7 @@ export default function RegisterPage() {
     const formData = new FormData(e.currentTarget)
     const name = formData.get('name') as string
     const email = formData.get('email') as string
-    const role = formData.get('role') as string
+    const role = 'admin';
 
     const passwordValidation = validatePassword(password)
     if (!passwordValidation.valid) {
@@ -149,7 +156,7 @@ export default function RegisterPage() {
                 <PasswordInput
                   name="confirmPassword"
                   value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  onChange={handleConfirmPasswordChange}
                   required
                   className="mt-1"
                   placeholder="••••••••"
@@ -158,20 +165,7 @@ export default function RegisterPage() {
                   <p className="text-xs text-destructive mt-1 font-medium">Las contraseñas no coinciden</p>
                 )}
               </div>
-              <div>
-                <label className="text-sm font-medium">Rol</label>
-                <Select name="role" defaultValue="employee">
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecciona un rol" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="admin">Administrador</SelectItem>
-                    <SelectItem value="manager">Gerente</SelectItem>
-                    <SelectItem value="employee">Empleado</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <Button type="submit" className="w-full" disabled={loading}>
+              <Button type="submit" className="w-full" disabled={loading || !validation?.valid}>
                 {loading ? 'Creando cuenta...' : 'Crear Cuenta'}
               </Button>
             </form>
