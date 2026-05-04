@@ -22,8 +22,9 @@ import {
   ChevronRight,
   Factory
 } from 'lucide-react'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { ThemeToggle } from '@/components/theme-toggle'
+import { getLowStockCount } from '@/lib/actions/alerts'
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
@@ -46,6 +47,11 @@ export default function ProtectedLayout({
   const pathname = usePathname()
   const { data: session } = useSession()
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [lowStockCount, setLowStockCount] = useState(0)
+
+  useEffect(() => {
+    getLowStockCount().then(setLowStockCount)
+  }, [pathname])
 
   const handleSignOut = async () => {
     await signOut({ redirect: true, callbackUrl: '/' })
@@ -118,7 +124,14 @@ export default function ProtectedLayout({
                 >
                   <item.icon size={18} className={cn(isActive ? 'text-white' : 'text-primary/70 group-hover:text-primary')} />
                   <span className="flex-1">{item.name}</span>
-                  {isActive && <ChevronRight size={14} className="opacity-50" />}
+
+                  {item.name === 'Insumos' && lowStockCount > 0 && (
+                    <span className="flex items-center justify-center w-5 h-5 rounded-full bg-rose-500 text-white text-[10px] font-bold shadow-sm animate-pulse">
+                      {lowStockCount}
+                    </span>
+                  )}
+
+                  {isActive && item.name !== 'Insumos' && <ChevronRight size={14} className="opacity-50" />}
                 </Link>
               )
             })}
@@ -129,7 +142,7 @@ export default function ProtectedLayout({
             <div className="p-4 rounded-lg bg-accent/30 border border-border/50 space-y-4">
               {session?.user && (
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-primary to-violet-500 flex items-center justify-center text-white shadow-md">
+                  <div className="w-10 h-10 rounded-lg bg-linear-to-br from-primary to-violet-500 flex items-center justify-center text-white shadow-md">
                     <User size={20} />
                   </div>
                   <div className="flex-1 min-w-0">
