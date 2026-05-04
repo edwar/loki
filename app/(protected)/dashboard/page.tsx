@@ -17,6 +17,9 @@ import { prisma } from '@/lib/prisma'
 import { cn } from '@/lib/utils'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
+import { SalesChart } from '@/components/dashboard/sales-chart'
+import { ExpensesChart } from '@/components/dashboard/expenses-chart'
+import { eachDayOfInterval, subDays, format } from 'date-fns'
 
 export const dynamic = 'force-dynamic'
 
@@ -56,6 +59,67 @@ async function getRecentSales() {
     orderBy: { createdAt: 'desc' },
     take: 5
   })
+}
+
+async function getHistoricalData() {
+  const thirtyDaysAgo = subDays(new Date(), 30)
+
+  const [sales, expenses] = await Promise.all([
+    prisma.dailySale.findMany({
+      where: {
+        deletedAt: null,
+        createdAt: { gte: thirtyDaysAgo }
+      },
+      select: {
+        totalAmount: true,
+        createdAt: true
+      },
+      orderBy: { createdAt: 'asc' }
+    }),
+    prisma.indirectCost.findMany({
+      where: {
+        deletedAt: null,
+        date: { gte: thirtyDaysAgo }
+      },
+      select: {
+        amount: true,
+        type: true,
+        date: true
+      }
+    })
+  ])
+
+  // Generate all days in the interval
+  const allDays = eachDayOfInterval({
+    start: thirtyDaysAgo,
+    end: new Date()
+  })
+
+  // Process sales by day with gap filling
+  const salesMap = sales.reduce((acc: any, sale) => {
+    const day = format(sale.createdAt, 'yyyy-MM-dd')
+    acc[day] = (acc[day] || 0) + Number(sale.totalAmount)
+    return acc
+  }, {})
+
+  const salesByDay = allDays.map(day => {
+    const dateStr = format(day, 'yyyy-MM-dd')
+    return {
+      date: dateStr,
+      amount: salesMap[dateStr] || 0
+    }
+  })
+
+  // Process expenses by category
+  const expensesByCategory = expenses.reduce((acc: any, expense) => {
+    acc[expense.type] = (acc[expense.type] || 0) + Number(expense.amount)
+    return acc
+  }, {})
+
+  return {
+    salesByDay,
+    expensesByCategory: Object.entries(expensesByCategory).map(([name, value]) => ({ name, value }))
+  }
 }
 
 async function getRecentExpenses() {
@@ -140,10 +204,11 @@ function RecentItemRow({ title, date, amount, icon: Icon, isNegative }: {
 }
 
 export default async function DashboardPage() {
-  const [stats, recentSales, recentExpenses] = await Promise.all([
+  const [stats, recentSales, recentExpenses, historicalData] = await Promise.all([
     getStats(),
     getRecentSales(),
-    getRecentExpenses()
+    getRecentExpenses(),
+    getHistoricalData()
   ])
 
   const lowStock = await prisma.supply.findMany({
@@ -203,6 +268,12 @@ export default async function DashboardPage() {
           color="bg-indigo-500"
           index={4}
         />
+      </div>
+
+      {/* Charts Section */}
+      <div className="grid lg:grid-cols-2 gap-8">
+        <SalesChart data={historicalData.salesByDay} />
+        <ExpensesChart data={historicalData.expensesByCategory} />
       </div>
 
       <div className="grid lg:grid-cols-12 gap-8">
