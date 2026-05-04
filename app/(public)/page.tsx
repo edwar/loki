@@ -134,7 +134,7 @@ export default async function LandingPage() {
 
             <h1 className="text-6xl md:text-8xl font-bold tracking-tight text-foreground animate-fade-in [animation-delay:200ms] font-display">
               Controla tu negocio
-              <span className="block bg-gradient-to-r from-primary to-violet-500 bg-clip-text text-transparent pb-2">
+              <span className="block bg-linear-to-r from-primary to-violet-500 bg-clip-text text-transparent pb-2">
                 con inteligencia real
               </span>
             </h1>

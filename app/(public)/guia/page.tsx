@@ -3,8 +3,8 @@ import {
   ChefHat, LayoutDashboard, TrendingUp, ShoppingBag, Factory,
   Package, Receipt, ShoppingCart, Truck, Users, Building2,
   Shield, ShieldAlert, ChevronRight, BookOpen, Search,
-  ArrowRight, Zap, Clock, MousePointer, FileText, AlertTriangle,
-  Download, BarChart3, Star, CheckCircle2
+  ArrowRight, Zap, MousePointer,
+  Star, CheckCircle2
 } from 'lucide-react'
 
 const modules = [
@@ -41,7 +41,7 @@ const modules = [
       'En el panel izquierdo selecciona uno o más productos del catálogo.',
       'Ajusta la cantidad con los controles + / − o escribiendo directamente.',
       'Opcionalmente asigna la venta a un cliente registrado.',
-      'Haz clic en "Registrar Venta" — el stock se actualiza automáticamente.',
+      'Haz clic en "Registrar Venta" — el stock del producto final se descuenta automáticamente.',
       'El historial de la derecha muestra todas las ventas con opción de Editar o Eliminar.',
       'Usa el botón "Exportar" para descargar el historial en CSV.',
     ],
@@ -79,7 +79,7 @@ const modules = [
       'Ve a Producción desde el menú lateral.',
       'Selecciona el producto que vas a producir.',
       'Indica el número de lotes y el rendimiento real obtenido.',
-      'El sistema calcula automáticamente los insumos consumidos y actualiza el stock.',
+      'El sistema calcula automáticamente los insumos consumidos, reduce su stock y aumenta el stock del producto final.',
       'Consulta el historial de producciones para analizar eficiencia.',
     ],
     tips: ['Compara el rendimiento esperado vs. real para detectar pérdidas en el proceso.'],
@@ -101,7 +101,7 @@ const modules = [
       'El badge rojo en el menú indica cuántos insumos están bajo el mínimo.',
       'Usa el botón de ajuste de stock para corregir inventario manualmente.',
     ],
-    tips: ['El stock mínimo dispara la alerta de reposición visible en el Dashboard.', 'Cuando se registra una venta, el stock de los insumos de la receta baja automáticamente.'],
+    tips: ['El stock mínimo dispara la alerta de reposición visible en el Dashboard.', 'El stock de insumos solo baja cuando registras un lote de producción, y solo sube cuando registras una compra de insumos.'],
   },
   {
     id: 'gastos',
@@ -280,7 +280,7 @@ export default function GuiaPage() {
           </div>
           <h1 className="text-5xl md:text-6xl font-extrabold tracking-tight leading-tight">
             Guía de Uso
-            <span className="block bg-gradient-to-r from-primary to-violet-500 bg-clip-text text-transparent">
+            <span className="block bg-linear-to-r from-primary to-violet-500 bg-clip-text text-transparent">
               Loki Business Hub
             </span>
           </h1>
@@ -418,7 +418,7 @@ export default function GuiaPage() {
             {[
               {
                 q: '¿Cómo funciona el stock automático?',
-                a: 'Cuando registras una venta, Loki descuenta los insumos de la receta de cada producto. Cuando registras una compra, el stock de los insumos sube automáticamente.'
+                a: 'Cuando registras una venta, Loki descuenta el stock del producto final vendido. El stock de insumos solo baja al registrar un lote de producción (que los consume), y solo sube al registrar una compra de insumos.'
               },
               {
                 q: '¿Puedo trabajar sin internet?',
