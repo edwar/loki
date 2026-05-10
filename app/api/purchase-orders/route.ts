@@ -4,7 +4,7 @@ import { prisma } from '@/lib/prisma'
 export async function POST(request: Request) {
   try {
     const body = await request.json()
-    const { supplierName, totalAmount, subtotal, discountPercentage, taxPercentage, purchaseDate, aiExtractedData, items } = body
+    const { supplierName, totalAmount, subtotal, discountPercentage, taxPercentage, purchaseDate, items } = body
 
     // Buscar o crear el proveedor
     let supplier = await prisma.supplier.findFirst({
@@ -73,7 +73,6 @@ export async function POST(request: Request) {
         taxPercentage: taxPercentage || 0,
         status: 'completed',
         purchaseDate: purchaseDate ? new Date(purchaseDate) : new Date(),
-        aiExtractedData,
         purchaseItems: {
           create: processedItems
         }

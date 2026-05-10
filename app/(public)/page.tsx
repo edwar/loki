@@ -89,7 +89,6 @@ export default async function LandingPage() {
           <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-muted-foreground">
             <a href="#features" className="hover:text-foreground transition-colors">Funciones</a>
             <a href="#benefits" className="hover:text-foreground transition-colors">Beneficios</a>
-            <a href="#pricing" className="hover:text-foreground transition-colors">Precios</a>
             <Link href="/guia" className="hover:text-foreground transition-colors">Guía de Uso</Link>
           </nav>
 
@@ -241,9 +240,6 @@ export default async function LandingPage() {
                     Hemos optimizado cada milisegundo de la interfaz para que el registro de una venta
                     tome menos tiempo que decir su nombre. Loki se adapta a tu ritmo, no al revés.
                   </p>
-                  <Button variant="secondary" className="rounded-full px-8 h-12 font-bold group-hover:px-10 transition-all">
-                    Ver el motor de Loki
-                  </Button>
                 </div>
               </div>
 
@@ -254,7 +250,7 @@ export default async function LandingPage() {
                   </div>
                   <h4 className="text-xl font-bold">Seguridad de Nivel Bancario</h4>
                   <p className="text-muted-foreground">
-                    Tus datos están encriptados y respaldados en la nube de Neon las 24 horas.
+                    Tus datos están encriptados y respaldados en la nube 24/7.
                   </p>
                 </div>
                 <div className="p-8 rounded-lg bg-card border border-border/50 space-y-4 hover:shadow-xl transition-all">
