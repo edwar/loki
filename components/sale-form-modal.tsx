@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Combobox } from '@/components/ui/combobox'
 import { formatCurrency } from '@/lib/utils'
 import { Plus, Minus, Trash2, X } from 'lucide-react'
 import { createSale, updateSale } from '@/lib/actions/sales'
@@ -37,11 +38,17 @@ export function SaleFormModal({ products, customers, sale, onSuccess, onClose }:
   )
   const [selectedProductId, setSelectedProductId] = useState('')
   const [quantity, setQuantity] = useState(1)
+  const [selectedCustomerId, setSelectedCustomerId] = useState(sale?.customerId || 'none')
   const [isPending, startTransition] = useTransition()
   const [indexToRemove, setIndexToRemove] = useState<number | null>(null)
   const [showQuickCustomer, setShowQuickCustomer] = useState(false)
   const [quickCustomerName, setQuickCustomerName] = useState('')
   const [quickCustomerPhone, setQuickCustomerPhone] = useState('')
+
+  const customerOptions = [
+    { value: 'none', label: 'Venta General (Sin Cliente)' },
+    ...customers.map((c: any) => ({ value: c.id, label: c.name }))
+  ]
 
   const handleQuickAddCustomer = async () => {
     if (!quickCustomerName.trim()) return
@@ -288,20 +295,15 @@ export function SaleFormModal({ products, customers, sale, onSuccess, onClose }:
               <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Cliente (opcional)</label>
               <div className="flex gap-2">
                 <div className="flex-1">
-                  <Select name="customerId" defaultValue={sale?.customerId || "none"}>
-                    <SelectTrigger className="h-12 rounded-lg w-full">
-                      <SelectValue placeholder="Venta General / Consumidor" />
-                    </SelectTrigger>
-                    <SelectContent className="rounded-lg">
-                      <SelectItem value="none">Venta General (Sin Cliente)</SelectItem>
-                      <SelectGroup>
-                        <SelectLabel className="text-[10px] uppercase tracking-widest text-muted-foreground/50">Clientes Registrados</SelectLabel>
-                        {customers.map((c: any) => (
-                          <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
-                        ))}
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
+                  <Combobox
+                    options={customerOptions}
+                    value={selectedCustomerId}
+                    labelCreate="Crear nuevo cliente"
+                    onValueChange={setSelectedCustomerId}
+                    placeholder="Venta General (Sin Cliente)"
+                    emptyMessage="No se encontraron clientes"
+                  />
+                  <input type="hidden" name="customerId" value={selectedCustomerId === 'none' ? '' : selectedCustomerId} />
                 </div>
                 <Button
                   type="button"

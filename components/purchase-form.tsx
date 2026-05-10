@@ -182,6 +182,7 @@ export function PurchaseForm({ suppliers, onSuccess, onClose }: PurchaseFormProp
             <Combobox
               options={localSuppliers.map(s => ({ value: s.id, label: s.name }))}
               value={localSuppliers.find(s => s.name === supplierName)?.id || supplierName}
+              labelCreate="Crear nuevo proveedor"
               onValueChange={(val) => {
                 const s = localSuppliers.find(opt => opt.id === val)
                 if (s) {

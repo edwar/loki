@@ -22,7 +22,8 @@ import {
   Factory,
   Shield,
   ShieldAlert,
-  FileText
+  FileText,
+  FileSignature
 } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { ThemeToggle } from '@/components/theme-toggle'
@@ -36,6 +37,7 @@ const navigation = [
   { name: 'Producción', href: '/produccion', icon: Factory },
   { name: 'Productos', href: '/productos', icon: ShoppingBag },
   { name: 'Ventas', href: '/ventas', icon: TrendingUp },
+  { name: 'Facturación', href: '/facturas', icon: FileSignature },
   { name: 'Gastos', href: '/gastos', icon: Receipt },
   { name: 'Proveedores', href: '/proveedores', icon: Truck, roles: ['admin', 'manager'] },
   { name: 'Clientes', href: '/clientes', icon: Users },

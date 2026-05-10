@@ -8,6 +8,7 @@ import { createPortal } from 'react-dom'
 interface ComboboxProps {
   options: { value: string; label: string }[]
   value?: string
+  labelCreate?: string
   onValueChange: (value: string) => void
   placeholder?: string
   emptyMessage?: string
@@ -18,6 +19,7 @@ interface ComboboxProps {
 export function Combobox({
   options,
   value,
+  labelCreate,
   onValueChange,
   placeholder = "Seleccionar opción...",
   emptyMessage = "No se encontraron resultados.",
@@ -97,7 +99,7 @@ export function Combobox({
           </button>
         )}
       </div>
-      <div className={cn("max-h-[300px] overflow-y-auto", filteredOptions.length > 0 && allowCustom && "p-1")}>
+      <div className="max-h-[300px] overflow-y-auto p-1">
         {filteredOptions.length === 0 && !allowCustom ? (
           <p className="p-4 text-sm text-center text-muted-foreground">{emptyMessage}</p>
         ) : (
@@ -106,7 +108,7 @@ export function Combobox({
               <button
                 key={option.value}
                 className={cn(
-                  "w-full text-left px-4 py-2.5 text-sm rounded-xl transition-all flex items-center justify-between group",
+                  "w-full text-left px-4 py-2.5 text-sm rounded-lg transition-all flex items-center justify-between group",
                   value === option.value
                     ? "bg-primary text-primary-foreground font-bold shadow-lg shadow-primary/20"
                     : "hover:bg-primary/10 hover:text-primary"
@@ -123,7 +125,7 @@ export function Combobox({
             ))}
             {allowCustom && search && !options.some(o => o.label.toLowerCase() === search.toLowerCase()) && (
               <button
-                className="w-full text-left px-4 py-3 text-sm rounded-b-lg transition-all flex items-center gap-3 hover:bg-emerald-500/10 hover:text-emerald-600 dark:hover:text-emerald-400 group"
+                className="w-full text-left px-4 py-2.5 text-sm rounded-lg transition-all flex items-center gap-1 hover:bg-emerald-500/10 hover:text-emerald-600 dark:hover:text-emerald-400 group"
                 onClick={() => {
                   onValueChange(search)
                   setOpen(false)
@@ -134,8 +136,8 @@ export function Combobox({
                   <Plus className="w-4 h-4" />
                 </div>
                 <div>
-                  <p className="font-bold">Crear nuevo proveedor</p>
-                  <p className="text-[10px] uppercase tracking-wider opacity-60">Usar: "{search}"</p>
+                  <p className="font-bold">{labelCreate || "Crear nuevo"}</p>
+                  <p className="text-[8px] uppercase tracking-wider opacity-60">Usar: "{search}"</p>
                 </div>
               </button>
             )}
@@ -153,9 +155,9 @@ export function Combobox({
         type="button"
         onClick={() => setOpen(!open)}
         className={cn(
-          "flex h-12 w-full items-center justify-between rounded-xl border border-input bg-background/50 px-4 py-2 text-sm transition-all hover:border-primary/30 focus:outline-none focus:ring-2 focus:ring-primary/20 text-left group",
+          "flex h-12 w-full items-center justify-between rounded-lg border border-input bg-background/50 px-4 py-2 text-sm transition-all hover:border-primary/30 focus:outline-none text-left group",
           !value && "text-muted-foreground",
-          open && "border-primary ring-2 ring-primary/20"
+          open && "border-primary"
         )}
       >
         <span className="truncate font-medium">
