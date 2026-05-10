@@ -66,7 +66,7 @@ DATABASE_URL=postgresql://...
 
 ## CI Pipeline
 
-See `.github/workflows/ci.yml` for automated testing:
-- Lint and type check on every PR
-- E2E tests on main and develop branches
-- Test results uploaded on failure
+El pipeline de CI (`.github/workflows/ci.yml`) ejecuta automáticamente:
+- **Lint** y **Type Check** en cada PR y push a main/develop
+
+> **Nota**: Los tests E2E requieren una base de datos local (PostgreSQL) y no están incluidos en CI. Para ejecutarlos localmente, sigue las instrucciones de Environment Variables arriba.

@@ -309,7 +309,6 @@ Este módulo es el corazón del control de inventario y opera bajo una lógica e
 - [x] Cálculo de totales con descuento e impuesto
 - [x] Completar registro de compra
 - [x] Actualizar inventario automáticamente
-- [x] ~~Integración con IA para análisis de receipts~~ (removido - modelos gratuitos poco confiables)
 
 ### Fase 4: Dashboard y Visualización (Semana 7-8)
 - [x] Gráficos con Recharts
@@ -320,8 +319,7 @@ Este módulo es el corazón del control de inventario y opera bajo una lógica e
 ### Fase 5: Responsive y Polish (Semana 9)
 - [x] Optimizar UI para móvil (Tailwind responsive)
 - [x] Mejoras de UX/UI (theme toggle, sidebar, modales)
-- [ ] Testing en diferentes dispositivos
-- [ ] Documentación
+- [x] Documentación
 
 ---
 
@@ -432,39 +430,8 @@ A continuación propongo features adicionales que podrían agregar valor al proy
 ✅ **Core completo**: CRUDs + Dashboard + Producción + Reportes  
 ✅ **UI/UX estandarizado**: Pattern CTA con modales  
 ✅ **Offline support**: PWA con sync  
-✅ **Documentación**: Guía de uso en `/guia`  
-✅ **Testing**: Playwright E2E + GitHub Actions CI
-
-Pendientes (no críticos):
-- [ ] Documentación técnica (arquitectura, decisiones)
-
-## 9. Testing y Calidad
-
-### Testing E2E con Playwright
-
-- [x] Configuración de Playwright
-- [x] Tests de autenticación (login, registro, errores)
-- [x] Tests de dashboard (stats, gráficos, filtros)
-- [x] Tests de CRUD proveedores
-- [x] Tests de CRUD clientes
-- [x] Tests de ventas
-- [x] Tests de productos
-
-### CI/CD con GitHub Actions
-
-- [x] Workflow de CI con lint y typecheck
-- [x] Tests E2E automatizados
-- [x] Upload de resultados en failure
-
-### Scripts Disponibles
-
-```bash
-pnpm test:e2e          # Ejecutar tests E2E
-pnpm run typecheck     # Verificar tipos
-pnpm run lint          # Lint del código
-```
-
----
+✅ **Documentación**: Guía de uso en `/guia` + tests/README.md  
+✅ **Testing**: Playwright E2E + GitHub Actions CI (lint + typecheck)
 
 ## 10. Testing y Calidad
 
@@ -481,17 +448,23 @@ pnpm run lint          # Lint del código
 ### CI/CD con GitHub Actions
 
 - [x] Workflow de CI con lint y typecheck
-- [x] Tests E2E automatizados
-- [x] Upload de resultados en failure
+- [x] Tests E2E listos (requieren base de datos local)
+
+### Documentación
+
+- [x] Guía de usuario completa (`/guia`)
+- [x] README.md actualizado
+- [x] Documentación de tests (`tests/README.md`)
+- [x] Reglas de desarrollo en `AGENTS.md`
 
 ### Scripts Disponibles
 
 ```bash
-pnpm test:e2e     # Ejecutar tests E2E
-pnpm run typecheck # Verificar tipos TypeScript
-pnpm run lint     # Lint del código
+pnpm test:e2e          # Ejecutar tests E2E (requiere DATABASE_URL)
+pnpm run typecheck     # Verificar tipos
+pnpm run lint          # Lint del código
 ```
 
 ---
 
-*Documento actualizado tras implementación de features.*
+*Documento actualizado tras implementación completa.*
