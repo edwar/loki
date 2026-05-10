@@ -217,7 +217,7 @@ export function PurchaseForm({ suppliers, onSuccess, onClose }: PurchaseFormProp
 
           <div className="space-y-2">
             {/* Header */}
-            <div className="hidden md:grid grid-cols-12 gap-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground px-1">
+            <div className="grid grid-cols-12 gap-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground px-1">
               <div className="col-span-4">Producto</div>
               <div className="col-span-2">Cantidad</div>
               <div className="col-span-2">Unidad</div>
@@ -226,56 +226,124 @@ export function PurchaseForm({ suppliers, onSuccess, onClose }: PurchaseFormProp
             </div>
 
             {items.map((item, index) => (
-              <div key={item.id} className="grid grid-cols-12 gap-2 items-end p-3 bg-muted/30 rounded-lg">
-                <div className="col-span-4">
-                  <Input
-                    value={item.nombre}
-                    onChange={(e) => handleItemChange(index, 'nombre', e.target.value)}
-                    placeholder="Nombre del insumo"
-                    className="h-11"
-                  />
+              <div key={item.id} className="p-3 bg-muted/30 rounded-lg space-y-3">
+                {/* Mobile: stacked layout */}
+                <div className="md:hidden space-y-2">
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Producto</label>
+                    <Input
+                      value={item.nombre}
+                      onChange={(e) => handleItemChange(index, 'nombre', e.target.value)}
+                      placeholder="Nombre del insumo"
+                      className="h-11"
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Cantidad</label>
+                      <Input
+                        type="text"
+                        inputMode="numeric"
+                        value={item.cantidad.toLocaleString('es-CO')}
+                        onChange={(e) => {
+                          const raw = e.target.value.replace(/\./g, '')
+                          handleItemChange(index, 'cantidad', parseInt(raw, 10) || 0)
+                        }}
+                        onFocus={(e) => e.target.select()}
+                        className="h-11 text-right"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Unidad</label>
+                      <Select value={item.unidad || 'unidad'} onValueChange={(v) => handleItemChange(index, 'unidad', v)}>
+                        <SelectTrigger className="h-11"><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          {UNIDADES.map(u => <SelectItem key={u} value={u}>{u}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-5 gap-2 items-end">
+                    <div className="col-span-4 space-y-1">
+                      <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Precio</label>
+                      <Input
+                        type="text"
+                        inputMode="numeric"
+                        value={item.precioUnitario.toLocaleString('es-CO')}
+                        onChange={(e) => {
+                          const raw = e.target.value.replace(/\./g, '')
+                          handleItemChange(index, 'precioUnitario', parseFloat(raw) || 0)
+                        }}
+                        onFocus={(e) => e.target.select()}
+                        className="h-11 text-right"
+                      />
+                    </div>
+                    <button
+                      onClick={() => setIndexToRemove(index)}
+                      className="h-11 flex items-center justify-center rounded-lg hover:bg-rose-500/10 text-rose-500 transition-colors"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                  {item.subtotal > 0 && (
+                    <div className="text-right text-xs text-muted-foreground">
+                      Subtotal: <span className="font-medium">{formatCurrency(item.subtotal)}</span>
+                    </div>
+                  )}
                 </div>
-                <div className="col-span-2">
-                  <Input
-                    type="text"
-                    inputMode="numeric"
-                    value={item.cantidad.toLocaleString('es-CO')}
-                    onChange={(e) => {
-                      const raw = e.target.value.replace(/\./g, '')
-                      handleItemChange(index, 'cantidad', parseInt(raw, 10) || 0)
-                    }}
-                    onFocus={(e) => e.target.select()}
-                    className="h-11 text-right"
-                  />
-                </div>
-                <div className="col-span-2">
-                  <Select value={item.unidad || 'unidad'} onValueChange={(v) => handleItemChange(index, 'unidad', v)}>
-                    <SelectTrigger className="h-11"><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      {UNIDADES.map(u => <SelectItem key={u} value={u}>{u}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="col-span-3">
-                  <Input
-                    type="text"
-                    inputMode="numeric"
-                    value={item.precioUnitario.toLocaleString('es-CO')}
-                    onChange={(e) => {
-                      const raw = e.target.value.replace(/\./g, '')
-                      handleItemChange(index, 'precioUnitario', parseFloat(raw) || 0)
-                    }}
-                    onFocus={(e) => e.target.select()}
-                    className="h-11 text-right"
-                  />
-                </div>
-                <div className="col-span-1 flex justify-end">
-                  <button
-                    onClick={() => setIndexToRemove(index)}
-                    className="w-11 h-11 flex items-center justify-center rounded-lg hover:bg-rose-500/10 text-rose-500 transition-colors"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
+
+                {/* Desktop: inline layout */}
+                <div className="hidden md:grid grid-cols-12 gap-2 items-end">
+                  <div className="col-span-4">
+                    <Input
+                      value={item.nombre}
+                      onChange={(e) => handleItemChange(index, 'nombre', e.target.value)}
+                      placeholder="Nombre del insumo"
+                      className="h-11"
+                    />
+                  </div>
+                  <div className="col-span-2">
+                    <Input
+                      type="text"
+                      inputMode="numeric"
+                      value={item.cantidad.toLocaleString('es-CO')}
+                      onChange={(e) => {
+                        const raw = e.target.value.replace(/\./g, '')
+                        handleItemChange(index, 'cantidad', parseInt(raw, 10) || 0)
+                      }}
+                      onFocus={(e) => e.target.select()}
+                      className="h-11 text-right"
+                    />
+                  </div>
+                  <div className="col-span-2">
+                    <Select value={item.unidad || 'unidad'} onValueChange={(v) => handleItemChange(index, 'unidad', v)}>
+                      <SelectTrigger className="h-11"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        {UNIDADES.map(u => <SelectItem key={u} value={u}>{u}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="col-span-3">
+                    <Input
+                      type="text"
+                      inputMode="numeric"
+                      value={item.precioUnitario.toLocaleString('es-CO')}
+                      onChange={(e) => {
+                        const raw = e.target.value.replace(/\./g, '')
+                        handleItemChange(index, 'precioUnitario', parseFloat(raw) || 0)
+                      }}
+                      onFocus={(e) => e.target.select()}
+                      className="h-11 text-right"
+                    />
+                  </div>
+                  <div className="col-span-1 flex justify-end">
+                    <button
+                      onClick={() => setIndexToRemove(index)}
+                      className="w-11 h-11 flex items-center justify-center rounded-lg hover:bg-rose-500/10 text-rose-500 transition-colors"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
               </div>
             ))}
