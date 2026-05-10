@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import {
   ChefHat, LayoutDashboard, TrendingUp, ShoppingBag, Factory,
   Package, Receipt, ShoppingCart, Truck, Users, Building2,
