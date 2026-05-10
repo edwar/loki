@@ -16,6 +16,7 @@ interface ConfirmationModalProps {
   cancelText?: string
   variant?: 'danger' | 'warning' | 'primary'
   loading?: boolean
+  children?: React.ReactNode
 }
 
 export function ConfirmationModal({
@@ -27,7 +28,8 @@ export function ConfirmationModal({
   confirmText = "Eliminar",
   cancelText = "Cancelar",
   variant = 'danger',
-  loading = false
+  loading = false,
+  children
 }: ConfirmationModalProps) {
   const [isMounted, setIsMounted] = React.useState(false)
 
@@ -74,6 +76,8 @@ export function ConfirmationModal({
           <p className="text-foreground/70 text-sm leading-relaxed mb-8">
             {description}
           </p>
+
+          {children && <div className="w-full mb-4">{children}</div>}
 
           <div className="flex flex-col w-full gap-3">
             <Button

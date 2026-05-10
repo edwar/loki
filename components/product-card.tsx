@@ -1,14 +1,14 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { formatCurrency, cn } from '@/lib/utils'
 import { Trash2, ShoppingBag, Edit2, ChevronDown, Plus } from 'lucide-react'
 import { deleteProduct, deleteRecipeItem, prepareProduct } from '@/lib/actions/products'
-import { ProductForm, RecipeForm } from './product-forms'
-import { Dialog } from './ui/dialog'
+import { RecipeForm } from './product-forms'
 import { NumericInput } from './ui/numeric-input'
 import { ConfirmationModal } from './ui/confirmation-modal'
 import { useTransition } from 'react'
@@ -17,14 +17,15 @@ export function ProductCard({
   product,
   categories,
   allSupplies,
-  index
+  index,
+  onEdit
 }: {
   product: any
   categories: string[]
   allSupplies: any[]
   index: number
+  onEdit: () => void
 }) {
-  const [isEditing, setIsEditing] = useState(false)
   const [isExpanded, setIsExpanded] = useState(false)
   const [isProducing, setIsProducing] = useState(false)
   const [recipeItemToDelete, setRecipeItemToDelete] = useState<string | null>(null)
@@ -104,10 +105,10 @@ export function ProductCard({
               </div>
             </div>
           </div>
-          <div className="flex items-center gap-2 md:gap-3 shrink-0">
-            <div className="flex gap-1 md:gap-2 mr-1 md:mr-2 pr-2 md:pr-4 border-r border-border/30" onClick={(e) => e.stopPropagation()}>
+          <div className="flex items-center gap-2 md:gap-3 shrink-0" onClick={(e) => e.stopPropagation()}>
+            <div className="flex gap-1 md:gap-2 mr-1 md:mr-2 pr-2 md:pr-4 border-r border-border/30">
               <Button
-                onClick={() => setIsEditing(true)}
+                onClick={onEdit}
                 variant="ghost"
                 size="sm"
                 className="h-8 w-8 p-0 rounded-lg hover:bg-primary/10 hover:text-primary transition-colors group"
@@ -124,12 +125,19 @@ export function ProductCard({
                 <Trash2 className='w-4 h-4 group-hover:text-rose-500' />
               </Button>
             </div>
-            <Button variant="ghost" size="sm" className="h-8 w-8 p-0 rounded-lg group-hover/header:bg-accent transition-all">
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation()
+                setIsExpanded(!isExpanded)
+              }}
+              className="h-8 w-8 p-0 rounded-lg hover:bg-accent transition-all"
+            >
               <ChevronDown
                 size={18}
                 className={`text-muted-foreground transition-transform duration-500 ${isExpanded ? 'rotate-180' : ''}`}
               />
-            </Button>
+            </button>
           </div>
         </CardHeader>
 
@@ -271,42 +279,17 @@ export function ProductCard({
         )}
       </Card>
 
-      <Dialog
-        isOpen={isEditing}
-        onClose={() => setIsEditing(false)}
-        title="Editar Producto"
-      >
-        <div className="mt-4">
-          <ProductForm
-            product={product}
-            categories={categories}
-            onSuccess={() => setIsEditing(false)}
-          />
-        </div>
-      </Dialog>
-
+      {/* Production Modal */}
       <ConfirmationModal
-        isOpen={productToDelete !== null}
-        onClose={() => setProductToDelete(null)}
-        onConfirm={() => {
-          if (!productToDelete) return
-          startTransition(async () => {
-            await deleteProduct(productToDelete)
-            setProductToDelete(null)
-          })
-        }}
-        title="¿Eliminar producto?"
-        description="Este producto será removido. Esta acción no se puede deshacer."
-        confirmText="Eliminar Producto"
-        variant="danger"
-      />
-
-      <Dialog
         isOpen={isProducing}
         onClose={() => setIsProducing(false)}
+        onConfirm={handleConfirmProduce}
         title={`Producir ${product.name}`}
+        description=""
+        confirmText="Confirmar Producción"
+        variant="warning"
       >
-        <div className="mt-4 space-y-6">
+        <div className="space-y-4 pt-2">
           <div className="p-4 bg-muted/30 rounded-lg space-y-2">
             <p className="text-sm text-muted-foreground">
               Se consumirán los materiales necesarios para producir <strong>1 lote</strong> de la receta.
@@ -330,25 +313,24 @@ export function ProductCard({
               className="h-14 text-lg font-black text-center border-amber-500/30 focus-visible:ring-amber-500/20"
             />
           </div>
-
-          <div className="flex justify-end gap-3 pt-4 border-t border-border/30">
-            <Button
-              variant="outline"
-              onClick={() => setIsProducing(false)}
-              disabled={isPending}
-            >
-              Cancelar
-            </Button>
-            <Button
-              onClick={handleConfirmProduce}
-              disabled={isPending || actualYield <= 0}
-              className="bg-amber-500 hover:bg-amber-600 text-white font-bold"
-            >
-              {isPending ? 'Procesando...' : 'Confirmar Producción'}
-            </Button>
-          </div>
         </div>
-      </Dialog>
+      </ConfirmationModal>
+
+      <ConfirmationModal
+        isOpen={productToDelete !== null}
+        onClose={() => setProductToDelete(null)}
+        onConfirm={() => {
+          if (!productToDelete) return
+          startTransition(async () => {
+            await deleteProduct(productToDelete)
+            setProductToDelete(null)
+          })
+        }}
+        title="¿Eliminar producto?"
+        description="Este producto será removido. Esta acción no se puede deshacer."
+        confirmText="Eliminar Producto"
+        variant="danger"
+      />
 
       <ConfirmationModal
         isOpen={recipeItemToDelete !== null}
