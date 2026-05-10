@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { Metadata } from 'next'
 import {
   ChefHat, LayoutDashboard, TrendingUp, ShoppingBag, Factory,
   Package, Receipt, ShoppingCart, Truck, Users, Building2,
@@ -7,6 +8,16 @@ import {
   Star, CheckCircle2
 } from 'lucide-react'
 import { GuiaHeader } from '@/components/guia-header'
+
+export const metadata: Metadata = {
+  title: 'Guía de Uso',
+  description: 'Manual completo de Loki. Aprende a usar el sistema de gestión empresarial: dashboard, ventas, inventario, producción, reportes y más.',
+  openGraph: {
+    title: 'Guía de Uso - Loki',
+    description: 'Manual completo de Loki para emprendedores.',
+    url: '/guia',
+  },
+}
 
 const modules = [
   {
@@ -239,8 +250,54 @@ const roles = [
 ]
 
 export default function GuiaPage() {
+  const faqs = [
+    {
+      q: '¿Cómo funciona el stock automático?',
+      a: 'Cuando registras una venta, Loki descuenta el stock del producto final vendido. El stock de insumos solo baja al registrar un lote de producción (que los consume), y solo sube al registrar una compra de insumos.'
+    },
+    {
+      q: '¿Puedo trabajar sin internet?',
+      a: 'Sí, Loki es una PWA con soporte offline. Las ventas se guardan localmente y se sincronizan automáticamente cuando vuelve la conexión.'
+    },
+    {
+      q: '¿Cómo agrego un nuevo integrante al equipo?',
+      a: 'Solo el Administrador puede crear usuarios. Ve a Equipo → Nuevo Usuario, define su rol y sus credenciales de acceso.'
+    },
+    {
+      q: '¿Cómo exporto la información?',
+      a: 'Todos los módulos con tablas tienen un botón "Exportar" que descarga los datos en formato CSV para Excel o Google Sheets.'
+    },
+    {
+      q: '¿Qué es el Log de Auditoría?',
+      a: 'Es un registro inmutable de todas las acciones críticas: quién creó, editó o eliminó qué y cuándo. Solo el Administrador puede consultarlo.'
+    },
+    {
+      q: '¿Puedo cambiar mi contraseña?',
+      a: 'Sí, desde el perfil de usuario. Si olvidaste tu contraseña, el administrador del sistema puede restablecerla desde el módulo de Equipo.'
+    },
+  ]
+
   return (
     <div className="min-h-screen bg-background text-foreground">
+      {/* JSON-LD FAQ Schema */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            "mainEntity": faqs.map((faq, i) => ({
+              "@type": "Question",
+              "position": i + 1,
+              "name": faq.q,
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": faq.a
+              }
+            }))
+          })
+        }}
+      />
       {/* Background */}
       <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
         <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-indigo-500/5 blur-[140px] rounded-full" />
@@ -395,32 +452,7 @@ export default function GuiaPage() {
             <h2 className="text-2xl font-bold tracking-tight">Preguntas Frecuentes</h2>
           </div>
           <div className="grid md:grid-cols-2 gap-4">
-            {[
-              {
-                q: '¿Cómo funciona el stock automático?',
-                a: 'Cuando registras una venta, Loki descuenta el stock del producto final vendido. El stock de insumos solo baja al registrar un lote de producción (que los consume), y solo sube al registrar una compra de insumos.'
-              },
-              {
-                q: '¿Puedo trabajar sin internet?',
-                a: 'Sí, Loki es una PWA con soporte offline. Las ventas se guardan localmente y se sincronizan automáticamente cuando vuelve la conexión.'
-              },
-              {
-                q: '¿Cómo agrego un nuevo integrante al equipo?',
-                a: 'Solo el Administrador puede crear usuarios. Ve a Equipo → Nuevo Usuario, define su rol y sus credenciales de acceso.'
-              },
-              {
-                q: '¿Cómo exporto la información?',
-                a: 'Todos los módulos con tablas tienen un botón "Exportar" que descarga los datos en formato CSV para Excel o Google Sheets.'
-              },
-              {
-                q: '¿Qué es el Log de Auditoría?',
-                a: 'Es un registro inmutable de todas las acciones críticas: quién creó, editó o eliminó qué y cuándo. Solo el Administrador puede consultarlo.'
-              },
-              {
-                q: '¿Puedo cambiar mi contraseña?',
-                a: 'Sí, desde el perfil de usuario. Si olvidaste tu contraseña, el administrador del sistema puede restablecerla desde el módulo de Equipo.'
-              },
-            ].map((faq, i) => (
+            {faqs.map((faq, i) => (
               <div key={i} className="p-6 rounded-lg border border-border/50 bg-card/40 space-y-2">
                 <p className="font-bold text-sm flex items-start gap-2">
                   <span className="w-5 h-5 rounded-full bg-primary/10 text-primary text-[10px] font-black flex items-center justify-center shrink-0 mt-0.5">?</span>

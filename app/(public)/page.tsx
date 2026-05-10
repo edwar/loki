@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { Metadata } from 'next'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import {
@@ -19,6 +20,22 @@ import {
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { ThemeToggle } from '@/components/theme-toggle'
+
+export const metadata: Metadata = {
+  title: 'Plataforma de Gestión Empresarial para Emprendedores',
+  description: 'Controla tu negocio con inteligencia real. Loki ofrece control de inventario, ventas, producción, gastos y reportes PDF en una plataforma diseñada para emprendedores modernos.',
+  openGraph: {
+    title: 'Loki - Plataforma de Gestión Empresarial',
+    description: 'Controla tu negocio con inteligencia real. Sistema integral para emprendedores.',
+    url: '/',
+    images: ['/og-image.png'],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Loki - Plataforma de Gestión Empresarial',
+    description: 'Controla tu negocio con inteligencia real.',
+  },
+}
 
 const features = [
   {
@@ -70,6 +87,32 @@ export default async function LandingPage() {
 
   return (
     <div className="min-h-screen bg-background selection:bg-primary/30 selection:text-primary overflow-x-hidden">
+      {/* JSON-LD Structured Data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "SoftwareApplication",
+            "name": "Loki",
+            "applicationCategory": "BusinessApplication",
+            "operatingSystem": "Web",
+            "description": "Plataforma integral de gestión empresarial para emprendedores. Control de inventario, ventas, producción, gastos y reportes PDF.",
+            "offers": {
+              "@type": "Offer",
+              "price": "0",
+              "priceCurrency": "USD",
+              "description": "Plan gratuito disponible"
+            },
+            "provider": {
+              "@type": "Organization",
+              "name": "Loki Systems",
+              "url": "https://loki.app"
+            }
+          })
+        }}
+      />
+
       {/* Dynamic Background Pattern */}
       <div className="fixed inset-0 -z-10 overflow-hidden">
         <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-primary/10 blur-[120px] animate-pulse" />
@@ -173,8 +216,9 @@ export default async function LandingPage() {
                   <div key={i} className="w-10 h-10 rounded-full border-2 border-background bg-accent flex items-center justify-center overflow-hidden">
                     <img
                       src={`https://i.pravatar.cc/100?u=${i}`}
-                      alt="User"
+                      alt="Usuario satisfecho"
                       className="w-full h-full object-cover"
+                      loading="lazy"
                     />
                   </div>
                 ))}
@@ -233,9 +277,9 @@ export default async function LandingPage() {
                 </div>
                 <div className="relative z-10 space-y-6 max-w-xl">
                   <Star className="text-amber-300 fill-amber-300" />
-                  <h3 className="text-4xl md:text-5xl font-bold tracking-tight font-display">
+                  <h2 className="text-4xl md:text-5xl font-bold tracking-tight font-display">
                     Velocidad inigualable para tu operación diaria
-                  </h3>
+                  </h2>
                   <p className="text-lg opacity-90 leading-relaxed">
                     Hemos optimizado cada milisegundo de la interfaz para que el registro de una venta
                     tome menos tiempo que decir su nombre. Loki se adapta a tu ritmo, no al revés.
@@ -248,7 +292,7 @@ export default async function LandingPage() {
                   <div className="w-12 h-12 rounded-lg bg-emerald-500/10 flex items-center justify-center">
                     <Shield className="text-emerald-500" />
                   </div>
-                  <h4 className="text-xl font-bold">Seguridad de Nivel Bancario</h4>
+                  <h2 className="text-xl font-bold">Seguridad de Nivel Bancario</h2>
                   <p className="text-muted-foreground">
                     Tus datos están encriptados y respaldados en la nube 24/7.
                   </p>
@@ -257,7 +301,7 @@ export default async function LandingPage() {
                   <div className="w-12 h-12 rounded-lg bg-indigo-500/10 flex items-center justify-center">
                     <Smartphone className="text-indigo-500" />
                   </div>
-                  <h4 className="text-xl font-bold">Experiencia Multi-dispositivo</h4>
+                  <h2 className="text-xl font-bold">Experiencia Multi-dispositivo</h2>
                   <p className="text-muted-foreground">
                     Gestiona desde tu iPad en el local o desde tu iPhone mientras viajas.
                   </p>
