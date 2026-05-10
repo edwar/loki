@@ -278,12 +278,16 @@ export function PurchaseForm({ suppliers, onSuccess, onClose }: PurchaseFormProp
                         className="h-11 text-right"
                       />
                     </div>
-                    <button
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      disabled={items.length === 1}
                       onClick={() => setIndexToRemove(index)}
-                      className="h-11 flex items-center justify-center rounded-lg hover:bg-rose-500/10 text-rose-500 transition-colors"
+                      className="h-11 flex items-center justify-center rounded-lg hover:bg-rose-500 text-rose-500 hover:text-white transition-colors"
                     >
                       <Trash2 className="w-4 h-4" />
-                    </button>
+                    </Button>
                   </div>
                   {item.subtotal > 0 && (
                     <div className="text-right text-xs text-muted-foreground">
@@ -337,12 +341,16 @@ export function PurchaseForm({ suppliers, onSuccess, onClose }: PurchaseFormProp
                     />
                   </div>
                   <div className="col-span-1 flex justify-end">
-                    <button
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      disabled={items.length === 1}
                       onClick={() => setIndexToRemove(index)}
-                      className="w-11 h-11 flex items-center justify-center rounded-lg hover:bg-rose-500/10 text-rose-500 transition-colors"
+                      className="w-11 h-11 flex items-center justify-center rounded-lg hover:bg-rose-500 text-rose-500 hover:text-white transition-colors"
                     >
                       <Trash2 className="w-4 h-4" />
-                    </button>
+                    </Button>
                   </div>
                 </div>
               </div>
