@@ -9,6 +9,7 @@ import { Building2, Plus, Edit2, Trash2 } from 'lucide-react'
 import { ConfirmationModal } from '@/components/ui/confirmation-modal'
 import { Modal } from '@/components/ui/modal'
 import { PropertyFormModal } from '@/components/property-form-modal'
+import { EmptyState } from '@/components/ui/empty-state'
 
 const PROPERTY_TYPES = [
   { value: 'terreno', label: 'Terreno' },
@@ -128,26 +129,13 @@ export function BienesClient({ properties }: BienesClientProps) {
 
       {/* Table */}
       {properties.length === 0 ? (
-        <Card className="rounded-lg border-dashed border-2 py-16 bg-accent/5">
-          <CardContent className="text-center space-y-4">
-            <div className="w-16 h-16 rounded-lg bg-accent/50 flex items-center justify-center mx-auto">
-              <Building2 size={32} className="text-muted-foreground/30" />
-            </div>
-            <div className="space-y-1">
-              <p className="font-bold text-lg">No hay bienes registrados</p>
-              <p className="text-xs text-muted-foreground max-w-[250px] mx-auto">
-                Registra tus activos para mantener un control de su valor.
-              </p>
-            </div>
-            <button
-              onClick={handleOpenNew}
-              className="h-10 px-5 rounded-lg bg-primary text-primary-foreground font-bold flex items-center gap-2 hover:bg-primary/90 transition-colors mx-auto"
-            >
-              <Plus size={18} />
-              Agregar Primer Bien
-            </button>
-          </CardContent>
-        </Card>
+        <EmptyState
+          icon={Building2}
+          title="No hay bienes registrados"
+          description="Registra tus activos para mantener un control de su valor."
+          actionLabel={<><Plus size={18} /> Agregar Primer Bien</>}
+          onAction={handleOpenNew}
+        />
       ) : (
         <Card className="rounded-lg border-border/40 bg-card/30 backdrop-blur-md overflow-hidden p-0">
           <CardHeader className="px-8 py-6 border-b border-border/30 bg-primary/5">

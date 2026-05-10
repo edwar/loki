@@ -11,6 +11,7 @@ import { deleteSupplier } from '@/lib/actions/suppliers'
 import { ConfirmationModal } from '@/components/ui/confirmation-modal'
 import { Modal } from '@/components/ui/modal'
 import { SupplierFormModal } from '@/components/supplier-form-modal'
+import { EmptyState } from '@/components/ui/empty-state'
 
 interface Supplier {
   id: string
@@ -114,26 +115,13 @@ export function ProveedoresClient({ suppliers }: ProveedoresClientProps) {
 
       {/* Table */}
       {suppliers.length === 0 ? (
-        <Card className="rounded-lg border-dashed border-2 py-16 bg-accent/5">
-          <CardContent className="text-center space-y-4">
-            <div className="w-16 h-16 rounded-lg bg-accent/50 flex items-center justify-center mx-auto">
-              <Building2 size={32} className="text-muted-foreground/30" />
-            </div>
-            <div className="space-y-1">
-              <p className="font-bold text-lg">No hay proveedores registrados</p>
-              <p className="text-xs text-muted-foreground max-w-[250px] mx-auto">
-                Agrega empresas que te suministran insumos y materias primas.
-              </p>
-            </div>
-            <button
-              onClick={handleOpenNew}
-              className="h-10 px-5 rounded-lg bg-primary text-primary-foreground font-bold flex items-center gap-2 hover:bg-primary/90 transition-colors mx-auto"
-            >
-              <Plus size={18} />
-              Agregar Primer Proveedor
-            </button>
-          </CardContent>
-        </Card>
+        <EmptyState
+          icon={Building2}
+          title="No hay proveedores registrados"
+          description="Agrega empresas que te suministran insumos y materias primas."
+          actionLabel={<><Plus size={18} /> Agregar Primer Proveedor</>}
+          onAction={handleOpenNew}
+        />
       ) : (
         <Card className="rounded-lg border-border/40 bg-card/30 backdrop-blur-md overflow-hidden p-0">
           <CardHeader className="px-8 py-6 border-b border-border/30 bg-primary/5">

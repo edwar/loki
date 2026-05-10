@@ -141,8 +141,8 @@ export function SaleFormModal({ products, customers, sale, onSuccess, onClose }:
       <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto py-6 space-y-6">
         <div className="space-y-4">
           <div className="flex flex-col md:flex-row md:items-end gap-3">
-            <div className="flex-1 space-y-2">
-              <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Producto</label>
+            <div className="flex-1 flex flex-col justify-end gap-2">
+              <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground block">Producto</label>
               <Select value={selectedProductId} onValueChange={setSelectedProductId}>
                 <SelectTrigger className="h-12 rounded-lg">
                   <SelectValue placeholder="Seleccionar producto" />
@@ -163,10 +163,10 @@ export function SaleFormModal({ products, customers, sale, onSuccess, onClose }:
               </Select>
             </div>
 
-            <div className="flex items-end gap-3">
-              <div className="space-y-2">
-                <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Cant.</label>
-                <div className="flex items-center bg-muted/50 rounded-lg border p-1 h-12">
+            <div className="flex gap-3 items-end">
+              <div className="flex flex-col justify-end gap-1 flex-1">
+                <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground block h-5">Cant.</label>
+                <div className="flex items-center rounded-lg border p-1 h-12">
                   <Button
                     type="button"
                     variant="ghost"
@@ -187,7 +187,7 @@ export function SaleFormModal({ products, customers, sale, onSuccess, onClose }:
                       setQuantity(isNaN(parsed) ? 0 : parsed)
                     }}
                     onFocus={(e) => e.target.select()}
-                    className="w-12 text-center font-bold text-sm bg-transparent border-none focus:outline-none focus:ring-0"
+                    className="w-full md:w-12 text-center font-bold text-sm bg-transparent border-none focus:outline-none focus:ring-0"
                   />
                   <Button
                     type="button"
@@ -232,7 +232,7 @@ export function SaleFormModal({ products, customers, sale, onSuccess, onClose }:
             <div className="space-y-2">
               {items.map((item, index) => (
                 <div key={index} className="flex items-center justify-between p-3 bg-muted/20 rounded-lg">
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-3 md:items-end w-full md:w-auto">
                     <span className="w-8 h-8 rounded-lg bg-primary/10 text-primary font-bold text-xs flex items-center justify-center">
                       {item.quantity}x
                     </span>

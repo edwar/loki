@@ -7,6 +7,7 @@ import { Package, Plus } from 'lucide-react'
 import { ProductCard } from '@/components/product-card'
 import { Modal } from '@/components/ui/modal'
 import { ProductFormModal } from '@/components/product-form-modal'
+import { EmptyState } from '@/components/ui/empty-state'
 
 interface Supply {
   id: string
@@ -95,21 +96,13 @@ export function ProductosClient({ products, categories, allSupplies }: Productos
         ))}
 
         {products.length === 0 && (
-          <Card className="rounded-lg border-dashed border-2 py-20 bg-accent/5">
-            <CardContent className="text-center space-y-4">
-              <div className="w-16 h-16 rounded-lg bg-accent/50 flex items-center justify-center mx-auto">
-                <Package size={32} className="text-muted-foreground/30" />
-              </div>
-              <p className="text-muted-foreground font-medium">Empieza creando tu primer producto.</p>
-              <button
-                onClick={handleOpenNew}
-                className="h-10 px-5 rounded-lg bg-primary text-primary-foreground font-bold flex items-center gap-2 hover:bg-primary/90 transition-colors mx-auto"
-              >
-                <Plus size={18} />
-                Crear Producto
-              </button>
-            </CardContent>
-          </Card>
+          <EmptyState
+            icon={Package}
+            title="No hay productos registrados"
+            description="Empieza creando tu primer producto para comenzar a gestionar tu catálogo."
+            actionLabel={<><Plus size={18} /> Crear Producto</>}
+            onAction={handleOpenNew}
+          />
         )}
       </div>
 

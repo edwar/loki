@@ -69,18 +69,17 @@ export function ProductFormModal({ product, categories, onSuccess, onClose }: Pr
 
       {/* Form */}
       <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto py-6 space-y-6">
-        <div className="space-y-2">
-          <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Nombre del Producto</label>
-          <Input
-            name="name"
-            defaultValue={product?.name}
-            required
-            placeholder="Ej: Empanada de Carne"
-            className="h-12"
-          />
-        </div>
-
         <div className="grid gap-6 md:grid-cols-2">
+          <div className="space-y-2">
+            <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Nombre del Producto</label>
+            <Input
+              name="name"
+              defaultValue={product?.name}
+              required
+              placeholder="Ej: Empanada de Carne"
+              className="h-12"
+            />
+          </div>
           <div className="space-y-2">
             <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Categoría</label>
             <Input

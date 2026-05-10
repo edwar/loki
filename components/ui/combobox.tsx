@@ -75,7 +75,7 @@ export function Combobox({
   const dropdownContent = open && createPortal(
     <div
       ref={dropdownRef}
-      className="fixed z-10000 bg-white dark:bg-slate-900 border border-border/50 rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200"
+      className="fixed z-10000 bg-white dark:bg-slate-900 border border-border/50 rounded-lg shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200"
       style={{
         top: coords.top + 8,
         left: coords.left,
@@ -97,7 +97,7 @@ export function Combobox({
           </button>
         )}
       </div>
-      <div className="max-h-[300px] overflow-y-auto p-1">
+      <div className={cn("max-h-[300px] overflow-y-auto", filteredOptions.length > 0 && allowCustom && "p-1")}>
         {filteredOptions.length === 0 && !allowCustom ? (
           <p className="p-4 text-sm text-center text-muted-foreground">{emptyMessage}</p>
         ) : (
@@ -123,7 +123,7 @@ export function Combobox({
             ))}
             {allowCustom && search && !options.some(o => o.label.toLowerCase() === search.toLowerCase()) && (
               <button
-                className="w-full text-left px-4 py-3 text-sm rounded-xl transition-all flex items-center gap-3 hover:bg-emerald-500/10 hover:text-emerald-600 dark:hover:text-emerald-400 group"
+                className="w-full text-left px-4 py-3 text-sm rounded-b-lg transition-all flex items-center gap-3 hover:bg-emerald-500/10 hover:text-emerald-600 dark:hover:text-emerald-400 group"
                 onClick={() => {
                   onValueChange(search)
                   setOpen(false)

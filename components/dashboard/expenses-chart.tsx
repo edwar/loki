@@ -10,7 +10,9 @@ import {
   Legend
 } from 'recharts'
 import { formatCurrency } from '@/lib/utils'
-import { PieChart as PieIcon } from 'lucide-react'
+import { PieChart as PieIcon, Receipt } from 'lucide-react'
+import { EmptyState } from '@/components/ui/empty-state'
+import { Button } from '../ui/button'
 
 interface ExpensesChartProps {
   data: { name: string; value: number }[]
@@ -43,12 +45,17 @@ export function ExpensesChart({ data }: ExpensesChartProps) {
       <CardContent className="px-2 pt-4">
         <div className="h-[300px] w-full">
           {!hasData ? (
-            <div className="flex flex-col items-center justify-center h-full text-center space-y-3">
-              <div className="w-12 h-12 rounded-full bg-accent/50 flex items-center justify-center">
-                <PieIcon className="text-muted-foreground/30" />
-              </div>
-              <p className="text-sm text-muted-foreground font-medium">Sin datos de gastos en este periodo.</p>
-            </div>
+            <EmptyState
+              icon={Receipt}
+              title="Sin gastos registrados"
+              description="Registra tus gastos para ver la distribución por categoría."
+              actionLabel={<>
+                <PieIcon size={12} className='mr-2' />
+                Ir a Gastos
+              </>}
+              onAction={() => window.location.href = '/gastos'}
+              compact
+            />
           ) : (
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
@@ -84,9 +91,9 @@ export function ExpensesChart({ data }: ExpensesChartProps) {
                     return null
                   }}
                 />
-                <Legend 
-                  verticalAlign="bottom" 
-                  height={36} 
+                <Legend
+                  verticalAlign="bottom"
+                  height={36}
                   formatter={(value) => <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{value}</span>}
                   iconType="circle"
                   iconSize={8}

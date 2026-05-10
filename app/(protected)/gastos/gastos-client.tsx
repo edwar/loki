@@ -11,6 +11,7 @@ import { deleteExpense } from '@/lib/actions/expenses'
 import { ConfirmationModal } from '@/components/ui/confirmation-modal'
 import { Modal } from '@/components/ui/modal'
 import { ExpenseFormModal } from '@/components/expense-form-modal'
+import { EmptyState } from '@/components/ui/empty-state'
 
 interface Expense {
   id: string
@@ -115,26 +116,13 @@ export function GastosClient({ expenses }: GastosClientProps) {
 
       {/* Table */}
       {expenses.length === 0 ? (
-        <Card className="rounded-lg border-dashed border-2 py-16 bg-accent/5">
-          <CardContent className="text-center space-y-4">
-            <div className="w-16 h-16 rounded-lg bg-accent/50 flex items-center justify-center mx-auto">
-              <Wallet size={32} className="text-muted-foreground/30" />
-            </div>
-            <div className="space-y-1">
-              <p className="font-bold text-lg">No hay gastos registrados</p>
-              <p className="text-xs text-muted-foreground max-w-[250px] mx-auto">
-                Comienza registrando tus costos operativos.
-              </p>
-            </div>
-            <button
-              onClick={handleOpenNew}
-              className="h-10 px-5 rounded-lg bg-rose-500 text-white font-bold flex items-center gap-2 hover:bg-rose-600 transition-colors mx-auto"
-            >
-              <Plus size={18} />
-              Registrar Primer Gasto
-            </button>
-          </CardContent>
-        </Card>
+        <EmptyState
+          icon={Wallet}
+          title="No hay gastos registrados"
+          description="Comienza registrando tus costos operativos."
+          actionLabel={<><Plus size={18} /> Registrar Primer Gasto</>}
+          onAction={handleOpenNew}
+        />
       ) : (
         <Card className="rounded-lg border-border/40 bg-card/30 backdrop-blur-md overflow-hidden p-0">
           <CardHeader className="px-8 py-6 border-b border-border/30 bg-primary/5">

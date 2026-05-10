@@ -6,11 +6,8 @@ import {
   TrendingUp,
   Receipt,
   AlertTriangle,
-  DollarSign,
   ArrowUpRight,
-  ChevronRight,
   Plus,
-  BarChart3,
   Calendar
 } from 'lucide-react'
 import { prisma } from '@/lib/prisma'
@@ -20,6 +17,7 @@ import { Button } from '@/components/ui/button'
 import { SalesChart } from '@/components/dashboard/sales-chart'
 import { ExpensesChart } from '@/components/dashboard/expenses-chart'
 import { DashboardFilters } from '@/components/dashboard/dashboard-filters'
+import { RecentActivityCard } from '@/components/dashboard/recent-activity-card'
 import { eachDayOfInterval, subDays, format } from 'date-fns'
 
 export const dynamic = 'force-dynamic'
@@ -59,17 +57,17 @@ async function getStats(range: string = '30d') {
   const salesTotal = todaySales.reduce((sum: number, s) => sum + Number(s.totalAmount), 0)
   const expensesTotal = todayExpenses.reduce((sum: number, e) => sum + Number(e.amount), 0)
   const yesterdayTotal = yesterdaySales.reduce((sum: number, s) => sum + Number(s.totalAmount), 0)
-  
+
   const periodSalesTotal = periodSales.reduce((sum: number, s) => sum + Number(s.totalAmount), 0)
   const periodExpensesTotal = periodExpenses.reduce((sum: number, e) => sum + Number(e.amount), 0)
 
   const salesChange = yesterdayTotal > 0 ? ((salesTotal - yesterdayTotal) / yesterdayTotal) * 100 : 0
 
-  return { 
-    suppliesCount, 
-    productsCount, 
-    salesTotal, 
-    expensesTotal, 
+  return {
+    suppliesCount,
+    productsCount,
+    salesTotal,
+    expensesTotal,
     salesChange,
     periodSalesTotal,
     periodExpensesTotal
@@ -87,7 +85,7 @@ async function getRecentSales() {
 
 async function getHistoricalData(range: string = '30d') {
   let thirtyDaysAgo = subDays(new Date(), 30)
-  
+
   if (range === '7d') thirtyDaysAgo = subDays(new Date(), 7)
   if (range === '90d') thirtyDaysAgo = subDays(new Date(), 90)
   if (range === 'year') {
@@ -151,9 +149,9 @@ async function getHistoricalData(range: string = '30d') {
 
   return {
     salesByDay,
-    expensesByCategory: Object.entries(expensesByCategoryMap).map(([name, value]) => ({ 
-      name, 
-      value: Number(value) 
+    expensesByCategory: Object.entries(expensesByCategoryMap).map(([name, value]) => ({
+      name,
+      value: Number(value)
     }))
   }
 }
@@ -234,7 +232,7 @@ function RecentItemRow({ title, date, amount, icon: Icon, isNegative }: {
           {isNegative ? '-' : ''}{formatCurrency(amount)}
         </p>
         <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-tighter">Exitosa</p>
-      </div>
+</div>
     </div>
   )
 }
@@ -328,53 +326,7 @@ export default async function DashboardPage(props: {
 
       <div className="grid lg:grid-cols-12 gap-8">
         {/* Recent Activity Section */}
-        <div className="lg:col-span-8 space-y-6">
-          <Card className="rounded-lg border-border/40 bg-card/30 backdrop-blur-md overflow-hidden">
-            <div className="p-8 pb-0 flex items-center justify-between">
-              <div>
-                <h2 className="text-2xl font-bold font-display tracking-tight">Actividad Reciente</h2>
-                <p className="text-sm text-muted-foreground font-medium">Ventas y egresos del día</p>
-              </div>
-              <Link href="/ventas">
-                <Button variant="ghost" className="rounded-lg text-xs font-bold text-primary hover:bg-primary/5">
-                  Ver Todo <ChevronRight size={14} className="ml-1" />
-                </Button>
-              </Link>
-            </div>
-            <CardContent className="p-4 pt-6 space-y-2">
-              {recentSales.length === 0 && recentExpenses.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-20 text-center space-y-4">
-                  <div className="w-16 h-16 rounded-full bg-accent/50 flex items-center justify-center">
-                    <BarChart3 className="text-muted-foreground/30" />
-                  </div>
-                  <p className="text-sm text-muted-foreground font-medium">No se detectó actividad hoy aún.</p>
-                </div>
-              ) : (
-                <div className="space-y-1">
-                  {recentSales.map((sale) => (
-                    <RecentItemRow
-                      key={sale.id}
-                      title={sale.saleItems.map((si) => si.product.name).join(', ')}
-                      date={sale.createdAt}
-                      amount={Number(sale.totalAmount)}
-                      icon={DollarSign}
-                    />
-                  ))}
-                  {recentExpenses.map((expense) => (
-                    <RecentItemRow
-                      key={expense.id}
-                      title={expense.type}
-                      date={expense.date}
-                      amount={Number(expense.amount)}
-                      icon={Receipt}
-                      isNegative
-                    />
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
+        <RecentActivityCard recentSales={recentSales} recentExpenses={recentExpenses} />
 
         {/* Alerts & Insights */}
         <div className="lg:col-span-4 space-y-8">

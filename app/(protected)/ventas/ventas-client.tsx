@@ -13,6 +13,7 @@ import { Modal } from '@/components/ui/modal'
 import { SaleFormModal } from '@/components/sale-form-modal'
 import { ExportButton } from '@/components/ui/export-button'
 import { Edit2 } from 'lucide-react'
+import { EmptyState } from '@/components/ui/empty-state'
 
 interface Product {
   id: string
@@ -147,21 +148,13 @@ export function VentasClient({ products, customers, sales }: VentasClientProps) 
 
       {/* Sales Table */}
       {sales.length === 0 && products.length > 0 ? (
-        <Card className="rounded-lg border-border/40 bg-card/30 backdrop-blur-md overflow-hidden py-16">
-          <CardContent className="text-center space-y-4">
-            <div className="w-16 h-16 rounded-lg bg-accent/30 flex items-center justify-center mx-auto">
-              <History size={32} className="text-muted-foreground/30" />
-            </div>
-            <p className="text-muted-foreground font-medium">No hay ventas registradas.</p>
-            <button
-              onClick={handleOpenNew}
-              className="h-10 px-5 rounded-lg bg-primary text-primary-foreground font-bold flex items-center gap-2 hover:bg-primary/90 transition-colors mx-auto"
-            >
-              <Plus size={18} />
-              Registrar Primera Venta
-            </button>
-          </CardContent>
-        </Card>
+        <EmptyState
+          icon={History}
+          title="No hay ventas registradas"
+          description="Registra tu primera venta para comenzar a rastrear tu historial."
+          actionLabel={<><Plus size={18} /> Registrar Primera Venta</>}
+          onAction={handleOpenNew}
+        />
       ) : sales.length > 0 && (
         <Card className="rounded-lg border-border/40 bg-card/30 backdrop-blur-md overflow-hidden p-0">
           <CardHeader className="px-8 py-6 border-b border-border/30 bg-primary/5">
