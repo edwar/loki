@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { headers } from "next/headers";
 import { Inter, Outfit } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/providers";
@@ -15,10 +16,22 @@ const outfit = Outfit({
   weight: ["400", "500", "600", "700", "800"],
 });
 
-const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://loki.app'
+function getBaseUrl() {
+  if (process.env.NEXT_PUBLIC_BASE_URL) {
+    return process.env.NEXT_PUBLIC_BASE_URL;
+  }
+  try {
+    const headersList = headers();
+    const host = headersList.get("host");
+    const protocol = process.env.NODE_ENV === "development" ? "http" : "https";
+    return `${protocol}://${host}`;
+  } catch {
+    return "https://loki.app";
+  }
+}
 
 export const metadata: Metadata = {
-  metadataBase: new URL(baseUrl),
+  metadataBase: new URL(getBaseUrl()),
   title: {
     default: "Loki - Gestión Empresarial Completa para Emprendedores",
     template: "%s | Loki",
@@ -51,13 +64,13 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "es_MX",
-    url: baseUrl,
+    url: getBaseUrl(),
     siteName: "Loki",
     title: "Loki - Gestión Empresarial Completa para Emprendedores",
     description: "Plataforma de gestión integral para tu negocio. Controla inventario, ventas, producción, gastos, clientes y genera reportes PDF automáticos.",
     images: [
       {
-        url: "/og.webp",
+        url: `${getBaseUrl()}/og.webp`,
         width: 1200,
         height: 630,
         alt: "Loki - Plataforma de Gestión Empresarial",
@@ -65,14 +78,14 @@ export const metadata: Metadata = {
     ],
   },
   twitter: {
-    card: "summary",
+    card: "summary_large_image",
     title: "Loki - Gestión Empresarial Completa para Emprendedores",
     description: "Controla inventario, ventas, producción, gastos y reportes PDF en una sola plataforma.",
-    images: ["/og.webp"],
+    images: [`${getBaseUrl()}/og.webp`],
     creator: "@lokisystems",
   },
   alternates: {
-    canonical: baseUrl,
+    canonical: getBaseUrl(),
   },
   manifest: "/manifest.json",
   appleWebApp: {
@@ -80,7 +93,7 @@ export const metadata: Metadata = {
     statusBarStyle: "default",
     title: "Loki",
   },
-icons: {
+  icons: {
     icon: '/favicon.svg',
     shortcut: '/favicon.svg',
     apple: '/favicon.svg',

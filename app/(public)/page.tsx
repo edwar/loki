@@ -22,13 +22,13 @@ import { authOptions } from '@/lib/auth'
 import { ThemeToggle } from '@/components/theme-toggle'
 
 export const metadata: Metadata = {
-  title: 'Plataforma de Gestión Empresarial para Emprendedores',
+  title: 'Loki - Gestión Empresarial Completa para Emprendedores',
   description: 'Controla tu negocio con inteligencia real. Loki ofrece control de inventario, ventas, producción, gastos y reportes PDF en una plataforma diseñada para emprendedores modernos.',
   openGraph: {
     title: 'Loki - Gestión Empresarial Completa para Emprendedores',
     description: 'Controla tu negocio con inteligencia real. Loki ofrece control de inventario, ventas, producción, gastos y reportes PDF en una plataforma diseñada para emprendedores modernos.',
     url: '/',
-    images: ['/og.webp'],
+    images: [{ url: '/og.webp', width: 1200, height: 630, alt: 'Loki - Gestión Empresarial' }],
   },
   twitter: {
     card: 'summary_large_image',
