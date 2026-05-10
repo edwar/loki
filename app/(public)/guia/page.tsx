@@ -14,7 +14,7 @@ export const metadata: Metadata = {
   description: 'Manual completo de Loki. Aprende a usar el sistema de gestión empresarial: dashboard, ventas, inventario, producción, reportes y más.',
   openGraph: {
     title: 'Guía de Uso - Loki',
-    description: 'Manual completo de Loki para emprendedores.',
+    description: 'Manual completo de Loki para emprendedores. Aprende a usar dashboard, ventas, inventario, producción, reportes y más.',
     url: '/guia',
   },
 }

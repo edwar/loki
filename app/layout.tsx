@@ -28,7 +28,7 @@ export const metadata: Metadata = {
     default: "Loki - Gestión Empresarial Completa para Emprendedores",
     template: "%s | Loki",
   },
-  description: "Plataforma de gestión integral para emprendedores. Controla inventario, ventas, producción, gastos y genera reportes PDF.",
+  description: "Plataforma de gestión integral para emprendedores. Controla inventario, ventas, producción, gastos, clientes y genera reportes PDF.",
   keywords: [
     "gestión empresarial",
     "sistema de ventas",
@@ -59,7 +59,7 @@ export const metadata: Metadata = {
     url: getBaseUrl(),
     siteName: "Loki",
     title: "Loki - Gestión Empresarial Completa para Emprendedores",
-    description: "Plataforma de gestión integral para emprendedores. Controla inventario, ventas, producción, gastos y genera reportes PDF.",
+    description: "Plataforma de gestión integral para emprendedores. Controla inventario, ventas, producción, gastos, clientes y genera reportes PDF.",
     images: [
       {
         url: `${getBaseUrl()}/og.webp`,

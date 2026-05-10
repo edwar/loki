@@ -26,7 +26,7 @@ export const metadata: Metadata = {
   description: 'Plataforma de gestión integral para emprendedores. Controla inventario, ventas, producción, gastos y genera reportes PDF.',
   openGraph: {
     title: 'Loki - Gestión Empresarial Completa para Emprendedores',
-    description: 'Plataforma de gestión integral para emprendedores. Controla inventario, ventas, producción, gastos y genera reportes PDF.',
+description: 'Plataforma de gestión integral para emprendedores. Controla inventario, ventas, producción, gastos, clientes y genera reportes PDF.',
     url: '/',
     images: [{ url: '/og.webp', width: 1200, height: 630, alt: 'Loki - Gestión Empresarial' }],
   },
