@@ -125,12 +125,19 @@ export function ProductCard({
                 <Trash2 className='w-4 h-4 group-hover:text-rose-500' />
               </Button>
             </div>
-            <Button variant="ghost" size="sm" className="h-8 w-8 p-0 rounded-lg group-hover/header:bg-accent transition-all">
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation()
+                setIsExpanded(!isExpanded)
+              }}
+              className="h-8 w-8 p-0 rounded-lg hover:bg-accent transition-all"
+            >
               <ChevronDown
                 size={18}
                 className={`text-muted-foreground transition-transform duration-500 ${isExpanded ? 'rotate-180' : ''}`}
               />
-            </Button>
+            </button>
           </div>
         </CardHeader>
 
