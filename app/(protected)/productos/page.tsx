@@ -1,9 +1,6 @@
 import { getProducts } from '@/lib/actions/products'
 import { getSupplies } from '@/lib/actions/supplies'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Package } from 'lucide-react'
-import { NewProductSection } from '@/components/new-product-section'
-import { ProductCard } from '@/components/product-card'
+import { ProductosClient } from './productos-client'
 
 export const dynamic = 'force-dynamic'
 
@@ -13,7 +10,6 @@ export default async function ProductosPage() {
     getSupplies()
   ])
 
-  // Serialize Decimals and calculate availability
   const products = productsRaw.map((p: any) => {
     const salePrice = Number(p.salePrice)
     const currentStock = Number(p.currentStock)
@@ -29,7 +25,6 @@ export default async function ProductosPage() {
       } : null
     })) || []
 
-    // Calcular cuántos LOTES se pueden preparar basado en insumos
     let maxBatches = Infinity
     if (recipeItems.length === 0) {
       maxBatches = 0
@@ -45,7 +40,9 @@ export default async function ProductosPage() {
     }
 
     return {
-      ...p,
+      id: p.id,
+      name: p.name,
+      category: p.category,
       salePrice,
       currentStock,
       yield: yieldAmount,
@@ -55,51 +52,18 @@ export default async function ProductosPage() {
   })
 
   const supplies = suppliesRaw.map((s: any) => ({
-    ...s,
-    currentStock: Number(s.currentStock),
-    minStock: Number(s.minStock),
-    purchasePrice: Number(s.purchasePrice)
+    id: s.id,
+    name: s.name,
+    unit: s.unit
   }))
 
   const categories = [...new Set(products.map((p: any) => p.category).filter(Boolean) as string[])]
-  const allSupplies = supplies.map((s: any) => ({ id: s.id, name: s.name, unit: s.unit }))
 
   return (
-    <div className="space-y-10 animate-fade-in">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-        <div>
-          <h1 className="text-4xl font-extrabold tracking-tight font-display">Catálogo de Productos</h1>
-          <p className="text-muted-foreground font-medium mt-1">Define tus productos y sus recetas para un control automático de inventario.</p>
-        </div>
-      </div>
-
-      {/* Product Creator */}
-      <NewProductSection categories={categories} />
-
-      {/* Product List */}
-      <div className="grid gap-8">
-        {products.map((product: any, index: number) => (
-          <ProductCard
-            key={product.id}
-            product={product}
-            categories={categories}
-            allSupplies={allSupplies}
-            index={index}
-          />
-        ))}
-
-        {products.length === 0 && (
-          <Card className="rounded-lg border-dashed border-2 py-20 bg-accent/5">
-            <CardContent className="text-center space-y-4">
-              <div className="w-16 h-16 rounded-lg bg-accent/50 flex items-center justify-center mx-auto">
-                <Package size={32} className="text-muted-foreground/30" />
-              </div>
-              <p className="text-muted-foreground font-medium">Empieza creando tu primer producto arriba.</p>
-            </CardContent>
-          </Card>
-        )}
-      </div>
-    </div>
+    <ProductosClient
+      products={products}
+      categories={categories}
+      allSupplies={supplies}
+    />
   )
 }
