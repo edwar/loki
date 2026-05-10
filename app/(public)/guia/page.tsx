@@ -1,5 +1,5 @@
 import {
-  ChefHat, TrendingUp, ShoppingBag, Factory,
+  ChefHat, LayoutDashboard, TrendingUp, ShoppingBag, Factory,
   Package, Receipt, ShoppingCart, Truck, Users, Building2,
   Shield, ShieldAlert, BookOpen, Search,
   ArrowRight, Zap, MousePointer,
