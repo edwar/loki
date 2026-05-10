@@ -24,3 +24,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
     git push -u origin feat/nueva-funcionalidad
     gh pr create --title "feat: descripción" --base main
     ```
+12. **Sincronizar main tras producción**: Después de que los cambios sean desplegados a producción (PR mergeado), siempre volver a `main` y hacer `git pull` para mantener la rama local actualizada. Esto evita trabajar sobre código desactualizado.
+    ```bash
+    git checkout main && git pull
+    ```
