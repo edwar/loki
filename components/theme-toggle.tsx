@@ -19,10 +19,20 @@ export function ThemeToggle() {
 
   const toggleTheme = () => {
     const newTheme = theme === 'light' ? 'dark' : 'light'
-    setTheme(newTheme)
     localStorage.setItem('theme', newTheme)
-    document.documentElement.classList.remove('light', 'dark')
-    document.documentElement.classList.add(newTheme)
+
+    if (!document.startViewTransition) {
+      setTheme(newTheme)
+      document.documentElement.classList.remove('light', 'dark')
+      document.documentElement.classList.add(newTheme)
+      return
+    }
+
+    document.startViewTransition(() => {
+      setTheme(newTheme)
+      document.documentElement.classList.remove('light', 'dark')
+      document.documentElement.classList.add(newTheme)
+    })
   }
 
   if (!mounted) {
