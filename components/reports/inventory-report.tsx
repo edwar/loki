@@ -1,8 +1,8 @@
 'use client'
 
-import { Document, Page, Text, View, StyleSheet, PDFDownloadLink } from '@react-pdf/renderer'
+import { Document, Page, Text, View, StyleSheet, PDFDownloadLink, PDFViewer } from '@react-pdf/renderer'
 import { formatCurrency } from '@/lib/utils'
-import { Download } from 'lucide-react'
+import { Download, Eye } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useEffect, useState } from 'react'
 
@@ -86,6 +86,7 @@ function InventoryPDF({ data }: { data: InventoryData }) {
 
 export function InventoryReport() {
   const [data, setData] = useState<InventoryData>({ supplies: [], totalValue: 0, lowStock: [], criticalCount: 0 })
+  const [showPreview, setShowPreview] = useState(false)
 
   useEffect(() => {
     const fetchData = async () => {
@@ -100,18 +101,35 @@ export function InventoryReport() {
 
   return (
     <div className="space-y-4">
-      <PDFDownloadLink
-        document={<InventoryPDF data={data} />}
-        fileName={`estado-inventario-${new Date().toISOString().split('T')[0]}.pdf`}
-        className="inline-flex"
-      >
-        {({ loading }) => (
-          <Button disabled={loading} className="rounded-lg">
-            <Download size={18} className="mr-2" />
-            {loading ? 'Generando...' : 'Descargar PDF'}
-          </Button>
-        )}
-      </PDFDownloadLink>
+      <div className="flex gap-3">
+        <Button
+          variant="outline"
+          onClick={() => setShowPreview(!showPreview)}
+          className="rounded-lg"
+        >
+          <Eye size={18} className="mr-2" />
+          {showPreview ? 'Ocultar Vista' : 'Vista Previa'}
+        </Button>
+        <PDFDownloadLink
+          document={<InventoryPDF data={data} />}
+          fileName={`estado-inventario-${new Date().toISOString().split('T')[0]}.pdf`}
+        >
+          {({ loading }) => (
+            <Button disabled={loading} className="rounded-lg">
+              <Download size={18} className="mr-2" />
+              {loading ? 'Generando...' : 'Descargar PDF'}
+            </Button>
+          )}
+        </PDFDownloadLink>
+      </div>
+
+      {showPreview && (
+        <div className="h-[600px] border border-border rounded-lg overflow-hidden">
+          <PDFViewer width="100%" height="100%" showToolbar={false}>
+            <InventoryPDF data={data} />
+          </PDFViewer>
+        </div>
+      )}
     </div>
   )
 }
