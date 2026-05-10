@@ -432,11 +432,65 @@ A continuación propongo features adicionales que podrían agregar valor al proy
 ✅ **Core completo**: CRUDs + Dashboard + Producción + Reportes  
 ✅ **UI/UX estandarizado**: Pattern CTA con modales  
 ✅ **Offline support**: PWA con sync  
-✅ **Documentación**: Guía de uso en `/guia`
+✅ **Documentación**: Guía de uso en `/guia`  
+✅ **Testing**: Playwright E2E + GitHub Actions CI
 
 Pendientes (no críticos):
-- [ ] Testing en dispositivos reales (móvil, tablet, desktop)
 - [ ] Documentación técnica (arquitectura, decisiones)
+
+## 9. Testing y Calidad
+
+### Testing E2E con Playwright
+
+- [x] Configuración de Playwright
+- [x] Tests de autenticación (login, registro, errores)
+- [x] Tests de dashboard (stats, gráficos, filtros)
+- [x] Tests de CRUD proveedores
+- [x] Tests de CRUD clientes
+- [x] Tests de ventas
+- [x] Tests de productos
+
+### CI/CD con GitHub Actions
+
+- [x] Workflow de CI con lint y typecheck
+- [x] Tests E2E automatizados
+- [x] Upload de resultados en failure
+
+### Scripts Disponibles
+
+```bash
+pnpm test:e2e          # Ejecutar tests E2E
+pnpm run typecheck     # Verificar tipos
+pnpm run lint          # Lint del código
+```
+
+---
+
+## 10. Testing y Calidad
+
+### Testing E2E con Playwright
+
+- [x] Configuración de Playwright (`playwright.config.ts`)
+- [x] Tests de autenticación (login, registro, errores)
+- [x] Tests de dashboard (stats, gráficos, filtros)
+- [x] Tests de CRUD proveedores
+- [x] Tests de CRUD clientes
+- [x] Tests de ventas
+- [x] Tests de productos
+
+### CI/CD con GitHub Actions
+
+- [x] Workflow de CI con lint y typecheck
+- [x] Tests E2E automatizados
+- [x] Upload de resultados en failure
+
+### Scripts Disponibles
+
+```bash
+pnpm test:e2e     # Ejecutar tests E2E
+pnpm run typecheck # Verificar tipos TypeScript
+pnpm run lint     # Lint del código
+```
 
 ---
 
