@@ -79,7 +79,7 @@ export function ProductCard({
                     {product.category || 'Sin categoría'}
                   </span>
                   <span className="text-sm font-bold text-foreground shrink-0">
-                    {formatCurrency(Number(product.salePrice) ?? 0)}
+                    {formatCurrency(Number(product.salePrice) || 0)}
                   </span>
                 </div>
                 <div className="flex items-center gap-3 sm:gap-2 sm:ml-2 sm:pl-3 sm:border-l border-border/30 mt-1 sm:mt-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-dashed sm:border-solid">
