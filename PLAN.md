@@ -4,6 +4,10 @@
 
 Loki es una plataforma integral de gestión empresarial que automatiza el registro de compras mediante IA, controla gastos, inventario, proveedores y clientes, con un panel administrativo visual. El sistema implementa soft delete para todas las eliminaciones y está diseñado para funcionar de manera responsive en cualquier dispositivo.
 
+### Estado Actual: 🟢 Producción
+
+El proyecto se encuentra en fase de producción activa. Los módulos core CRUD, IA para receipts, dashboard con gráficos, sistema de producción/recetas, autenticación, auditoría y PWA offline están completamente implementados.
+
 ---
 
 ## 2. Stack Tecnológico Recomendado
@@ -22,8 +26,8 @@ Loki es una plataforma integral de gestión empresarial que automatiza el regist
 - **Base de datos**: Neon (PostgreSQL) - como solicitaste
 
 ### IA y Procesamiento
-- **OCR/Extracción de datos**: Google Gemini API (gratis hasta cierto límite) o Tesseract.js (gratuito, local)
-- **Visión**: GPT-4 Vision o Claude Vision (para analizar receipts)
+- **OCR**: Tesseract.js (gratuito, local)
+- ~~**IA para receipts**~~: Removido — modelos gratuitos poco confiables. Registro manual en su lugar.
 
 ### Utilities
 - **Fechas**: date-fns
@@ -183,26 +187,18 @@ users (
 
 ## 4. Módulos del Sistema
 
-### 4.1 Módulo de Compras con IA
+### 4.1 Módulo de Inventario (Abastecimiento + Insumos unificado) ✅
 
-**Funcionalidad**: El usuario sube una foto/PDF de un receipt y la IA extrae automáticamente:
-- Nombre del proveedor (o detecta si es nuevo)
-- Lista de productos comprados
-- Cantidades y precios
-- Total de la compra
-- Fecha
+**Funcionalidad**: Una sola vista (`/inventario`) que combina el registro de compras con la gestión del inventario de insumos.
 
-**Flujo**:
-1. Usuario accede a "Nueva Compra"
-2. Sube imagen/PDF del receipt
-3. Sistema envía a IA (Google Gemini o similar)
-4. IA devuelve datos estructurados en JSON
-5. Usuario revisa/edita los datos extraídos
-6. Sistema crea registro en `purchase_orders` y actualiza inventario
+**Vista Unificada**:
+- **Panel izquierdo**: Formulario para registrar una compra (proveedor, fecha, items con cantidad, unidad, precio, descuento, IVA)
+- **Panel derecho**: Tabla de inventario con todos los insumos, stock actual, mínimo, alertas de stock bajo
+- **Flujo natural**: Registra compra → los insumos se agregan automáticamente → ves el resultado actualizado
 
-**UI**: Formulario con drag-and-drop para archivos, vista previa de la imagen, campos editables con los datos de la IA.
+**Unificación**: Siguiendo el principio "menos complejidad es más útil", las antiguas vistas separadas de "Abastecimiento" e "Insumos" fueron fusionadas en una sola.
 
-### 4.2 Módulo de Gastos Indirectos
+### 4.2 Módulo de Gastos Indirectos ✅
 
 **Categorías predefinidas**:
 - Transporte / Flete
@@ -214,28 +210,28 @@ users (
 
 **CRUD completo**: Crear, leer, actualizar, eliminar (soft) gastos.
 
-### 4.3 Módulo de Ventas Diarias
+### 4.3 Módulo de Ventas Diarias ✅
 
 - Registro de ventas por fecha
 - Asociación opcional con cliente
 - Desglose de productos vendidos
 - Cálculo automático de totales
 
-### 4.4 Módulo de Proveedores
+### 4.4 Módulo de Proveedores ✅
 
 - CRUD completo
 - Historial de compras por proveedor
 - Contacto rápido (teléfono, email)
 - Evaluación de proveedores (rating)
 
-### 4.5 Módulo de Clientes
+### 4.5 Módulo de Clientes ✅
 
 - CRUD completo
 - Historial de compras
 - Total de compras acumuladas
 - Datos de contacto
 
-### 4.6 Módulo de Producción y Recetario (Core)
+### 4.6 Módulo de Producción y Recetario (Core) ✅
 
 Este módulo es el corazón del control de inventario y opera bajo una lógica estricta de transformación de materia prima a producto final:
 
@@ -258,64 +254,73 @@ Este módulo es el corazón del control de inventario y opera bajo una lógica e
 - Los productos finales generados en el paso anterior son los únicos disponibles para la venta.
 - Las ventas descuentan de este inventario terminado, manteniendo una separación clara entre "Lo que compro" (insumos) y "Lo que vendo" (producto final).
 
-**Inmuebles/Activos**:
-- Bienes de la empresa
+**Inmuebles/Activos (Bienes)** ✅:
+- CRUD completo de bienes/propiedades
 - Valor actual vs valor de compra
-- Depreciación (opcional)
+- Depreciación configurable
 - Mantenimiento de activos
 
-### 4.7 Panel de Administración (Dashboard)
+### 4.7 Panel de Administración (Dashboard) ✅
 
-**Gráficos sugeridos**:
-- Ventas del mes (gráfico de barras)
+**Gráficos**:
+- Ventas del mes (gráfico de área)
 - Gastos por categoría (gráfico de dona)
-- Evolución de inventario (línea)
+- Evolución de inventario
 - Top proveedores por volumen
-- Comparación mensual de ingresos/gastos
+- Comparación temporal de ingresos/gastos
 
-**Tablas**:
+**Tablas y KPIs**:
 - Compras recientes
 - Últimas ventas
 - Gastos del día/mes
 - Stock bajo mínimo
+- Actividad reciente
+- Alertas de reposición
+- Filtros por período (7d, 30d, 90d, año, todo)
+
+### 4.8 Módulos Adicionales Implementados ✅
+
+- **Gestión de Equipo/Usuarios**: CRUD de usuarios con roles, protección contra eliminación del último admin.
+- **Log de Auditoría**: Registro automático de todas las acciones de usuarios.
+- **Guía de Uso**: Página `/guia` con instrucciones del sistema.
 
 ---
 
 ## 5. Fases de Desarrollo
 
 ### Fase 1: Fundamentos (Semana 1-2)
-- [ ] Configurar Neon y conectar con el proyecto
-- [ ] Crear schema de base de datos completo
-- [ ] Configurar autenticación (NextAuth)
-- [ ] Setup de UI base (layout, navegación, theme)
-- [ ] Rutas base del dashboard
+- [x] Configurar Neon y conectar con el proyecto
+- [x] Crear schema de base de datos completo
+- [x] Configurar autenticación (NextAuth)
+- [x] Setup de UI base (layout, navegación, theme)
+- [x] Rutas base del dashboard
 
 ### Fase 2: Módulos Core CRUD (Semana 3-4)
-- [ ] CRUD Proveedores
-- [ ] CRUD Clientes
-- [ ] CRUD Insumos/Inventario
-- [ ] CRUD Inmuebles/Activos
-- [ ] CRUD Gastos Indirectos
-- [ ] CRUD Ventas Diarias
+- [x] CRUD Proveedores
+- [x] CRUD Clientes
+- [x] CRUD Insumos/Inventario
+- [x] CRUD Inmuebles/Activos
+- [x] CRUD Gastos Indirectos
+- [x] CRUD Ventas Diarias
 
-### Fase 3: Compras con IA (Semana 5-6)
-- [ ] Integración con Google Gemini API o Tesseract
-- [ ] Endpoint de procesamiento de imágenes
-- [ ] UI de upload de receipts
-- [ ] Extraer y parsear datos del receipt
-- [ ] Completar registro de compra
-- [ ] Actualizar inventario automáticamente
+### Fase 3: Compras (Semana 5-6)
+- [x] Registro manual de compras con formulario completo
+- [x] Búsqueda/creación de proveedores integrada
+- [x] Cálculo de totales con descuento e impuesto
+- [x] Completar registro de compra
+- [x] Actualizar inventario automáticamente
+- [x] ~~Integración con IA para análisis de receipts~~ (removido - modelos gratuitos poco confiables)
 
 ### Fase 4: Dashboard y Visualización (Semana 7-8)
-- [ ] Gráficos con Recharts/Tremor
-- [ ] Tablas con datos agregados
-- [ ] KPIs principales
-- [ ] Filtros por fecha
+- [x] Gráficos con Recharts
+- [x] Tablas con datos agregados
+- [x] KPIs principales
+- [x] Filtros por fecha
 
 ### Fase 5: Responsive y Polish (Semana 9)
-- [ ] Optimizar UI para móvil
+- [x] Optimizar UI para móvil (Tailwind responsive)
+- [x] Mejoras de UX/UI (theme toggle, sidebar, modales)
 - [ ] Testing en diferentes dispositivos
-- [ ] Mejoras de UX/UI
 - [ ] Documentación
 
 ---
@@ -348,37 +353,61 @@ Crear archivo `types/index.ts` con todas las interfaces que reflejen las tablas 
 
 ---
 
-## 7. Estructura de Archivos Propuesta
+## 7. Estructura de Archivos
 
 ```
 app/
-├── (auth)/
-│   ├── login/page.tsx
-│   └── register/page.tsx
-├── (dashboard)/
+├── (public)/
 │   ├── layout.tsx
-│   ├── page.tsx (dashboard)
-│   ├── compras/page.tsx
-│   ├── gastos/page.tsx
+│   ├── page.tsx
+│   ├── login/page.tsx
+│   ├── register/page.tsx
+│   └── guia/page.tsx
+├── (protected)/
+│   ├── layout.tsx
+│   ├── dashboard/page.tsx
+│   ├── inventario/page.tsx ← Unificado (compras + insumos)
+│   ├── produccion/page.tsx
+│   ├── productos/page.tsx
 │   ├── ventas/page.tsx
-│   ├── inventario/page.tsx
+│   ├── gastos/page.tsx
 │   ├── proveedores/page.tsx
 │   ├── clientes/page.tsx
-│   ├── activos/page.tsx
-│   └── settings/page.tsx
+│   ├── bienes/page.tsx
+│   ├── equipo/page.tsx
+│   └── auditoria/page.tsx
 ├── api/
-│   ├── auth/[...nextauth]/route.ts
-│   └── upload/route.ts
+│   ├── auth/
+│   │   ├── register/route.ts
+│   │   └── [...nextauth]/route.ts
+│   ├── purchase-orders/route.ts
+│   └── suppliers/route.ts
 ├── lib/
-│   ├── db.ts (conexión Neon)
-│   ├── actions/ (server actions)
+│   ├── actions/
+│   ├── auth.ts
+│   ├── prisma.ts
+│   ├── offline-sync.ts
 │   └── utils.ts
 ├── components/
-│   ├── ui/ (shadcn components)
+│   ├── ui/
 │   ├── dashboard/
 │   └── forms/
-└── globals.css
+└── prisma/
+    └── schema.prisma
 ```
+
+**Flujo del sidebar (orden operativo):**
+1. Dashboard
+2. Inventario (compras + insumos unificados)
+3. Producción
+4. Productos
+5. Ventas
+6. Gastos
+7. Proveedores
+8. Clientes
+9. Bienes
+10. Equipo
+11. Auditoría
 
 ---
 
@@ -388,71 +417,28 @@ A continuación propongo features adicionales que podrían agregar valor al proy
 
 ### 8.1 Funcionalidades Avanzadas
 
-- **Alertas de stock**: Notificaciones automáticas cuando el inventario caiga por debajo del mínimo, ya sea por email o dentro de la app.
+- [x] **Alertas de stock**: Notificaciones automáticas cuando el inventario caiga por debajo del mínimo (auditoría + dashboard alerts).
+- [x] **Exportación a Excel/CSV**: Exportar cualquier tabla a formato Excel para análisis externo (`xlsx` library).
+- [x] **Categorías personalizadas**: Insumos, productos y gastos tienen categorías configurables.
 
-- **Reportes PDF**: Generación de reportes mensuales/trimestrales en PDF para exportar: estado de resultados, inventario, historial de compras.
+- [ ] **Reportes PDF**: Generación de reportes mensuales/trimestrales en PDF para exportar: estado de resultados, inventario, historial de compras.
 
-- **Exportación a Excel/CSV**: Exportar cualquier tabla a formato Excel para análisis externo.
-
-- **Multi-moneda**: Soporte para registrar precios en diferentes monedas, con tipo de cambio configurable.
-
-- **Categorías personalizadas**: El usuario puede crear sus propias categorías de gastos, productos, etc.
+- [ ] **Multi-moneda**: Soporte para registrar precios en diferentes monedas, con tipo de cambio configurable.
 
 ### 8.2 Mejoras en el Módulo de IA
 
-- **Historial de extracción**: Guardar las imágenes procesadas junto con los datos extraídos para revisión posterior.
-
-- **Validación de confianza**: Mostrar un % de certeza en los datos extraídos por la IA para que el usuario sepa qué verificar.
-
-- **Templates por proveedor**: Si un proveedor emite receipts con formato similar, la IA aprende a reconocerlos mejor.
-
-### 8.3 Funcionalidades de Negocio
-
-- **Presupuestos**: Crear presupuestos para proyectos/obras que incluyan materiales, mano de obra y gastos indirectos.
-
-- **Rentabilidad por producto**: Calcular cuánto ganas por cada insumo vendido considerando costo de compra + gastos indirectos asignados.
-
-- **Cuentas por cobrar**: Seguimiento de ventas a crédito a clientes.
-
-- **Facturación básica**: Generación de facturas simples en PDF.
-
-### 8.4 UX/UI
-
-- **Modo offline**: Progressive Web App (PWA) que permita registrar datos sin conexión y syncar después.
-
-- **Tema oscuro**: Soporte para modo oscuro/claro.
-
-- **Keyboard shortcuts**: Para power users (Ctrl+N para nueva compra, etc.).
-
-- **Búsqueda global**: Search bar en el header que busque en todas las secciones.
-
-### 8.5 Seguridad y Mantenimiento
-
-- **Logs de auditoría**: Registrar quién hizo qué cambio y cuándo.
-
-- **Roles granulares**: Permisos por usuario (admin vs empleado vs vendedor).
-
-- **Backup automático**: Configurar backup diario en Neon.
-
-- **Rate limiting**: Proteger endpoints de API de abuse.
-
-### 8.6 Integraciones Futuras
-
-- **WhatsApp Business**: Enviar facturas o alertas por WhatsApp.
+- [ ] **Historial de extracción**: Guardar las imágenes procesadas junto con los datos extraídos para revisión posterior.
+- [ ] **Validación de confianza**: Mostrar un % de certeza en los datos extraídos por la IA para que el usuario sepa qué verificar.
+- [ ] **Templates por proveedor**: Si un proveedor emite receipts con formato similar, la IA aprende a reconocerlos mejor.
+- [x] **Guía de uso**: Página `/guia` con instrucciones de uso del sistema.
 
 ---
 
 ## 9. Próximos Pasos
 
-1. **Confirmar stack**: ¿Te sientes cómodo con Next.js + Neon + Tailwind? ¿Prefieres alguna otra librería?
-
-2. **IA seleccionada**: ¿Tienes preferencia por Google Gemini, OpenAI Vision, o prefieres algo completamente gratuito (Tesseract)?
-
-3. **Scope inicial**: ¿Comenzamos con el core (CRUDs + Dashboard) o quieres incluir el módulo de IA desde el inicio?
-
-4. **Configurar Neon**: ¿Ya tienes una cuenta en Neon creada? ¿O necesitas ayuda para configurar la base de datos?
-
-Cuéntame tu decisión sobre estos puntos y cualquier observación sobre el plan para afinarlo antes de comenzar el desarrollo.
+1. **Scope inicial**: ✅ Core (CRUDs + Dashboard + Producción) — Completado.
+2. **Testing**: Verificar el sistema en dispositivos reales (móvil, tablet, desktop).
+3. **Documentación**: Documentar arquitectura, decisiones técnicas y guías de uso.
 
 ---
 

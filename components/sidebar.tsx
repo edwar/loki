@@ -7,23 +7,29 @@ import { cn } from '@/lib/utils'
 import {
   LayoutDashboard,
   Package,
+  ChefHat,
   ShoppingBag,
-  Receipt,
-  Users,
-  Truck,
   TrendingUp,
-  LogOut,
-  ChefHat
+  Receipt,
+  Building2,
+  Users,
+  UsersRound,
+  ClipboardList,
+  LogOut
 } from 'lucide-react'
 
 const navigation = [
-  { name: 'Dashboard', href: '/', icon: LayoutDashboard },
-  { name: 'Insumos', href: '/insumos', icon: Package },
+  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+  { name: 'Inventario', href: '/inventario', icon: Package },
+  { name: 'Producción', href: '/produccion', icon: ChefHat },
   { name: 'Productos', href: '/productos', icon: ShoppingBag },
   { name: 'Ventas', href: '/ventas', icon: TrendingUp },
   { name: 'Gastos', href: '/gastos', icon: Receipt },
-  { name: 'Proveedores', href: '/proveedores', icon: Truck },
+  { name: 'Proveedores', href: '/proveedores', icon: Building2 },
   { name: 'Clientes', href: '/clientes', icon: Users },
+  { name: 'Bienes', href: '/bienes', icon: Building2 },
+  { name: 'Equipo', href: '/equipo', icon: UsersRound },
+  { name: 'Auditoría', href: '/auditoria', icon: ClipboardList },
 ]
 
 export function Sidebar({ children }: { children: React.ReactNode }) {
@@ -36,18 +42,15 @@ export function Sidebar({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-screen bg-[#f0f4f8] flex">
-      {/* Narrow Black Sidebar */}
       <aside className="w-[72px] min-h-screen bg-black flex flex-col items-center py-6 fixed">
-        {/* Logo */}
         <div className="w-10 h-10 rounded-lg bg-white flex items-center justify-center mb-8">
           <ChefHat size={20} className="text-black" />
         </div>
 
-        {/* Navigation */}
         <nav className="flex-1 flex flex-col items-center gap-1">
           {navigation.map((item) => {
             const isActive = pathname === item.href ||
-              (item.href !== '/' && pathname.startsWith(item.href))
+              (item.href !== '/dashboard' && pathname.startsWith(item.href))
             return (
               <Link
                 key={item.name}
@@ -66,7 +69,6 @@ export function Sidebar({ children }: { children: React.ReactNode }) {
           })}
         </nav>
 
-        {/* Sign Out */}
         <button
           onClick={handleSignOut}
           className="w-12 h-12 rounded-lg flex items-center justify-center text-gray-500 hover:bg-gray-800 hover:text-white transition-all duration-200"
@@ -76,7 +78,6 @@ export function Sidebar({ children }: { children: React.ReactNode }) {
         </button>
       </aside>
 
-      {/* Main Content */}
       <main className="flex-1 ml-[72px]">
         <div className="p-8">{children}</div>
       </main>

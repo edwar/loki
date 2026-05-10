@@ -31,12 +31,11 @@ import { SyncManager } from '@/components/sync-manager'
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-  { name: 'Ventas', href: '/ventas', icon: TrendingUp },
-  { name: 'Productos', href: '/productos', icon: ShoppingBag },
+  { name: 'Inventario', href: '/inventario', icon: Package, roles: ['admin', 'manager'] },
   { name: 'Producción', href: '/produccion', icon: Factory },
-  { name: 'Insumos', href: '/insumos', icon: Package, roles: ['admin', 'manager'] },
-  { name: 'Gastos', href: '/gastos', icon: Receipt, roles: ['admin', 'manager'] },
-  { name: 'Compras', href: '/compras', icon: ShoppingCart, roles: ['admin', 'manager'] },
+  { name: 'Productos', href: '/productos', icon: ShoppingBag },
+  { name: 'Ventas', href: '/ventas', icon: TrendingUp },
+  { name: 'Gastos', href: '/gastos', icon: Receipt },
   { name: 'Proveedores', href: '/proveedores', icon: Truck, roles: ['admin', 'manager'] },
   { name: 'Clientes', href: '/clientes', icon: Users },
   { name: 'Bienes', href: '/bienes', icon: Building2, roles: ['admin'] },

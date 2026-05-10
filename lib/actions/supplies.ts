@@ -33,7 +33,7 @@ export async function createSupply(formData: FormData) {
     },
   })
 
-  revalidatePath('/insumos')
+  revalidatePath('/inventario')
 }
 
 export async function updateSupply(id: string, formData: FormData) {
@@ -60,7 +60,7 @@ export async function updateSupply(id: string, formData: FormData) {
     },
   })
 
-  revalidatePath('/insumos')
+  revalidatePath('/inventario')
 }
 
 export async function deleteSupply(id: string) {
@@ -69,5 +69,5 @@ export async function deleteSupply(id: string) {
     data: { deletedAt: new Date() },
   })
 
-  revalidatePath('/insumos')
+  revalidatePath('/inventario')
 }
