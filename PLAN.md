@@ -431,7 +431,8 @@ A continuación propongo features adicionales que podrían agregar valor al proy
 ✅ **UI/UX estandarizado**: Pattern CTA con modales  
 ✅ **Offline support**: PWA con sync  
 ✅ **Documentación**: Guía de uso en `/guia` + tests/README.md  
-✅ **Testing**: Playwright E2E + GitHub Actions CI (lint + typecheck)
+✅ **Testing**: Playwright E2E + GitHub Actions CI (lint + typecheck)  
+🚧 **SEO**: Sección 11 - Por implementar
 
 ## 10. Testing y Calidad
 
