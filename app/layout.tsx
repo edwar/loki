@@ -98,6 +98,36 @@ export const viewport: Viewport = {
   initialScale: 1,
 };
 
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Loki",
+  "description": "Plataforma de gestión integral para emprendedores. Controla inventario, ventas, producción, gastos, clientes y genera reportes PDF.",
+  "url": getBaseUrl(),
+  "applicationCategory": "BusinessApplication",
+  "operatingSystem": "Web Browser, PWA",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "MXN",
+    "availability": "https://schema.org/OnlineOnly"
+  },
+  "creator": {
+    "@type": "Organization",
+    "name": "Loki Systems",
+    "url": getBaseUrl()
+  },
+  "featureList": [
+    "Control de inventario y suministros",
+    "Gestión de ventas y clientes",
+    "Producción y recetas",
+    "Gastos indirectos",
+    "Reportes PDF",
+    "Dashboard con métricas",
+    "Sistema offline PWA"
+  ]
+}
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -105,6 +135,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es">
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      </head>
       <body className={`${inter.variable} ${outfit.variable} min-h-full antialiased font-sans overflow-x-hidden`}>
         <Providers>{children}</Providers>
       </body>

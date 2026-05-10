@@ -432,7 +432,7 @@ A continuación propongo features adicionales que podrían agregar valor al proy
 ✅ **Offline support**: PWA con sync  
 ✅ **Documentación**: Guía de uso en `/guia` + tests/README.md  
 ✅ **Testing**: Playwright E2E + GitHub Actions CI (lint + typecheck)  
-🚧 **SEO**: Sección 11 - Por implementar
+✅ **SEO**: Implementado - metadata, sitemap, robots.txt, schema markup
 
 ## 10. Testing y Calidad
 
@@ -468,4 +468,122 @@ pnpm run lint          # Lint del código
 
 ---
 
-*Documento actualizado tras implementación completa.*
+## 11. Mejoras y Nuevos Módulos Propuestos
+
+### 11.1 SEO ✅ Implementado
+
+El SEO fue identificado como pendiente en la sección 9. Ya implementado:
+
+- [x] Metadata dinámica para todas las páginas (title, description, open graph)
+- [x] sitemap.xml automático (solo rutas públicas)
+- [x] robots.txt (bloquea rutas protegidas)
+- [x] Schema markup WebApplication JSON-LD en layout raíz
+- [x] Font optimization con next/font (Inter + Outfit)
+- [x] Favicon y OG image configurados
+
+### 11.2 Módulos de Alto Valor (Nuevos)
+
+#### A. Sistema de Facturación
+
+- [ ] **Generación de facturas formales** con folio sequential
+- [ ] Datos fiscales del negocio (nombre, RFC, dirección)
+- [ ] Exportación PDF de facturas
+- [ ] Registro de facturas emitidas vs receipts simples
+- [ ] Integración con clientes (datos fiscales)
+
+**Impacto**: Alto — Necesario para operaciones formales con clientes que requieren comprobantes.
+
+#### B. Presupuestos y Cotizaciones
+
+- [ ] Crear presupuestos desde productos disponibles
+- [ ] Descuentos y validez del presupuesto
+- [ ] Envío por WhatsApp o email
+- [ ] Convertir presupuesto a venta confirmada
+- [ ] Historial de presupuestos por cliente
+
+**Impacto**: Alto — Facilita la venta B2B y pedidos grandes.
+
+#### C. Métricas de Rentabilidad
+
+- [ ] **Costo por producto** (calculado desde recetas)
+- [ ] **Margen de ganancia** por producto (precio venta - costo)
+- [ ] **Rentabilidad por categoría** de productos
+- [ ] Dashboard de margen de ganancia
+- [ ] Alertas cuando el margen baje de阈值 configurable
+
+**Impacto**: Medio — Permite identificar productos más rentables.
+
+#### D. Control de Lotes y Vencimiento
+
+- [ ] Asignar número de lote a compras de insumos
+- [ ] Fecha de vencimiento por lote
+- [ ] Alertas de productos próximos a vencer
+- [ ] Reporte de inventario por lote
+- [ ] Trazabilidad de lote en producción
+
+**Impacto**: Medio — Esencial para productos perecederos (panadería, repostería).
+
+#### E. Sistema de Alertas Automáticas
+
+- [ ] Notificaciones en dashboard de stock bajo
+- [ ] Alertas de insumos próximos a vencer
+- [ ] Notificaciones de gastos elevados (超出 umbral)
+- [ ] Resumen semanal por email (opcional)
+- [ ] Centro de notificaciones en la UI
+
+**Impacto**: Medio — Mejora la operación diaria.
+
+### 11.3 Mejoras de UX/UI
+
+#### A. Dashboard de Métricas Avanzadas
+
+- [ ] KPIs adicionales: ticket promedio, productos más vendidos, clientes top
+- [ ] Comparación período vs período anterior
+- [ ] Gráfico de tendencias de inventario
+- [ ] Indicador de rotación de inventario
+
+#### B. Calendario de Producción
+
+- [ ] Vista semanal/mensual de producción planificada
+- [ ] Programar producción futura
+- [ ] Capacidad de producción por día (límite de batches)
+- [ ] Notificaciones de producción pendiente
+
+**Impacto**: Bajo-Medio — Útil para panaderías con planificación.
+
+#### C. Exportación Mejorada
+
+- [ ] Exportar a Excel con formato profesional
+- [ ] Exportar dashboard completo (gráficos + datos)
+- [ ] Programar exportación automática mensual
+
+### 11.4 Funcionalidades Operativas
+
+#### A. Backup y Recuperación
+
+- [ ] Exportar base de datos completa (JSON/SQL)
+- [ ] Programar backup manual desde UI
+- [ ] Restaurar desde backup
+
+#### B. Multi-sucursal (Futuro)
+
+- [ ] Estructura para múltiples ubicaciones
+- [ ] Inventario por sucursal
+- [ ] Reportes consolidados
+
+**Nota**: Esta funcionalidad requiere cambios significativos en el schema.
+
+### 11.5 Priorización Recomendada
+
+| Prioridad | Módulo | Justificación |
+|-----------|--------|----------------|
+| 1 | SEO | Mejora visibilidad y está marcado como pendiente |
+| 2 | Facturación | Necesario para operaciones formales |
+| 3 | Métricas de Rentabilidad | Información de negocio crítica |
+| 4 | Presupuestos | Facilita venta B2B |
+| 5 | Alertas Automáticas | Mejora operación diaria |
+| 6 | Control de Lotes | Solo si hay productos perecederos |
+
+---
+
+*Documento actualizado con propuestas de mejora.*
