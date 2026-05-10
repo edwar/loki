@@ -199,7 +199,7 @@ export function NewProductionModal({ products }: { products: Product[] }) {
           <div className="pt-2">
             <Button
               type="submit"
-              disabled={!canProduce || loading || !selectedProductId || selectedProduct?.recipeItems.length! === 0}
+              disabled={!canProduce || loading || !selectedProductId || (selectedProduct?.recipeItems?.length ?? 0) === 0}
               className="w-full h-12 rounded-lg font-bold shadow-lg shadow-primary/20"
             >
               {loading ? (
@@ -208,7 +208,7 @@ export function NewProductionModal({ products }: { products: Product[] }) {
                 <>Confirmar Producción</>
               )}
             </Button>
-            {!canProduce && selectedProductId && selectedProduct?.recipeItems.length! > 0 && (
+            {!canProduce && selectedProductId && (selectedProduct?.recipeItems?.length ?? 0) > 0 && (
               <p className="text-center text-[10px] text-rose-500 font-bold mt-3 uppercase tracking-wider">
                 Insumos insuficientes para completar esta orden
               </p>
