@@ -57,9 +57,9 @@ export const metadata: Metadata = {
     description: "Plataforma de gestión integral para tu negocio. Controla inventario, ventas, producción, gastos, clientes y genera reportes PDF automáticos.",
     images: [
       {
-        url: "/favicon.svg",
-        width: 512,
-        height: 512,
+        url: "/og.webp",
+        width: 1200,
+        height: 630,
         alt: "Loki - Plataforma de Gestión Empresarial",
       },
     ],
@@ -68,7 +68,7 @@ export const metadata: Metadata = {
     card: "summary",
     title: "Loki - Gestión Empresarial Completa para Emprendedores",
     description: "Controla inventario, ventas, producción, gastos y reportes PDF en una sola plataforma.",
-    images: ["/favicon.svg"],
+    images: ["/og.webp"],
     creator: "@lokisystems",
   },
   alternates: {
