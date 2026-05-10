@@ -421,7 +421,7 @@ A continuación propongo features adicionales que podrían agregar valor al proy
 - [x] **Exportación a Excel/CSV**: Exportar cualquier tabla a formato Excel para análisis externo (`xlsx` library).
 - [x] **Categorías personalizadas**: Insumos, productos y gastos tienen categorías configurables.
 
-- [ ] **Reportes PDF**: Generación de reportes mensuales/trimestrales en PDF para exportar: estado de resultados, inventario, historial de compras.
+- [x] **Reportes PDF**: Generación de reportes mensuales/trimestrales en PDF para exportar: estado de resultados, inventario, historial de compras.
 
 - [ ] **Multi-moneda**: Soporte para registrar precios en diferentes monedas, con tipo de cambio configurable.
 
