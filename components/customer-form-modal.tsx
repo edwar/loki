@@ -115,7 +115,7 @@ export function CustomerFormModal({ customer, onSuccess, onClose }: CustomerForm
           <Button
             type="button"
             onClick={onClose}
-            variant="secondary"
+            variant="ghost"
             className="flex-1 h-12 rounded-lg"
           >
             Cancelar

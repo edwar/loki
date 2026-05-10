@@ -71,7 +71,6 @@ export function InventarioClient({ supplies, suppliers }: InventarioClientProps)
             <ExportButton
               data={exportData}
               filename={`Inventario_${new Date().toISOString().split('T')[0]}`}
-              variant="outline"
               className="h-12 px-6 rounded-lg font-bold"
             />
           )}

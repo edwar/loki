@@ -10,10 +10,9 @@ interface ExportButtonProps {
   filename: string
   label?: string
   className?: string
-  variant?: "destructive" | "outline" | "secondary" | "ghost" | "primary" | "pill" | undefined
 }
 
-export function ExportButton({ data, filename, label = 'Exportar Excel', className, variant = 'outline' }: ExportButtonProps) {
+export function ExportButton({ data, filename, label = 'Exportar Excel', className, }: ExportButtonProps) {
   const handleExport = () => {
     try {
       if (!data || data.length === 0) {
@@ -40,7 +39,7 @@ export function ExportButton({ data, filename, label = 'Exportar Excel', classNa
 
   return (
     <Button
-      variant={variant}
+      variant="outline"
       onClick={handleExport}
       className={className || "rounded-lg font-bold"}
     >

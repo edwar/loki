@@ -105,7 +105,6 @@ export function VentasClient({ products, customers, sales }: VentasClientProps) 
             <ExportButton
               data={exportData}
               filename={`Ventas_${new Date().toISOString().split('T')[0]}`}
-              variant="outline"
               className="h-12 px-6 rounded-lg font-bold"
             />
           )}

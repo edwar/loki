@@ -199,7 +199,7 @@ export function NewProductionModal({ products }: { products: Product[] }) {
           <div className="pt-2">
             <Button
               type="submit"
-              disabled={!canProduce || loading}
+              disabled={!canProduce || loading || !selectedProductId || selectedProduct?.recipeItems.length! === 0}
               className="w-full h-12 rounded-lg font-bold shadow-lg shadow-primary/20"
             >
               {loading ? (

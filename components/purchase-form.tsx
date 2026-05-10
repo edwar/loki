@@ -209,7 +209,7 @@ export function PurchaseForm({ suppliers, onSuccess, onClose }: PurchaseFormProp
         <div>
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Items</h3>
-            <Button onClick={handleAddItem} variant="secondary" size="sm" className="h-9 rounded-lg">
+            <Button onClick={handleAddItem} size="sm" className="h-9 rounded-lg">
               <Plus className="w-4 h-4 mr-1" />
               Agregar
             </Button>
@@ -341,7 +341,7 @@ export function PurchaseForm({ suppliers, onSuccess, onClose }: PurchaseFormProp
 
       {/* Footer Actions */}
       <div className="flex gap-3 pt-4 border-t border-border">
-        <Button onClick={resetForm} variant="secondary" className="flex-1 h-12 rounded-lg">
+        <Button onClick={resetForm} variant="ghost" className="flex-1 h-12 rounded-lg">
           Limpiar
         </Button>
         <Button

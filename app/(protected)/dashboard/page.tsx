@@ -232,7 +232,7 @@ function RecentItemRow({ title, date, amount, icon: Icon, isNegative }: {
           {isNegative ? '-' : ''}{formatCurrency(amount)}
         </p>
         <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-tighter">Exitosa</p>
-</div>
+      </div>
     </div>
   )
 }
@@ -359,7 +359,7 @@ export default async function DashboardPage(props: {
                   ))}
                 </div>
                 <Link href="/insumos" className="block">
-                  <Button variant="outline" className="w-full rounded-lg border-amber-500/30 text-amber-700 dark:text-amber-400 hover:bg-amber-500/10 h-11 font-bold">
+                  <Button className="w-full rounded-lg border-amber-500/30 text-amber-700 dark:text-amber-400 hover:bg-amber-500/10 h-11 font-bold">
                     Gestionar Inventario
                   </Button>
                 </Link>

@@ -94,11 +94,10 @@ export default async function ProductionPage() {
         </div>
         <div className="flex items-center gap-3">
           {serializedLogs.length > 0 && (
-            <ExportButton 
-              data={exportData} 
-              filename={`Produccion_${new Date().toISOString().split('T')[0]}`} 
-              variant="outline" 
-              className="h-12 px-6 rounded-lg font-bold" 
+            <ExportButton
+              data={exportData}
+              filename={`Produccion_${new Date().toISOString().split('T')[0]}`}
+              className="h-12 px-6 rounded-lg font-bold"
             />
           )}
           <NewProductionModal products={products} />

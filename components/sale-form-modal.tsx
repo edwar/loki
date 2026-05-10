@@ -6,7 +6,9 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrig
 import { formatCurrency } from '@/lib/utils'
 import { Plus, Minus, Trash2, X } from 'lucide-react'
 import { createSale, updateSale } from '@/lib/actions/sales'
+import { createCustomer } from '@/lib/actions/customers'
 import { ConfirmationModal } from '@/components/ui/confirmation-modal'
+import { Input } from '@/components/ui/input'
 import { sileo as toast } from 'sileo'
 
 interface SaleItem {
@@ -37,6 +39,25 @@ export function SaleFormModal({ products, customers, sale, onSuccess, onClose }:
   const [quantity, setQuantity] = useState(1)
   const [isPending, startTransition] = useTransition()
   const [indexToRemove, setIndexToRemove] = useState<number | null>(null)
+  const [showQuickCustomer, setShowQuickCustomer] = useState(false)
+  const [quickCustomerName, setQuickCustomerName] = useState('')
+  const [quickCustomerPhone, setQuickCustomerPhone] = useState('')
+
+  const handleQuickAddCustomer = async () => {
+    if (!quickCustomerName.trim()) return
+    try {
+      const fd = new FormData()
+      fd.set('name', quickCustomerName.trim())
+      if (quickCustomerPhone.trim()) fd.set('phone', quickCustomerPhone.trim())
+      const newCustomer = await createCustomer(fd)
+      toast.success({ title: 'Cliente agregado' })
+      setShowQuickCustomer(false)
+      setQuickCustomerName('')
+      setQuickCustomerPhone('')
+    } catch (error) {
+      toast.error({ title: 'Error al crear cliente' })
+    }
+  }
 
   const selectedProduct = products.find((p: any) => p.id === selectedProductId)
 
@@ -203,7 +224,6 @@ export function SaleFormModal({ products, customers, sale, onSuccess, onClose }:
               <Button
                 type="button"
                 onClick={addItem}
-                variant="secondary"
                 size="icon"
                 className="h-12 w-12 rounded-lg shrink-0"
               >
@@ -266,20 +286,69 @@ export function SaleFormModal({ products, customers, sale, onSuccess, onClose }:
 
             <div className="space-y-2">
               <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Cliente (opcional)</label>
-              <Select name="customerId" defaultValue={sale?.customerId || "none"}>
-                <SelectTrigger className="h-12 rounded-lg">
-                  <SelectValue placeholder="Venta General / Consumidor" />
-                </SelectTrigger>
-                <SelectContent className="rounded-lg">
-                  <SelectItem value="none">Venta General (Sin Cliente)</SelectItem>
-                  <SelectGroup>
-                    <SelectLabel className="text-[10px] uppercase tracking-widest text-muted-foreground/50">Clientes Registrados</SelectLabel>
-                    {customers.map((c: any) => (
-                      <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
-                    ))}
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
+              <div className="flex gap-2">
+                <div className="flex-1">
+                  <Select name="customerId" defaultValue={sale?.customerId || "none"}>
+                    <SelectTrigger className="h-12 rounded-lg w-full">
+                      <SelectValue placeholder="Venta General / Consumidor" />
+                    </SelectTrigger>
+                    <SelectContent className="rounded-lg">
+                      <SelectItem value="none">Venta General (Sin Cliente)</SelectItem>
+                      <SelectGroup>
+                        <SelectLabel className="text-[10px] uppercase tracking-widest text-muted-foreground/50">Clientes Registrados</SelectLabel>
+                        {customers.map((c: any) => (
+                          <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                        ))}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowQuickCustomer(!showQuickCustomer)}
+                  className="h-12 px-3 rounded-lg shrink-0"
+                >
+                  <Plus size={18} />
+                </Button>
+              </div>
+              {showQuickCustomer && (
+                <div className="p-3 bg-muted/30 rounded-lg border border-border/50 space-y-3 animate-in fade-in slide-in-from-top-2">
+                  <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Agregar Cliente Rápido</p>
+                  <Input
+                    placeholder="Nombre del cliente"
+                    value={quickCustomerName}
+                    onChange={(e) => setQuickCustomerName(e.target.value)}
+                    className="h-10"
+                  />
+                  <Input
+                    placeholder="Teléfono (opcional)"
+                    value={quickCustomerPhone}
+                    onChange={(e) => setQuickCustomerPhone(e.target.value)}
+                    className="h-10"
+                  />
+                  <div className="flex gap-2">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setShowQuickCustomer(false)}
+                      className="flex-1 h-9"
+                    >
+                      Cancelar
+                    </Button>
+                    <Button
+                      type="button"
+                      onClick={handleQuickAddCustomer}
+                      disabled={!quickCustomerName.trim()}
+                      className="flex-1 h-9"
+                    >
+                      Agregar
+                    </Button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -288,7 +357,7 @@ export function SaleFormModal({ products, customers, sale, onSuccess, onClose }:
           <Button
             type="button"
             onClick={onClose}
-            variant="secondary"
+            variant="ghost"
             className="flex-1 h-12 rounded-lg"
           >
             Cancelar

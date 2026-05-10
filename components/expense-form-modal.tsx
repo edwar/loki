@@ -129,7 +129,7 @@ export function ExpenseFormModal({ expense, onSuccess, onClose }: ExpenseFormMod
           <Button
             type="button"
             onClick={onClose}
-            variant="secondary"
+            variant="ghost"
             className="flex-1 h-12 rounded-lg"
           >
             Cancelar
