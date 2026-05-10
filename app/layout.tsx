@@ -20,10 +20,10 @@ const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://loki.app'
 export const metadata: Metadata = {
   metadataBase: new URL(baseUrl),
   title: {
-    default: "Loki - Plataforma de Gestión Empresarial",
+    default: "Loki - Gestión Empresarial Completa para Emprendedores",
     template: "%s | Loki",
   },
-  description: "Sistema integral de gestión empresarial para emprendedores. Control de inventario, ventas, producción, gastos, clientes y reportes PDF en una sola plataforma.",
+  description: "Plataforma de gestión integral para tu negocio. Controla inventario, ventas, producción, gastos, clientes y genera reportes PDF automáticos.",
   keywords: [
     "gestión empresarial",
     "sistema de ventas",
@@ -53,22 +53,22 @@ export const metadata: Metadata = {
     locale: "es_MX",
     url: baseUrl,
     siteName: "Loki",
-    title: "Loki - Plataforma de Gestión Empresarial",
-    description: "Sistema integral de gestión empresarial para emprendedores. Control de inventario, ventas, producción, gastos y reportes PDF.",
+    title: "Loki - Gestión Empresarial Completa para Emprendedores",
+    description: "Plataforma de gestión integral para tu negocio. Controla inventario, ventas, producción, gastos, clientes y genera reportes PDF automáticos.",
     images: [
       {
-        url: "/og-image.png",
-        width: 1200,
-        height: 630,
+        url: "/favicon.svg",
+        width: 512,
+        height: 512,
         alt: "Loki - Plataforma de Gestión Empresarial",
       },
     ],
   },
   twitter: {
-    card: "summary_large_image",
-    title: "Loki - Plataforma de Gestión Empresarial",
-    description: "Sistema integral de gestión empresarial para emprendedores.",
-    images: ["/og-image.png"],
+    card: "summary",
+    title: "Loki - Gestión Empresarial Completa para Emprendedores",
+    description: "Controla inventario, ventas, producción, gastos y reportes PDF en una sola plataforma.",
+    images: ["/favicon.svg"],
     creator: "@lokisystems",
   },
   alternates: {
