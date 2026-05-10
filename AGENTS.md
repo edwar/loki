@@ -16,3 +16,11 @@ This version has breaking changes — APIs, conventions, and file structure may 
 8. **Menos complejidad es más útil**: Preferir vistas simples y consolidadas antes que muchos puntos de navegación. Si dos módulos comparten contexto (ej. insumos y compras), unificarlos en una sola vista con secciones claras. Evitar crear nuevas rutas cuando la funcionalidad puede integrarse en una existente.
 9. **Forms en Modal (CTA Pattern)**: Para registrar nuevos datos, usar un botón tipo call-to-action en la esquina superior derecha de la vista (ej. "Registrar Compra", "Agregar Producto") que abra un modal centrado. No usar acordeones colapsables ni formularios en columnas laterales. El modal debe tener header con título y botón de cerrar, cuerpo con scroll para el formulario, y footer con acciones (cancelar/guardar). Esto mantiene la vista limpia y el formulario recibe toda la atención.
 10. **Botón Cancelar en Modales**: Cuando se incluya un botón de "Cancelar" en el footer de un modal, usar siempre `variant="ghost"`. El botón de acción principal (Guardar, Registrar, etc.) debe usar el estilo por defecto (primary).
+11. **Flujo de Pull Requests**: Para cualquier feature o fix significativo, siempre crear una rama dedicada (`feat/nombre` o `fix/nombre`), hacer los commits en esa rama, y crear un PR vía `gh pr create` antes de merge. No hacer commits directos a `main`. El flujo correcto es:
+    ```bash
+    git checkout -b feat/nueva-funcionalidad
+    # hacer cambios
+    git add -A && git commit -m "feat: descripción"
+    git push -u origin feat/nueva-funcionalidad
+    gh pr create --title "feat: descripción" --base main
+    ```

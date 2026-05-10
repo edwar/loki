@@ -2,11 +2,11 @@
 
 ## 1. Resumen Ejecutivo
 
-Loki es una plataforma integral de gestión empresarial que automatiza el registro de compras mediante IA, controla gastos, inventario, proveedores y clientes, con un panel administrativo visual. El sistema implementa soft delete para todas las eliminaciones y está diseñado para funcionar de manera responsive en cualquier dispositivo.
+Loki es una plataforma integral de gestión empresarial que automatiza el registro de compras, controla gastos, inventario, proveedores y clientes, genera reportes PDF, con un panel administrativo visual. El sistema implementa soft delete para todas las eliminaciones y está diseñado para funcionar de manera responsive en cualquier dispositivo.
 
 ### Estado Actual: 🟢 Producción
 
-El proyecto se encuentra en fase de producción activa. Los módulos core CRUD, IA para receipts, dashboard con gráficos, sistema de producción/recetas, autenticación, auditoría y PWA offline están completamente implementados.
+El proyecto se encuentra en fase de producción activa. Los módulos core CRUD, dashboard con gráficos, sistema de producción/recetas, autenticación, auditoría, PWA offline y reportes PDF están completamente implementados.
 
 ---
 
@@ -366,6 +366,7 @@ app/
 ├── (protected)/
 │   ├── layout.tsx
 │   ├── dashboard/page.tsx
+│   ├── reportes/page.tsx ← PDF reports
 │   ├── inventario/page.tsx ← Unificado (compras + insumos)
 │   ├── produccion/page.tsx
 │   ├── productos/page.tsx
@@ -378,36 +379,33 @@ app/
 │   └── auditoria/page.tsx
 ├── api/
 │   ├── auth/
-│   │   ├── register/route.ts
-│   │   └── [...nextauth]/route.ts
-│   ├── purchase-orders/route.ts
-│   └── suppliers/route.ts
+│   ├── reports/
+│   └── ...
 ├── lib/
 │   ├── actions/
 │   ├── auth.ts
 │   ├── prisma.ts
 │   ├── offline-sync.ts
 │   └── utils.ts
-├── components/
-│   ├── ui/
-│   ├── dashboard/
-│   └── forms/
-└── prisma/
-    └── schema.prisma
+└── components/
+    ├── ui/
+    ├── reports/
+    └── dashboard/
 ```
 
 **Flujo del sidebar (orden operativo):**
 1. Dashboard
-2. Inventario (compras + insumos unificados)
-3. Producción
-4. Productos
-5. Ventas
-6. Gastos
-7. Proveedores
-8. Clientes
-9. Bienes
-10. Equipo
-11. Auditoría
+2. Reportes (PDF)
+3. Inventario (compras + insumos unificados)
+4. Producción
+5. Productos
+6. Ventas
+7. Gastos
+8. Proveedores
+9. Clientes
+10. Bienes
+11. Equipo
+12. Auditoría
 
 ---
 
@@ -423,23 +421,23 @@ A continuación propongo features adicionales que podrían agregar valor al proy
 
 - [x] **Reportes PDF**: Generación de reportes mensuales/trimestrales en PDF para exportar: estado de resultados, inventario, historial de compras.
 
-- [ ] **Multi-moneda**: Soporte para registrar precios en diferentes monedas, con tipo de cambio configurable.
+### 8.2 Otras Features (Pendientes de Evaluar)
 
-### 8.2 Mejoras en el Módulo de IA
-
-- [ ] **Historial de extracción**: Guardar las imágenes procesadas junto con los datos extraídos para revisión posterior.
-- [ ] **Validación de confianza**: Mostrar un % de certeza en los datos extraídos por la IA para que el usuario sepa qué verificar.
-- [ ] **Templates por proveedor**: Si un proveedor emite receipts con formato similar, la IA aprende a reconocerlos mejor.
-- [x] **Guía de uso**: Página `/guia` con instrucciones de uso del sistema.
+- [ ] **Multi-moneda**: Soporte para registrar precios en diferentes monedas. (Baja prioridad - útil solo si hay operaciones internacionales)
 
 ---
 
-## 9. Próximos Pasos
+## 9. Estado Final
 
-1. **Scope inicial**: ✅ Core (CRUDs + Dashboard + Producción) — Completado.
-2. **Testing**: Verificar el sistema en dispositivos reales (móvil, tablet, desktop).
-3. **Documentación**: Documentar arquitectura, decisiones técnicas y guías de uso.
+✅ **Core completo**: CRUDs + Dashboard + Producción + Reportes  
+✅ **UI/UX estandarizado**: Pattern CTA con modales  
+✅ **Offline support**: PWA con sync  
+✅ **Documentación**: Guía de uso en `/guia`
+
+Pendientes (no críticos):
+- [ ] Testing en dispositivos reales (móvil, tablet, desktop)
+- [ ] Documentación técnica (arquitectura, decisiones)
 
 ---
 
-*Documento generado para revisión y ajuste antes de iniciar desarrollo.*
+*Documento actualizado tras implementación de features.*
