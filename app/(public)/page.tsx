@@ -23,17 +23,17 @@ import { ThemeToggle } from '@/components/theme-toggle'
 
 export const metadata: Metadata = {
   title: 'Loki - Gestión Empresarial Completa para Emprendedores',
-  description: 'Controla tu negocio con inteligencia real. Loki ofrece control de inventario, ventas, producción, gastos y reportes PDF en una plataforma diseñada para emprendedores modernos.',
-openGraph: {
+  description: 'Plataforma de gestión integral para emprendedores. Controla inventario, ventas, producción, gastos y genera reportes PDF.',
+  openGraph: {
     title: 'Loki - Gestión Empresarial Completa para Emprendedores',
-    description: 'Controla inventario, ventas, producción, gastos y reportes PDF en una plataforma.',
+    description: 'Plataforma de gestión integral para emprendedores. Controla inventario, ventas, producción, gastos y genera reportes PDF.',
     url: '/',
     images: [{ url: '/og.webp', width: 1200, height: 630, alt: 'Loki - Gestión Empresarial' }],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Loki - Gestión Empresarial Completa para Emprendedores',
-    description: 'Controla tu negocio con inteligencia real.',
+    description: 'Plataforma de gestión integral para emprendedores. Controla inventario, ventas, producción, gastos y reportes PDF.',
     images: ['/og.webp'],
   },
 }
