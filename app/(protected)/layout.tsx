@@ -18,11 +18,11 @@ import {
   LogOut,
   User,
   Building2,
-  ShoppingCart,
   ChevronRight,
   Factory,
   Shield,
-  ShieldAlert
+  ShieldAlert,
+  FileText
 } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { ThemeToggle } from '@/components/theme-toggle'
@@ -31,6 +31,7 @@ import { SyncManager } from '@/components/sync-manager'
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+  { name: 'Reportes', href: '/reportes', icon: FileText, roles: ['admin', 'manager'] },
   { name: 'Inventario', href: '/inventario', icon: Package, roles: ['admin', 'manager'] },
   { name: 'Producción', href: '/produccion', icon: Factory },
   { name: 'Productos', href: '/productos', icon: ShoppingBag },
@@ -114,33 +115,33 @@ export default function ProtectedLayout({
             {navigation
               .filter(item => !item.roles || item.roles.includes(session?.user?.role as string))
               .map((item, index) => {
-              const isActive = pathname === item.href ||
-                (item.href !== '/dashboard' && pathname.startsWith(item.href))
-              return (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  onClick={() => setMobileOpen(false)}
-                  className={cn(
-                    'group flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-semibold transition-all duration-300 relative overflow-hidden',
-                    isActive
-                      ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/20'
-                      : 'text-muted-foreground hover:bg-accent/50 hover:text-foreground'
-                  )}
-                >
-                  <item.icon size={18} className={cn(isActive ? 'text-white' : 'text-primary/70 group-hover:text-primary')} />
-                  <span className="flex-1">{item.name}</span>
+                const isActive = pathname === item.href ||
+                  (item.href !== '/dashboard' && pathname.startsWith(item.href))
+                return (
+                  <Link
+                    key={item.name}
+                    href={item.href}
+                    onClick={() => setMobileOpen(false)}
+                    className={cn(
+                      'group flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-semibold transition-all duration-300 relative overflow-hidden',
+                      isActive
+                        ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/20'
+                        : 'text-muted-foreground hover:bg-accent/50 hover:text-foreground'
+                    )}
+                  >
+                    <item.icon size={18} className={cn(isActive ? 'text-white' : 'text-primary/70 group-hover:text-primary')} />
+                    <span className="flex-1">{item.name}</span>
 
-                  {item.name === 'Insumos' && lowStockCount > 0 && (
-                    <span className="flex items-center justify-center w-5 h-5 rounded-full bg-rose-500 text-white text-[10px] font-bold shadow-sm animate-pulse">
-                      {lowStockCount}
-                    </span>
-                  )}
+                    {item.name === 'Insumos' && lowStockCount > 0 && (
+                      <span className="flex items-center justify-center w-5 h-5 rounded-full bg-rose-500 text-white text-[10px] font-bold shadow-sm animate-pulse">
+                        {lowStockCount}
+                      </span>
+                    )}
 
-                  {isActive && item.name !== 'Insumos' && <ChevronRight size={14} className="opacity-50" />}
-                </Link>
-              )
-            })}
+                    {isActive && item.name !== 'Insumos' && <ChevronRight size={14} className="opacity-50" />}
+                  </Link>
+                )
+              })}
           </nav>
 
           {/* User & Settings */}
@@ -198,7 +199,7 @@ export default function ProtectedLayout({
           </div>
         </div>
       </main>
-      
+
       <SyncManager />
     </div>
   )
