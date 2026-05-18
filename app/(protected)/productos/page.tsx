@@ -1,13 +1,18 @@
 import { getProducts } from '@/lib/actions/products'
 import { getSupplies } from '@/lib/actions/supplies'
+import { prisma } from '@/lib/prisma'
 import { ProductosClient } from './productos-client'
 
 export const dynamic = 'force-dynamic'
 
 export default async function ProductosPage() {
-  const [productsRaw, suppliesRaw] = await Promise.all([
+  const [productsRaw, suppliesRaw, dbCategories] = await Promise.all([
     getProducts(),
-    getSupplies()
+    getSupplies(),
+    prisma.category.findMany({
+      where: { type: 'product', deletedAt: null },
+      orderBy: { name: 'asc' }
+    })
   ])
 
   const products = productsRaw.map((p: any) => {
@@ -42,7 +47,7 @@ export default async function ProductosPage() {
     return {
       id: p.id,
       name: p.name,
-      category: p.category,
+      category: p.category?.name || null,
       salePrice,
       currentStock,
       yield: yieldAmount,
@@ -58,7 +63,9 @@ export default async function ProductosPage() {
     unitsPerPack: Number(s.unitsPerPack)
   }))
 
-  const categories = [...new Set(products.map((p: any) => p.category).filter(Boolean) as string[])]
+  const productCategories = products.map((p: any) => p.category).filter(Boolean) as string[]
+  const dbCategoryNames = dbCategories.map((c) => c.name)
+  const categories = [...new Set([...productCategories, ...dbCategoryNames])]
 
   return (
     <ProductosClient

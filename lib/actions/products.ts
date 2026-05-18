@@ -8,6 +8,7 @@ export async function getProducts() {
   return prisma.product.findMany({
     where: { deletedAt: null },
     include: {
+      category: true,
       recipeItems: {
         where: { deletedAt: null },
         include: { supply: true },
@@ -19,14 +20,22 @@ export async function getProducts() {
 
 export async function createProduct(formData: FormData) {
   const name = formData.get('name') as string
-  const categoryId = formData.get('categoryId') as string | null
+  const categoryName = formData.get('category') as string | null
   const salePrice = parseFloat(formData.get('salePrice') as string) || 0
   const yieldAmount = parseFloat(formData.get('yield') as string) || 1
+
+  let categoryId = null
+  if (categoryName) {
+    const category = await prisma.category.findFirst({
+      where: { name: categoryName, type: 'product', deletedAt: null }
+    })
+    categoryId = category?.id || null
+  }
 
   await prisma.product.create({
     data: {
       name,
-      categoryId: categoryId || null,
+      categoryId,
       salePrice,
       yield: yieldAmount,
     },
@@ -75,15 +84,23 @@ export async function deleteRecipeItem(id: string) {
 
 export async function updateProduct(id: string, formData: FormData) {
   const name = formData.get('name') as string
-  const categoryId = formData.get('categoryId') as string | null
+  const categoryName = formData.get('category') as string | null
   const salePrice = parseFloat(formData.get('salePrice') as string) || 0
   const yieldAmount = parseFloat(formData.get('yield') as string) || 1
+
+  let categoryId = null
+  if (categoryName) {
+    const category = await prisma.category.findFirst({
+      where: { name: categoryName, type: 'product', deletedAt: null }
+    })
+    categoryId = category?.id || null
+  }
 
   await prisma.product.update({
     where: { id },
     data: {
       name,
-      categoryId: categoryId || null,
+      categoryId,
       salePrice,
       yield: yieldAmount,
     },
