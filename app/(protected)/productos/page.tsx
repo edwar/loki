@@ -54,7 +54,8 @@ export default async function ProductosPage() {
   const supplies = suppliesRaw.map((s: any) => ({
     id: s.id,
     name: s.name,
-    unit: s.unit
+    unit: s.unit,
+    unitsPerPack: Number(s.unitsPerPack)
   }))
 
   const categories = [...new Set(products.map((p: any) => p.category).filter(Boolean) as string[])]
