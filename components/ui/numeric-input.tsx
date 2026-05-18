@@ -93,7 +93,6 @@ export const NumericInput = React.forwardRef<HTMLInputElement, NumericInputProps
           'focus:outline-none focus:border-primary',
           'disabled:bg-muted disabled:cursor-not-allowed',
           'text-foreground',
-          'text-right',
           className)}
       />
     )

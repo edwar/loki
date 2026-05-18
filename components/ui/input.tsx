@@ -33,6 +33,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           'focus:outline-none focus:border-primary',
           'disabled:bg-muted disabled:cursor-not-allowed',
           'text-foreground',
+          'text-left',
           className
         )}
         ref={ref}
