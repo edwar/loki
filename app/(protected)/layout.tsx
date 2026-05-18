@@ -172,20 +172,36 @@ export default function ProtectedLayout({
               if (visibleItems.length === 0) return null
 
               const isExpanded = expandedSections[section.title]
-              const sectionActive = visibleItems.some(item => 
+              const sectionActive = visibleItems.some(item =>
                 pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href))
               )
 
               return (
-                <div key={section.title} className="mb-4">
+                <div
+                  key={section.title}
+                  className={cn(
+                    'mb-2 py-3 rounded-lg transition-colors duration-200 border-l-2',
+                    sectionActive
+                      ? 'border-primary! bg-primary/10!'
+                      : 'border-transparent! hover:border-border/50!'
+                  )}
+                >
                   <button
                     onClick={() => setExpandedSections(prev => ({ ...prev, [section.title]: !prev[section.title] }))}
-                    className="flex items-center justify-between w-full px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 hover:text-muted-foreground/80 transition-colors"
+                    className={cn(
+                      'flex items-center justify-between w-full px-3 py-2 text-[10px] font-bold uppercase tracking-widest transition-all duration-200',
+                      sectionActive
+                        ? 'text-primary'
+                        : 'text-muted-foreground/60 hover:text-muted-foreground/80'
+                    )}
                   >
-                    <span>{section.title}</span>
-                    <ChevronDown 
-                      size={14} 
-                      className={cn('transition-transform duration-200', isExpanded ? 'rotate-180' : '')} 
+                    <div className="flex items-center gap-2">
+                      {sectionActive && <div className="w-1.5 h-1.5 rounded-full bg-primary" />}
+                      <span>{section.title}</span>
+                    </div>
+                    <ChevronDown
+                      size={14}
+                      className={cn('transition-transform duration-200', isExpanded ? 'rotate-180' : '')}
                     />
                   </button>
                   <div className={cn('space-y-1 overflow-hidden transition-all duration-300', isExpanded ? 'mt-1' : 'h-0')}>
@@ -200,12 +216,15 @@ export default function ProtectedLayout({
                           href={item.href}
                           onClick={() => setMobileOpen(false)}
                           className={cn(
-                            'group flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-semibold transition-all duration-300',
+                            'group flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-semibold transition-all duration-300 relative',
                             isActive
-                              ? 'bg-primary text-primary-foreground shadow-md shadow-primary/20'
+                              ? 'bg-primary text-primary-foreground shadow-md shadow-primary/20 ml-8'
                               : 'text-muted-foreground hover:bg-accent/50 hover:text-foreground'
                           )}
                         >
+                          {isActive && (
+                            <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-white/30 rounded-r-full" />
+                          )}
                           {Icon && <Icon size={16} className={cn(isActive ? 'text-white' : 'text-primary/70 group-hover:text-primary')} />}
                           <span className="flex-1">{item.name}</span>
                           {isActive && <ChevronRight size={12} className="opacity-50" />}
