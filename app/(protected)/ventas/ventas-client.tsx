@@ -109,21 +109,19 @@ export function VentasClient({ products, customers, sales }: VentasClientProps) 
             />
           )}
           {products.length > 0 ? (
-            <button
+            <Button
               onClick={handleOpenNew}
-              className="h-12 px-6 rounded-lg bg-primary text-primary-foreground font-bold flex items-center gap-2 hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20"
             >
               <Plus size={20} />
               Nueva Venta
-            </button>
+            </Button>
           ) : (
-            <button
+            <Button
               disabled
-              className="h-12 px-6 rounded-lg bg-muted text-muted-foreground font-bold flex items-center gap-2 cursor-not-allowed opacity-50"
             >
               <ShoppingBag size={20} />
               Sin productos
-            </button>
+            </Button>
           )}
         </div>
       </div>

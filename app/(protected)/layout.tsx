@@ -29,6 +29,7 @@ import { useState, useEffect } from 'react'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { getLowStockCount } from '@/lib/actions/alerts'
 import { SyncManager } from '@/components/sync-manager'
+import { Button } from '@/components/ui/button'
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
@@ -81,12 +82,12 @@ export default function ProtectedLayout({
 
       {/* Mobile Trigger */}
       <div className="lg:hidden fixed top-4 right-4 z-50">
-        <button
+        <Button
           onClick={() => setMobileOpen(!mobileOpen)}
           className="p-3 rounded-lg bg-card/80 backdrop-blur-xl border border-border shadow-xl active:scale-95 transition-all"
         >
           {mobileOpen ? <X size={20} /> : <Menu size={20} />}
-        </button>
+        </Button>
       </div>
 
       {/* Sidebar */}
@@ -170,13 +171,13 @@ export default function ProtectedLayout({
                 <div className="flex items-center justify-center">
                   <ThemeToggle />
                 </div>
-                <button
+                <Button
                   onClick={handleSignOut}
-                  className="flex items-center justify-center gap-2 bg-background/50 rounded-lg h-10 border border-border/50 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
                   title="Cerrar Sesión"
+                  variant="destructive"
                 >
                   <LogOut size={16} />
-                </button>
+                </Button>
               </div>
             </div>
             <div className="mt-4 text-[10px] font-bold text-center text-muted-foreground/40 uppercase tracking-[0.2em]">

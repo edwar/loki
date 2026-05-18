@@ -72,13 +72,12 @@ export function GastosClient({ expenses }: GastosClientProps) {
             Registra y monitorea los costos indirectos de tu operación.
           </p>
         </div>
-        <button
+        <Button
           onClick={handleOpenNew}
-          className="h-12 px-6 rounded-lg bg-rose-500 text-white font-bold flex items-center gap-2 hover:bg-rose-600 transition-colors shadow-lg shadow-rose-500/20"
         >
           <Plus size={20} />
           Nuevo Gasto
-        </button>
+        </Button>
       </div>
 
       {/* Stats */}

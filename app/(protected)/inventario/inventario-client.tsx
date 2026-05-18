@@ -11,6 +11,7 @@ import { formatDate } from '@/lib/utils'
 import { Modal } from '@/components/ui/modal'
 import { PurchaseForm } from '@/components/purchase-form'
 import { SupplyForm } from '@/components/supply-form'
+import { Button } from '@/components/ui/button'
 
 interface Supplier {
   id: string
@@ -68,29 +69,28 @@ export function InventarioClient({ supplies, suppliers }: InventarioClientProps)
             Controla tu stock de insumos y registra compras.
           </p>
         </div>
-<div className="flex gap-3">
-            {supplies.length > 0 && (
-              <ExportButton
-                data={exportData}
-                filename={`Inventario_${new Date().toISOString().split('T')[0]}`}
-                className="h-12 px-6 rounded-lg font-bold"
-              />
-            )}
-            <button
-              onClick={() => setSupplyModalOpen(true)}
-              className="h-12 px-6 rounded-lg bg-secondary text-secondary-foreground font-bold flex items-center gap-2 hover:bg-secondary/90 transition-colors shadow-lg shadow-secondary/20"
-            >
-              <Plus size={20} />
-              Nuevo Insumo
-            </button>
-            <button
-              onClick={() => setModalOpen(true)}
-              className="h-12 px-6 rounded-lg bg-primary text-primary-foreground font-bold flex items-center gap-2 hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20"
-            >
-              <Plus size={20} />
-              Registrar Compra
-            </button>
-          </div>
+        <div className="flex gap-3">
+          {supplies.length > 0 && (
+            <ExportButton
+              data={exportData}
+              filename={`Inventario_${new Date().toISOString().split('T')[0]}`}
+              className="h-12 px-6 rounded-lg font-bold"
+            />
+          )}
+          <Button
+            onClick={() => setSupplyModalOpen(true)}
+            variant='secondary'
+          >
+            <Plus size={20} />
+            Nuevo Insumo
+          </Button>
+          <Button
+            onClick={() => setModalOpen(true)}
+          >
+            <Plus size={20} />
+            Registrar Compra
+          </Button>
+        </div>
       </div>
 
       {/* Stats */}

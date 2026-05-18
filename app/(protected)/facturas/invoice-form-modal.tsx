@@ -252,13 +252,14 @@ export function InvoiceFormModal({ isOpen, onClose, onSuccess, customers, produc
                     {formatCurrency(item.quantity * item.unitPrice)}
                   </div>
                   <div className="col-span-1">
-                    <button
+                    <Button
                       type="button"
                       onClick={() => removeItem(item.id)}
-                      className="text-red-500 hover:text-red-700"
+                      variant="destructive"
+                      size="sm"
                     >
                       <Trash2 className="h-4 w-4" />
-                    </button>
+                    </Button>
                   </div>
                 </div>
               ))}

@@ -70,13 +70,12 @@ export function ClientesClient({ customers }: ClientesClientProps) {
             Administra tu base de datos y fideliza a tus compradores.
           </p>
         </div>
-        <button
+        <Button
           onClick={handleOpenNew}
-          className="h-12 px-6 rounded-lg bg-primary text-primary-foreground font-bold flex items-center gap-2 hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20"
         >
           <Plus size={20} />
           Nuevo Cliente
-        </button>
+        </Button>
       </div>
 
       {/* Stats */}

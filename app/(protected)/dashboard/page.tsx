@@ -273,7 +273,7 @@ export default async function DashboardPage(props: {
         <div className="flex items-center gap-3">
           <DashboardFilters />
           <Link href="/ventas">
-            <Button className="rounded-lg h-12 px-6 font-bold shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 active:scale-95 transition-all">
+            <Button className="font-bold shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 active:scale-95 transition-all">
               <Plus size={20} className="mr-2" />
               Nueva Venta
             </Button>
@@ -370,7 +370,7 @@ export default async function DashboardPage(props: {
                   ))}
                 </div>
                 <Link href="/insumos" className="block">
-                  <Button className="w-full rounded-lg border-amber-500/30 text-amber-700 dark:text-amber-400 hover:bg-amber-500/10 h-11 font-bold">
+                  <Button variant='destructive' className="w-full font-bold">
                     Gestionar Inventario
                   </Button>
                 </Link>

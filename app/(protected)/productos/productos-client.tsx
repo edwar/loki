@@ -8,6 +8,7 @@ import { ProductCard } from '@/components/product-card'
 import { Modal } from '@/components/ui/modal'
 import { ProductFormModal } from '@/components/product-form-modal'
 import { EmptyState } from '@/components/ui/empty-state'
+import { Button } from '@/components/ui/button'
 
 interface Supply {
   id: string
@@ -73,13 +74,12 @@ export function ProductosClient({ products, categories, allSupplies }: Productos
             Define tus productos y sus recetas para un control automático de inventario.
           </p>
         </div>
-        <button
+        <Button
           onClick={handleOpenNew}
-          className="h-12 px-6 rounded-lg bg-primary text-primary-foreground font-bold flex items-center gap-2 hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20"
         >
           <Plus size={20} />
           Nuevo Producto
-        </button>
+        </Button>
       </div>
 
       {/* Product List */}

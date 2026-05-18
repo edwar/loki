@@ -69,13 +69,12 @@ export function CategoriasClient({ categories }: CategoriasClientProps) {
             Administra las categorías para insumos y productos.
           </p>
         </div>
-        <button
+        <Button
           onClick={handleOpenNew}
-          className="h-12 px-6 rounded-lg bg-primary text-primary-foreground font-bold flex items-center gap-2 hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20"
         >
           <Plus size={20} />
           Nueva Categoría
-        </button>
+        </Button>
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">
@@ -165,7 +164,7 @@ function CategoryForm({ category, onSuccess, onClose }: { category?: Category | 
     e.preventDefault()
     setLoading(true)
     const formData = new FormData(e.currentTarget)
-    
+
     if (isEditing) {
       await updateCategory(category.id, formData)
     } else {
