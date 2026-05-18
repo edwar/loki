@@ -138,7 +138,7 @@ export default function ProtectedLayout({
       <div className="lg:hidden fixed top-4 right-4 z-50">
         <Button
           onClick={() => setMobileOpen(!mobileOpen)}
-          className="p-3 rounded-lg bg-card/80 backdrop-blur-xl border border-border shadow-xl active:scale-95 transition-all"
+          className="p-3 text-foreground rounded-lg bg-card/80 backdrop-blur-xl border border-border shadow-xl active:scale-95 transition-all"
         >
           {mobileOpen ? <X size={20} /> : <Menu size={20} />}
         </Button>
