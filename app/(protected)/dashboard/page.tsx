@@ -330,6 +330,17 @@ export default async function DashboardPage(props: {
 
         {/* Alerts & Insights */}
         <div className="lg:col-span-4 space-y-8">
+
+          {/* Productivity Insight */}
+          <Card className="rounded-lg border-primary/20 bg-primary/3 p-8 space-y-4">
+            <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+              <ArrowUpRight className="text-primary" size={20} />
+            </div>
+            <h4 className="font-bold">Dato del día</h4>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              Tus ventas han crecido un <span className="text-primary font-bold">{stats.salesChange.toFixed(1)}%</span> respecto a ayer. ¡Buen trabajo!
+            </p>
+          </Card>
           {lowStock.length > 0 && (
             <Card className="rounded-lg border-amber-500/20 bg-amber-500/3 overflow-hidden relative group">
               <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:scale-125 transition-transform duration-1000">
@@ -366,17 +377,6 @@ export default async function DashboardPage(props: {
               </CardContent>
             </Card>
           )}
-
-          {/* Productivity Insight */}
-          <Card className="rounded-lg border-primary/20 bg-primary/3 p-8 space-y-4">
-            <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-              <ArrowUpRight className="text-primary" size={20} />
-            </div>
-            <h4 className="font-bold">Dato del día</h4>
-            <p className="text-sm text-muted-foreground leading-relaxed">
-              Tus ventas han crecido un <span className="text-primary font-bold">{stats.salesChange.toFixed(1)}%</span> respecto a ayer. ¡Buen trabajo!
-            </p>
-          </Card>
         </div>
       </div>
     </div>
