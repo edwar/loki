@@ -204,7 +204,7 @@ export default function ProtectedLayout({
                       className={cn('transition-transform duration-200', isExpanded ? 'rotate-180' : '')}
                     />
                   </button>
-                  <div className={cn('space-y-1 overflow-hidden transition-all duration-300', isExpanded ? 'mt-1' : 'h-0')}>
+                  <div className={cn('space-y-1 overflow-hidden transition-all duration-300 pr-2', isExpanded ? 'mt-1' : 'h-0')}>
                     {visibleItems.map((item) => {
                       const isActive = pathname === item.href ||
                         (item.href !== '/dashboard' && pathname.startsWith(item.href))
@@ -219,7 +219,7 @@ export default function ProtectedLayout({
                             'group flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-semibold transition-all duration-300 relative',
                             isActive
                               ? 'bg-primary text-primary-foreground shadow-md shadow-primary/20 ml-8'
-                              : 'text-muted-foreground hover:bg-accent/50 hover:text-foreground'
+                              : 'text-muted-foreground hover:bg-accent/50 hover:text-foreground mr-8'
                           )}
                         >
                           {isActive && (
