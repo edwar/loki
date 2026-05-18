@@ -22,13 +22,24 @@ export async function POST(request: Request) {
 
     // Procesar cada item para crear o actualizar insumos
     const processedItems = await Promise.all(items.map(async (item: any) => {
-      // Buscar insumo existente por nombre (insensible a mayúsculas)
-      let supply = await prisma.supply.findFirst({
-        where: {
-          name: { equals: item.supplyName, mode: 'insensitive' },
-          deletedAt: null
-        }
-      })
+      let supply = null
+
+      // Si viene supplyId, usar ese supply directamente
+      if (item.supplyId) {
+        supply = await prisma.supply.findUnique({
+          where: { id: item.supplyId, deletedAt: null }
+        })
+      }
+
+      // Si no se encontró por ID, buscar por nombre (fallback)
+      if (!supply && item.supplyName) {
+        supply = await prisma.supply.findFirst({
+          where: {
+            name: { equals: item.supplyName, mode: 'insensitive' },
+            deletedAt: null
+          }
+        })
+      }
 
       if (supply) {
         // Actualizar stock y precio del insumo existente
@@ -44,7 +55,7 @@ export async function POST(request: Request) {
         // Crear nuevo insumo si no existe
         supply = await prisma.supply.create({
           data: {
-            name: item.supplyName,
+            name: item.supplyName || 'Sin nombre',
             unit: item.unit || 'unidad',
             currentStock: item.quantity,
             purchasePrice: item.unitPrice,
@@ -55,7 +66,7 @@ export async function POST(request: Request) {
 
       return {
         supplyId: supply.id,
-        supplyName: item.supplyName,
+        supplyName: supply.name,
         quantity: item.quantity,
         unit: item.unit || 'unidad',
         unitPrice: item.unitPrice,

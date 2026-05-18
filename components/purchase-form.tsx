@@ -16,16 +16,6 @@ import { formatCurrency } from '@/lib/utils'
 import { Combobox } from '@/components/ui/combobox'
 import { ConfirmationModal } from '@/components/ui/confirmation-modal'
 import { DatePicker } from '@/components/ui/date-picker'
-
-interface PurchaseItem {
-  id: string
-  nombre: string
-  cantidad: number
-  unidad: string
-  precioUnitario: number
-  subtotal: number
-}
-
 import { UNIDADES } from '@/lib/constants'
 
 interface Supplier {
@@ -33,25 +23,43 @@ interface Supplier {
   name: string
 }
 
+interface Supply {
+  id: string
+  name: string
+  unit: string
+}
+
+interface PurchaseItem {
+  id: string
+  supplyId: string
+  supplyName: string
+  cantidad: number
+  unidad: string
+  precioUnitario: number
+  subtotal: number
+}
+
 interface PurchaseFormProps {
   suppliers: Supplier[]
+  supplies?: Supply[]
   onSuccess?: () => void
   onClose?: () => void
 }
 
-export function PurchaseForm({ suppliers, onSuccess, onClose }: PurchaseFormProps) {
+export function PurchaseForm({ suppliers, supplies = [], onSuccess, onClose }: PurchaseFormProps) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [supplierName, setSupplierName] = useState('')
   const [purchaseDate, setPurchaseDate] = useState(new Date().toISOString().split('T')[0])
   const [items, setItems] = useState<PurchaseItem[]>([
-    { id: crypto.randomUUID(), nombre: '', cantidad: 1, unidad: 'unidad', precioUnitario: 0, subtotal: 0 }
+    { id: crypto.randomUUID(), supplyId: '', supplyName: '', cantidad: 1, unidad: 'unidad', precioUnitario: 0, subtotal: 0 }
   ])
   const [descuentoPorcentaje, setDescuentoPorcentaje] = useState(0)
   const [impuestoPorcentaje, setImpuestoPorcentaje] = useState(0)
   const [indexToRemove, setIndexToRemove] = useState<number | null>(null)
   const [localSuppliers, setLocalSuppliers] = useState(suppliers)
+  const [localSupplies, setLocalSupplies] = useState(supplies)
 
   const calculateTotal = () => {
     const subtotal = items.reduce((sum, item) => sum + item.subtotal, 0)
@@ -62,19 +70,27 @@ export function PurchaseForm({ suppliers, onSuccess, onClose }: PurchaseFormProp
   }
 
   const handleAddItem = () => {
-    setItems([...items, { id: crypto.randomUUID(), nombre: '', cantidad: 1, unidad: 'unidad', precioUnitario: 0, subtotal: 0 }])
+    setItems([...items, { id: crypto.randomUUID(), supplyId: '', supplyName: '', cantidad: 1, unidad: 'unidad', precioUnitario: 0, subtotal: 0 }])
   }
 
   const confirmRemoveItem = () => {
     if (indexToRemove === null) return
     const newItems = items.filter((_, i) => i !== indexToRemove)
-    setItems(newItems.length > 0 ? newItems : [{ id: crypto.randomUUID(), nombre: '', cantidad: 1, unidad: 'unidad', precioUnitario: 0, subtotal: 0 }])
+    setItems(newItems.length > 0 ? newItems : [{ id: crypto.randomUUID(), supplyId: '', supplyName: '', cantidad: 1, unidad: 'unidad', precioUnitario: 0, subtotal: 0 }])
     setIndexToRemove(null)
   }
 
   const handleItemChange = (index: number, field: keyof PurchaseItem, value: string | number) => {
     const newItems = [...items]
     newItems[index] = { ...newItems[index], [field]: value }
+
+    if (field === 'supplyId') {
+      const supply = localSupplies.find(s => s.id === value)
+      if (supply) {
+        newItems[index].supplyName = supply.name
+        newItems[index].unidad = supply.unit
+      }
+    }
 
     if (field === 'cantidad' || field === 'precioUnitario') {
       const rawQty = typeof newItems[index].cantidad === 'string' ? newItems[index].cantidad : String(newItems[index].cantidad)
@@ -85,6 +101,24 @@ export function PurchaseForm({ suppliers, onSuccess, onClose }: PurchaseFormProp
     }
 
     setItems(newItems)
+  }
+
+  const handleSupplyCreate = async (name: string) => {
+    try {
+      const response = await fetch('/api/supplies', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, unit: 'unidad' })
+      })
+      if (response.ok) {
+        const newSupply = await response.json()
+        setLocalSupplies(prev => [...prev, { id: newSupply.id, name: newSupply.name, unit: newSupply.unit }])
+        return newSupply
+      }
+    } catch (err) {
+      console.error('Error creating supply:', err)
+    }
+    return null
   }
 
   const handleSavePurchase = async () => {
@@ -108,7 +142,8 @@ export function PurchaseForm({ suppliers, onSuccess, onClose }: PurchaseFormProp
             const rawQty = typeof item.cantidad === 'string' ? item.cantidad : String(item.cantidad)
             const rawPrice = typeof item.precioUnitario === 'string' ? item.precioUnitario : String(item.precioUnitario)
             return {
-              supplyName: item.nombre,
+              supplyId: item.supplyId,
+              supplyName: item.supplyName || item.supplyId,
               quantity: parseFloat(rawQty.replace(/\./g, '')) || 0,
               unit: item.unidad || 'unidad',
               unitPrice: parseFloat(rawPrice.replace(/\./g, '')) || 0,
@@ -132,7 +167,7 @@ export function PurchaseForm({ suppliers, onSuccess, onClose }: PurchaseFormProp
   const resetForm = () => {
     setSupplierName('')
     setPurchaseDate(new Date().toISOString().split('T')[0])
-    setItems([{ id: crypto.randomUUID(), nombre: '', cantidad: 1, unidad: 'unidad', precioUnitario: 0, subtotal: 0 }])
+    setItems([{ id: crypto.randomUUID(), supplyId: '', supplyName: '', cantidad: 1, unidad: 'unidad', precioUnitario: 0, subtotal: 0 }])
     setDescuentoPorcentaje(0)
     setImpuestoPorcentaje(0)
     setError(null)
@@ -232,11 +267,23 @@ export function PurchaseForm({ suppliers, onSuccess, onClose }: PurchaseFormProp
                 <div className="md:hidden space-y-2">
                   <div className="space-y-1">
                     <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Producto</label>
-                    <Input
-                      value={item.nombre}
-                      onChange={(e) => handleItemChange(index, 'nombre', e.target.value)}
-                      placeholder="Nombre del insumo"
-                      className="h-11"
+                    <Combobox
+                      options={localSupplies.map(s => ({ value: s.id, label: s.name }))}
+                      value={item.supplyId}
+                      onValueChange={async (val) => {
+                        const existing = localSupplies.find(s => s.id === val)
+                        if (existing) {
+                          handleItemChange(index, 'supplyId', val)
+                        } else {
+                          const newSupply = await handleSupplyCreate(val)
+                          if (newSupply) {
+                            handleItemChange(index, 'supplyId', newSupply.id)
+                          }
+                        }
+                      }}
+                      placeholder="Seleccionar insumo..."
+                      className="w-full"
+                      allowCustom
                     />
                   </div>
                   <div className="grid grid-cols-2 gap-2">
@@ -300,11 +347,23 @@ export function PurchaseForm({ suppliers, onSuccess, onClose }: PurchaseFormProp
                 {/* Desktop: inline layout */}
                 <div className="hidden md:grid grid-cols-12 gap-2 items-end">
                   <div className="col-span-4">
-                    <Input
-                      value={item.nombre}
-                      onChange={(e) => handleItemChange(index, 'nombre', e.target.value)}
-                      placeholder="Nombre del insumo"
-                      className="h-11"
+                    <Combobox
+                      options={localSupplies.map(s => ({ value: s.id, label: s.name }))}
+                      value={item.supplyId}
+                      onValueChange={async (val) => {
+                        const existing = localSupplies.find(s => s.id === val)
+                        if (existing) {
+                          handleItemChange(index, 'supplyId', val)
+                        } else {
+                          const newSupply = await handleSupplyCreate(val)
+                          if (newSupply) {
+                            handleItemChange(index, 'supplyId', newSupply.id)
+                          }
+                        }
+                      }}
+                      placeholder="Seleccionar..."
+                      className="w-full"
+                      allowCustom
                     />
                   </div>
                   <div className="col-span-2">
@@ -423,7 +482,7 @@ export function PurchaseForm({ suppliers, onSuccess, onClose }: PurchaseFormProp
         </Button>
         <Button
           onClick={handleSavePurchase}
-          disabled={loading || !supplierName || items.every(i => !i.nombre)}
+          disabled={loading || !supplierName || items.every(i => !i.supplyId && !i.supplyName)}
           className="flex-1 h-12 font-semibold rounded-lg"
         >
           {loading ? (

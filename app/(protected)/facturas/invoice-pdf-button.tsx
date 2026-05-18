@@ -67,7 +67,7 @@ export function InvoicePDFButton({ invoice, businessSettings }: Props) {
         otro: 'Otro'
       }
 
-      let html = `
+      const html = `
 <!DOCTYPE html>
 <html>
 <head>
