@@ -494,15 +494,7 @@ El SEO fue identificado como pendiente en la sección 9. Ya implementado:
 
 **Impacto**: Alto — Necesario para operaciones formales con clientes que requieren comprobantes.
 
-#### B. Presupuestos y Cotizaciones
 
-- [ ] Crear presupuestos desde productos disponibles
-- [ ] Descuentos y validez del presupuesto
-- [ ] Envío por WhatsApp o email
-- [ ] Convertir presupuesto a venta confirmada
-- [ ] Historial de presupuestos por cliente
-
-**Impacto**: Alto — Facilita la venta B2B y pedidos grandes.
 
 #### C. Métricas de Rentabilidad ✅ Implementado
 
@@ -514,15 +506,7 @@ El SEO fue identificado como pendiente en la sección 9. Ya implementado:
 
 **Impacto**: Medio — Permite identificar productos más rentables.
 
-#### D. Control de Lotes y Vencimiento
 
-- [ ] Asignar número de lote a compras de insumos
-- [ ] Fecha de vencimiento por lote
-- [ ] Alertas de productos próximos a vencer
-- [ ] Reporte de inventario por lote
-- [ ] Trazabilidad de lote en producción
-
-**Impacto**: Medio — Esencial para productos perecederos (panadería, repostería).
 
 #### E. Sistema de Alertas Automáticas ✅ Implementado
 
@@ -536,43 +520,18 @@ El SEO fue identificado como pendiente en la sección 9. Ya implementado:
 
 ### 11.3 Mejoras de UX/UI
 
-#### A. Dashboard de Métricas Avanzadas
+#### A. Dashboard de Métricas Avanzadas ✅ Implementado
 
-- [ ] KPIs adicionales: ticket promedio, productos más vendidos, clientes top
-- [ ] Comparación período vs período anterior
+- [x] KPIs adicionales: ticket promedio, productos más vendidos, clientes top
+- [x] Comparación período vs período anterior
 - [ ] Gráfico de tendencias de inventario
-- [ ] Indicador de rotación de inventario
+- [x] Indicador de rotación de inventario
 
-#### B. Calendario de Producción
-
-- [ ] Vista semanal/mensual de producción planificada
-- [ ] Programar producción futura
-- [ ] Capacidad de producción por día (límite de batches)
-- [ ] Notificaciones de producción pendiente
-
-**Impacto**: Bajo-Medio — Útil para panaderías con planificación.
-
-#### C. Exportación Mejorada
+#### B. Exportación Mejorada
 
 - [ ] Exportar a Excel con formato profesional
 - [ ] Exportar dashboard completo (gráficos + datos)
 - [ ] Programar exportación automática mensual
-
-### 11.4 Funcionalidades Operativas
-
-#### A. Backup y Recuperación
-
-- [ ] Exportar base de datos completa (JSON/SQL)
-- [ ] Programar backup manual desde UI
-- [ ] Restaurar desde backup
-
-#### B. Multi-sucursal (Futuro)
-
-- [ ] Estructura para múltiples ubicaciones
-- [ ] Inventario por sucursal
-- [ ] Reportes consolidados
-
-**Nota**: Esta funcionalidad requiere cambios significativos en el schema.
 
 ### 11.5 Priorización Recomendada
 
@@ -582,8 +541,8 @@ El SEO fue identificado como pendiente en la sección 9. Ya implementado:
 | 2 | Facturación | ✅ Completado |
 | 3 | Métricas de Rentabilidad | ✅ Completado |
 | 4 | Alertas Automáticas | ✅ Completado |
-| 5 | Presupuestos | Facilita venta B2B |
-| 6 | Control de Lotes | Solo si hay productos perecederos |
+| 5 | Dashboard Métricas Avanzadas | ✅ Completado |
+| 6 | Exportación Mejorada | Exportar datos a Excel |
 
 ---
 

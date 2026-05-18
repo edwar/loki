@@ -32,23 +32,67 @@ import { getLowStockCount } from '@/lib/actions/alerts'
 import { SyncManager } from '@/components/sync-manager'
 import { Button } from '@/components/ui/button'
 import { NotificationsDropdown } from '@/components/notifications-dropdown'
+import { ChevronDown } from 'lucide-react'
 
-const navigation = [
-  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-  { name: 'Reportes', href: '/reportes', icon: FileText, roles: ['admin', 'manager'] },
-  { name: 'Inventario', href: '/inventario', icon: Package, roles: ['admin', 'manager'] },
-  { name: 'Producción', href: '/produccion', icon: Factory },
-  { name: 'Productos', href: '/productos', icon: ShoppingBag },
-  { name: 'Ventas', href: '/ventas', icon: TrendingUp },
-  { name: 'Facturación', href: '/facturas', icon: FileSignature },
-  { name: 'Gastos', href: '/gastos', icon: Receipt },
-  { name: 'Proveedores', href: '/proveedores', icon: Truck, roles: ['admin', 'manager'] },
-  { name: 'Categorías', href: '/categorias', icon: Tag },
-  { name: 'Clientes', href: '/clientes', icon: Users },
-  { name: 'Rentabilidad', href: '/rentabilidad', icon: Percent },
-  { name: 'Bienes', href: '/bienes', icon: Building2, roles: ['admin'] },
-  { name: 'Equipo', href: '/equipo', icon: Shield, roles: ['admin'] },
-  { name: 'Auditoría', href: '/auditoria', icon: ShieldAlert, roles: ['admin'] },
+interface NavItem {
+  name: string
+  href: string
+  icon?: any
+  roles?: string[]
+}
+
+interface NavSection {
+  title: string
+  items: NavItem[]
+  defaultOpen?: boolean
+}
+
+const navigation: NavSection[] = [
+  {
+    title: 'Principal',
+    defaultOpen: true,
+    items: [
+      { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+      { name: 'Reportes', href: '/reportes', icon: FileText, roles: ['admin', 'manager'] },
+    ]
+  },
+  {
+    title: 'Inventario',
+    defaultOpen: true,
+    items: [
+      { name: 'Inventario', href: '/inventario', icon: Package, roles: ['admin', 'manager'] },
+      { name: 'Producción', href: '/produccion', icon: Factory },
+      { name: 'Productos', href: '/productos', icon: ShoppingBag },
+    ]
+  },
+  {
+    title: 'Ventas',
+    defaultOpen: true,
+    items: [
+      { name: 'Ventas', href: '/ventas', icon: TrendingUp },
+      { name: 'Facturación', href: '/facturas', icon: FileSignature },
+      { name: 'Rentabilidad', href: '/rentabilidad', icon: Percent },
+    ]
+  },
+  {
+    title: 'Gastos',
+    defaultOpen: false,
+    items: [
+      { name: 'Gastos', href: '/gastos', icon: Receipt },
+    ]
+  },
+  {
+    title: 'Administración',
+    defaultOpen: false,
+    items: [
+      { name: 'Proveedores', href: '/proveedores', icon: Truck, roles: ['admin', 'manager'] },
+      { name: 'Categorías', href: '/categorias', icon: Tag },
+      { name: 'Clientes', href: '/clientes', icon: Users },
+      { name: 'Bienes', href: '/bienes', icon: Building2, roles: ['admin'] },
+      { name: 'Equipo', href: '/equipo', icon: Shield, roles: ['admin'] },
+      { name: 'Auditoría', href: '/auditoria', icon: ShieldAlert, roles: ['admin'] },
+    ]
+  },
 ]
 
 export default function ProtectedLayout({
@@ -60,6 +104,13 @@ export default function ProtectedLayout({
   const { data: session } = useSession()
   const [mobileOpen, setMobileOpen] = useState(false)
   const [lowStockCount, setLowStockCount] = useState(0)
+  const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>(() => {
+    const initial: Record<string, boolean> = {}
+    navigation.forEach(section => {
+      initial[section.title] = section.defaultOpen || false
+    })
+    return initial
+  })
 
   useEffect(() => {
     getLowStockCount().then(setLowStockCount)
@@ -115,40 +166,56 @@ export default function ProtectedLayout({
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 px-4 space-y-1 overflow-y-auto scrollbar-none">
-            <div className="px-4 mb-4">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">Menú Principal</p>
-            </div>
-            {navigation
-              .filter(item => !item.roles || item.roles.includes(session?.user?.role as string))
-              .map((item) => {
-                const isActive = pathname === item.href ||
-                  (item.href !== '/dashboard' && pathname.startsWith(item.href))
-                return (
-                  <Link
-                    key={item.name}
-                    href={item.href}
-                    onClick={() => setMobileOpen(false)}
-                    className={cn(
-                      'group flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-semibold transition-all duration-300 relative overflow-hidden',
-                      isActive
-                        ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/20'
-                        : 'text-muted-foreground hover:bg-accent/50 hover:text-foreground'
-                    )}
+          <nav className="flex-1 px-3 overflow-y-auto scrollbar-none">
+            {navigation.map((section) => {
+              const visibleItems = section.items.filter(item => !item.roles || item.roles.includes(session?.user?.role as string))
+              if (visibleItems.length === 0) return null
+
+              const isExpanded = expandedSections[section.title]
+              const sectionActive = visibleItems.some(item => 
+                pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href))
+              )
+
+              return (
+                <div key={section.title} className="mb-4">
+                  <button
+                    onClick={() => setExpandedSections(prev => ({ ...prev, [section.title]: !prev[section.title] }))}
+                    className="flex items-center justify-between w-full px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 hover:text-muted-foreground/80 transition-colors"
                   >
-                    <item.icon size={18} className={cn(isActive ? 'text-white' : 'text-primary/70 group-hover:text-primary')} />
-                    <span className="flex-1">{item.name}</span>
+                    <span>{section.title}</span>
+                    <ChevronDown 
+                      size={14} 
+                      className={cn('transition-transform duration-200', isExpanded ? 'rotate-180' : '')} 
+                    />
+                  </button>
+                  <div className={cn('space-y-1 overflow-hidden transition-all duration-300', isExpanded ? 'mt-1' : 'h-0')}>
+                    {visibleItems.map((item) => {
+                      const isActive = pathname === item.href ||
+                        (item.href !== '/dashboard' && pathname.startsWith(item.href))
+                      const Icon = item.icon
 
-                    {item.name === 'Insumos' && lowStockCount > 0 && (
-                      <span className="flex items-center justify-center w-5 h-5 rounded-full bg-rose-500 text-white text-[10px] font-bold shadow-sm animate-pulse">
-                        {lowStockCount}
-                      </span>
-                    )}
-
-                    {isActive && item.name !== 'Insumos' && <ChevronRight size={14} className="opacity-50" />}
-                  </Link>
-                )
-              })}
+                      return (
+                        <Link
+                          key={item.name}
+                          href={item.href}
+                          onClick={() => setMobileOpen(false)}
+                          className={cn(
+                            'group flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-semibold transition-all duration-300',
+                            isActive
+                              ? 'bg-primary text-primary-foreground shadow-md shadow-primary/20'
+                              : 'text-muted-foreground hover:bg-accent/50 hover:text-foreground'
+                          )}
+                        >
+                          {Icon && <Icon size={16} className={cn(isActive ? 'text-white' : 'text-primary/70 group-hover:text-primary')} />}
+                          <span className="flex-1">{item.name}</span>
+                          {isActive && <ChevronRight size={12} className="opacity-50" />}
+                        </Link>
+                      )
+                    })}
+                  </div>
+                </div>
+              )
+            })}
           </nav>
 
           {/* User & Settings */}

@@ -11,6 +11,7 @@ import { ConfirmationModal } from '@/components/ui/confirmation-modal'
 import { Modal } from '@/components/ui/modal'
 import { CustomerFormModal } from '@/components/customer-form-modal'
 import { EmptyState } from '@/components/ui/empty-state'
+import { ExportButton } from '@/components/ui/export-button'
 
 interface Customer {
   id: string
