@@ -31,6 +31,7 @@ import { ThemeToggle } from '@/components/theme-toggle'
 import { getLowStockCount } from '@/lib/actions/alerts'
 import { SyncManager } from '@/components/sync-manager'
 import { Button } from '@/components/ui/button'
+import { NotificationsDropdown } from '@/components/notifications-dropdown'
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
