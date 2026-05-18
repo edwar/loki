@@ -20,13 +20,10 @@ interface SalesChartProps {
 export function SalesChart({ data }: SalesChartProps) {
   return (
     <Card className="rounded-lg border-border/40 bg-card/30 backdrop-blur-md overflow-hidden">
-      <CardHeader className="flex flex-row items-center justify-between pb-2">
-        <div className="space-y-1">
-          <CardTitle className="text-xl font-bold font-display">Flujo de Ventas</CardTitle>
-          <p className="text-xs text-muted-foreground font-medium">Historial de los últimos 30 días</p>
-        </div>
-        <div className="p-2 rounded-lg bg-primary/10 text-primary">
+      <CardHeader className="flex flex-row items-center justify-between p-2">
+        <div className="space-y-1 flex items-center gap-2">
           <TrendingUp size={20} />
+          <CardTitle className="text-base font-bold flex items-center gap-2">Flujo de Ventas</CardTitle>
         </div>
       </CardHeader>
       <CardContent className="px-2 pt-4">

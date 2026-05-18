@@ -12,7 +12,7 @@ export const dynamic = 'force-dynamic'
 
 export default async function AuditoriaPage() {
   const session = await getServerSession(authOptions)
-  
+
   if (session?.user?.role !== 'admin') {
     redirect('/dashboard')
   }
@@ -32,8 +32,11 @@ export default async function AuditoriaPage() {
       </div>
 
       <Card className="rounded-lg border-border/40 bg-card/30 backdrop-blur-md overflow-hidden shadow-sm">
-        <CardHeader className="px-4 sm:px-6 py-4 flex flex-row items-center justify-between border-b border-border/10">
-          <CardTitle className="text-xl">Actividad Reciente</CardTitle>
+        <CardHeader className="p-2 flex flex-row items-center justify-between border-b border-border/10">
+          <CardTitle className="text-base font-bold flex items-center gap-2">
+            <Activity size={20} />
+            Actividad Reciente
+          </CardTitle>
         </CardHeader>
         <CardContent className="p-0">
           <Table>
@@ -73,11 +76,10 @@ export default async function AuditoriaPage() {
                       </div>
                     </TableCell>
                     <TableCell className="py-4">
-                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md border ${
-                        log.action === 'DELETE' ? 'bg-rose-500/10 text-rose-500 border-rose-500/20' :
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md border ${log.action === 'DELETE' ? 'bg-rose-500/10 text-rose-500 border-rose-500/20' :
                         log.action === 'CREATE' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' :
-                        'bg-blue-500/10 text-blue-500 border-blue-500/20'
-                      }`}>
+                          'bg-blue-500/10 text-blue-500 border-blue-500/20'
+                        }`}>
                         {log.action}
                       </span>
                     </TableCell>

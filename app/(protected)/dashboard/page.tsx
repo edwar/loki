@@ -1,4 +1,4 @@
-import { Card, CardContent } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { formatCurrency, formatDate } from '@/lib/utils'
 import {
   Package,
@@ -8,7 +8,11 @@ import {
   AlertTriangle,
   ArrowUpRight,
   Plus,
-  Calendar
+  Calendar,
+  Users,
+  BarChart3,
+  RotateCcw,
+  DollarSign
 } from 'lucide-react'
 import { prisma } from '@/lib/prisma'
 import { cn } from '@/lib/utils'
@@ -19,6 +23,7 @@ import { ExpensesChart } from '@/components/dashboard/expenses-chart'
 import { DashboardFilters } from '@/components/dashboard/dashboard-filters'
 import { RecentActivityCard } from '@/components/dashboard/recent-activity-card'
 import { eachDayOfInterval, subDays, format } from 'date-fns'
+import { getAdvancedMetrics } from '@/lib/actions/advanced-metrics'
 
 export const dynamic = 'force-dynamic'
 
@@ -179,26 +184,26 @@ function StatCard({ title, value, subtitle, change, index, icon: Icon, color }: 
       `stagger-${index}`
     )}>
       <div className={cn('absolute top-0 right-0 w-24 h-24 blur-3xl opacity-10 transition-opacity group-hover:opacity-20', color)} />
-      <CardContent className="p-6">
-        <div className="flex justify-between items-start mb-4">
-          <div className={cn('p-2.5 rounded-lg bg-background/50 border border-border/50 group-hover:scale-110 transition-transform duration-500', color.replace('bg-', 'text-'))}>
-            <Icon size={20} />
+      <CardContent className="p-2">
+        <div className="flex justify-between items-start mb-3">
+          <div className={cn('p-2 rounded-lg bg-background/50 border border-border/50 group-hover:scale-110 transition-transform duration-500', color.replace('bg-', 'text-'))}>
+            <Icon size={18} />
           </div>
           {change !== undefined && change !== 0 && (
             <div className={cn(
-              'flex items-center gap-1 text-[10px] font-bold px-2 py-1 rounded-lg',
+              'flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-lg',
               change >= 0 ? 'bg-emerald-500/10 text-emerald-500' : 'bg-rose-500/10 text-rose-500'
             )}>
-              {change >= 0 ? <ArrowUpRight size={12} /> : <ArrowUpRight size={12} className="rotate-90" />}
+              {change >= 0 ? <ArrowUpRight size={10} /> : <ArrowUpRight size={10} className="rotate-90" />}
               {Math.abs(change).toFixed(1)}%
             </div>
           )}
         </div>
-        <div className="space-y-1">
+        <div className="space-y-0.5">
           <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground opacity-70">{title}</p>
-          <h3 className="text-3xl font-bold tracking-tight font-display">{value}</h3>
+          <h3 className="text-2xl font-bold tracking-tight font-display">{value}</h3>
           {subtitle && (
-            <p className="text-xs text-muted-foreground font-medium pt-1">{subtitle}</p>
+            <p className="text-xs text-muted-foreground font-medium">{subtitle}</p>
           )}
         </div>
       </CardContent>
@@ -243,11 +248,12 @@ export default async function DashboardPage(props: {
   const searchParams = await props.searchParams
   const range = searchParams.range || '30d'
 
-  const [stats, recentSales, recentExpenses, historicalData] = await Promise.all([
+  const [stats, recentSales, recentExpenses, historicalData, advancedMetrics] = await Promise.all([
     getStats(range),
     getRecentSales(),
     getRecentExpenses(),
-    getHistoricalData(range)
+    getHistoricalData(range),
+    getAdvancedMetrics(range)
   ])
 
   const rangeLabels: Record<string, string> = {
@@ -282,7 +288,7 @@ export default async function DashboardPage(props: {
       </div>
 
       {/* Main Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         <StatCard
           title={`Ventas (${rangeLabels[range]})`}
           value={formatCurrency(stats.periodSalesTotal)}
@@ -301,12 +307,29 @@ export default async function DashboardPage(props: {
           index={2}
         />
         <StatCard
+          title="Ticket Promedio"
+          value={formatCurrency(advancedMetrics.ticketPromedio)}
+          subtitle={`${advancedMetrics.ticketPromedioAnterior > 0 ? 'vs ' + formatCurrency(advancedMetrics.ticketPromedioAnterior) : ''}`}
+          change={advancedMetrics.ticketCambio}
+          icon={DollarSign}
+          color="bg-emerald-500"
+          index={3}
+        />
+        <StatCard
+          title="Rotación Inventario"
+          value={advancedMetrics.rotacionInventario.tasaRotacion.toFixed(1) + 'x'}
+          subtitle={`${advancedMetrics.rotacionInventario.diasPromedioStock.toFixed(0)} días promedio`}
+          icon={RotateCcw}
+          color="bg-violet-500"
+          index={4}
+        />
+        <StatCard
           title="Stock Crítico"
           value={lowStock.length.toString()}
           subtitle="Insumos bajo el mínimo"
           icon={AlertTriangle}
           color="bg-amber-500"
-          index={3}
+          index={5}
         />
         <StatCard
           title="Catálogo Activo"
@@ -314,63 +337,179 @@ export default async function DashboardPage(props: {
           subtitle="Productos en vitrina"
           icon={ShoppingBag}
           color="bg-indigo-500"
-          index={4}
+          index={6}
         />
       </div>
 
-      {/* Charts Section */}
-      <div className="grid lg:grid-cols-2 gap-8">
-        <SalesChart data={historicalData.salesByDay} />
-        <ExpensesChart data={historicalData.expensesByCategory} />
+      {/* Bento Grid Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        {/* Charts Row - spans 8 columns */}
+        <div className="lg:col-span-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+          <SalesChart data={historicalData.salesByDay} />
+          <ExpensesChart data={historicalData.expensesByCategory} />
+        </div>
+
+        {/* Top Products - spans 4 columns */}
+        <Card className="lg:col-span-4 rounded-lg">
+          <CardHeader className="p-2">
+            <CardTitle className="text-base font-bold flex items-center gap-2">
+              <BarChart3 size={18} className="text-primary" />
+              Productos Más Vendidos
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="pt-0">
+            {advancedMetrics.productosMasVendidos.length === 0 ? (
+              <p className="text-center text-muted-foreground py-4 text-sm">Sin ventas en este período</p>
+            ) : (
+              <div className="space-y-2">
+                {advancedMetrics.productosMasVendidos.map((product, index) => (
+                  <div key={product.productId} className="flex items-center justify-between p-2 bg-muted/30 rounded-lg">
+                    <div className="flex items-center gap-2">
+                      <span className="w-5 h-5 rounded-full bg-primary/10 text-primary text-[10px] font-bold flex items-center justify-center">
+                        {index + 1}
+                      </span>
+                      <span className="text-sm font-medium truncate max-w-[120px]">{product.name}</span>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-sm font-bold text-primary">{formatCurrency(product.revenue)}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Top Clients - spans 4 columns */}
+        <Card className="lg:col-span-4 rounded-lg">
+          <CardHeader className="p-2">
+            <CardTitle className="text-base font-bold flex items-center gap-2">
+              <Users size={18} className="text-primary" />
+              Mejores Clientes
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="pt-0">
+            {advancedMetrics.clientesTop.length === 0 ? (
+              <p className="text-center text-muted-foreground py-4 text-sm">Sin clientes en este período</p>
+            ) : (
+              <div className="space-y-2">
+                {advancedMetrics.clientesTop.map((client, index) => (
+                  <div key={client.customerId || 'general'} className="flex items-center justify-between p-2 bg-muted/30 rounded-lg">
+                    <div className="flex items-center gap-2">
+                      <span className="w-5 h-5 rounded-full bg-primary/10 text-primary text-[10px] font-bold flex items-center justify-center">
+                        {index + 1}
+                      </span>
+                      <span className="text-sm font-medium truncate max-w-[120px]">{client.name}</span>
+                    </div>
+                    <span className="text-sm font-bold text-primary">{formatCurrency(client.totalPurchases)}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Period Comparison - spans 8 columns */}
+        <Card className="lg:col-span-8 rounded-lg">
+          <CardHeader className="p-2">
+            <CardTitle className="text-base font-bold flex items-center gap-2">
+              <TrendingUp size={18} className="text-primary" />
+              Comparación con Período Anterior
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="pt-0">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <div className="text-center p-3 bg-muted/30 rounded-lg">
+                <p className="text-[10px] font-bold uppercase text-muted-foreground mb-1">Ventas</p>
+                <p className="text-lg font-bold">{formatCurrency(advancedMetrics.comparacionPeriodo.ventasActual)}</p>
+                <p className={cn(
+                  "text-[10px] font-bold mt-1",
+                  advancedMetrics.comparacionPeriodo.cambioVentas >= 0 ? "text-emerald-500" : "text-rose-500"
+                )}>
+                  {advancedMetrics.comparacionPeriodo.cambioVentas >= 0 ? '+' : ''}{advancedMetrics.comparacionPeriodo.cambioVentas.toFixed(1)}%
+                </p>
+              </div>
+              <div className="text-center p-3 bg-muted/30 rounded-lg">
+                <p className="text-[10px] font-bold uppercase text-muted-foreground mb-1">Gastos</p>
+                <p className="text-lg font-bold">{formatCurrency(advancedMetrics.comparacionPeriodo.gastosActual)}</p>
+                <p className={cn(
+                  "text-[10px] font-bold mt-1",
+                  advancedMetrics.comparacionPeriodo.cambioGastos <= 0 ? "text-emerald-500" : "text-rose-500"
+                )}>
+                  {advancedMetrics.comparacionPeriodo.cambioGastos >= 0 ? '+' : ''}{advancedMetrics.comparacionPeriodo.cambioGastos.toFixed(1)}%
+                </p>
+              </div>
+              <div className="text-center p-3 bg-muted/30 rounded-lg">
+                <p className="text-[10px] font-bold uppercase text-muted-foreground mb-1">Utilidad</p>
+                <p className="text-lg font-bold">{formatCurrency(advancedMetrics.comparacionPeriodo.utilidadActual)}</p>
+                <p className={cn(
+                  "text-[10px] font-bold mt-1",
+                  advancedMetrics.comparacionPeriodo.cambioUtilidad >= 0 ? "text-emerald-500" : "text-rose-500"
+                )}>
+                  {advancedMetrics.comparacionPeriodo.cambioUtilidad >= 0 ? '+' : ''}{advancedMetrics.comparacionPeriodo.cambioUtilidad.toFixed(1)}%
+                </p>
+              </div>
+              <div className="text-center p-3 bg-muted/30 rounded-lg">
+                <p className="text-[10px] font-bold uppercase text-muted-foreground mb-1">Inventario</p>
+                <p className="text-lg font-bold">{formatCurrency(advancedMetrics.rotacionInventario.valorInventario)}</p>
+                <p className="text-[10px] text-muted-foreground mt-1">
+                  {advancedMetrics.rotacionInventario.diasPromedioStock.toFixed(0)} días
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
-      <div className="grid lg:grid-cols-12 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Recent Activity Section */}
         <RecentActivityCard recentSales={recentSales} recentExpenses={recentExpenses} />
 
         {/* Alerts & Insights */}
-        <div className="lg:col-span-4 space-y-8">
+        <div className="lg:col-span-4 space-y-6">
 
           {/* Productivity Insight */}
-          <Card className="rounded-lg border-primary/20 bg-primary/3 p-8 space-y-4">
-            <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-              <ArrowUpRight className="text-primary" size={20} />
-            </div>
-            <h4 className="font-bold">Dato del día</h4>
-            <p className="text-sm text-muted-foreground leading-relaxed">
-              Tus ventas han crecido un <span className="text-primary font-bold">{stats.salesChange.toFixed(1)}%</span> respecto a ayer. ¡Buen trabajo!
-            </p>
+          <Card className="rounded-lg border-primary/20 bg-primary/3 p-2 space-y-2">
+            <CardHeader className="flex flex-row items-center justify-between p-2">
+              <CardTitle className="font-bold text-sm flex items-center gap-2">
+                <ArrowUpRight className="text-primary" size={20} />
+                Dato del día
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-0 text-xs text-muted-foreground leading-relaxed">
+              Tus ventas han crecido un <span className="text-primary font-bold">{stats.salesChange.toFixed(1)}%</span> vs ayer.
+            </CardContent>
           </Card>
           {lowStock.length > 0 && (
             <Card className="rounded-lg border-amber-500/20 bg-amber-500/3 overflow-hidden relative group">
-              <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:scale-125 transition-transform duration-1000">
-                <AlertTriangle size={120} className="text-amber-500" />
+              <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:scale-125 transition-transform duration-1000">
+                <AlertTriangle size={60} className="text-amber-500" />
               </div>
-              <CardContent className="p-8 space-y-6 relative z-10">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-lg bg-amber-500/10 flex items-center justify-center">
-                    <AlertTriangle size={24} className="text-amber-500" />
+              <CardContent className="p-2 space-y-3 relative z-10">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center">
+                    <AlertTriangle size={16} className="text-amber-500" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-lg text-foreground">Reposición</h3>
-                    <p className="text-xs text-amber-600 dark:text-amber-400 font-bold uppercase tracking-wider">Acción Requerida</p>
+                    <h3 className="font-bold text-sm text-foreground">Reposición</h3>
+                    <p className="text-[10px] text-amber-600 dark:text-amber-400 font-bold uppercase tracking-wider">Acción Requerida</p>
                   </div>
                 </div>
-                <div className="space-y-3">
+                <div className="space-y-2">
                   {lowStock.map((supply) => (
-                    <div key={supply.id} className="flex items-center justify-between p-3 bg-background/50 rounded-lg border border-amber-500/10 group/item hover:bg-background transition-colors">
+                    <div key={supply.id} className="flex items-center justify-between p-2 bg-background/50 rounded-lg border border-amber-500/10 group/item hover:bg-background transition-colors">
                       <div className="flex items-center gap-2">
-                        <Package size={14} className="text-muted-foreground" />
+                        <Package size={12} className="text-muted-foreground" />
                         <span className="text-sm font-bold">{supply.name}</span>
                       </div>
-                      <span className="text-[10px] font-extrabold px-2 py-1 bg-rose-500/10 text-rose-600 dark:text-rose-400 rounded-lg">
+                      <span className="text-[10px] font-extrabold px-2 py-0.5 bg-rose-500/10 text-rose-600 dark:text-rose-400 rounded-lg">
                         {Number(supply.currentStock)} {supply.unit}
                       </span>
                     </div>
                   ))}
                 </div>
                 <Link href="/insumos" className="block">
-                  <Button variant='destructive' className="w-full font-bold">
+                  <Button variant='destructive' size="sm" className="w-full font-bold">
                     Gestionar Inventario
                   </Button>
                 </Link>
