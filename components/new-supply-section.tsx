@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { SupplyForm } from './supply-forms'
 import { Plus, ChevronDown } from 'lucide-react'
 
-export function NewSupplySection({ suppliers }: { suppliers: any[] }) {
+export function NewSupplySection() {
   const [isOpen, setIsOpen] = useState(false)
 
   return (
@@ -36,7 +36,7 @@ export function NewSupplySection({ suppliers }: { suppliers: any[] }) {
       
       {isOpen && (
         <CardContent className="px-4 py-6 animate-in fade-in slide-in-from-top-1 duration-300">
-          <SupplyForm supply={null} suppliers={suppliers} onSuccess={() => setIsOpen(false)} />
+          <SupplyForm supply={null} onSuccess={() => setIsOpen(false)} />
         </CardContent>
       )}
     </Card>

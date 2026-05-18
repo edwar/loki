@@ -14,7 +14,6 @@ import {
   TrendingUp,
   Menu,
   X,
-  ChefHat,
   LogOut,
   User,
   Building2,
@@ -99,8 +98,8 @@ export default function ProtectedLayout({
           {/* Logo */}
           <div className="p-8">
             <Link href="/dashboard" className="flex items-center gap-3 group">
-              <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center shadow-lg shadow-primary/20 group-hover:scale-110 transition-transform duration-300">
-                <ChefHat size={22} className="text-primary-foreground" />
+              <div className="w-14 h-14 rounded-lg bg-primary flex items-center justify-center shadow-lg shadow-primary/20 group-hover:scale-110 transition-transform duration-300">
+                <img src="/favicon.svg" alt="Loki" width={40} height={40} />
               </div>
               <div>
                 <h1 className="text-xl font-bold tracking-tight font-display">Loki</h1>
@@ -116,7 +115,7 @@ export default function ProtectedLayout({
             </div>
             {navigation
               .filter(item => !item.roles || item.roles.includes(session?.user?.role as string))
-              .map((item, index) => {
+              .map((item) => {
                 const isActive = pathname === item.href ||
                   (item.href !== '/dashboard' && pathname.startsWith(item.href))
                 return (

@@ -79,7 +79,7 @@ export function InvoiceFormModal({ isOpen, onClose, onSuccess, customers, produc
 
   const addItem = (product: Product) => {
     setItems([...items, {
-      id: Date.now().toString(),
+      id: crypto.randomUUID(),
       productId: product.id,
       productName: product.name,
       quantity: 1,

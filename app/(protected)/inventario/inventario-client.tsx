@@ -10,6 +10,7 @@ import { ExportButton } from '@/components/ui/export-button'
 import { formatDate } from '@/lib/utils'
 import { Modal } from '@/components/ui/modal'
 import { PurchaseForm } from '@/components/purchase-form'
+import { SupplyForm } from '@/components/supply-form'
 
 interface Supplier {
   id: string
@@ -36,6 +37,7 @@ interface InventarioClientProps {
 export function InventarioClient({ supplies, suppliers }: InventarioClientProps) {
   const router = useRouter()
   const [modalOpen, setModalOpen] = useState(false)
+  const [supplyModalOpen, setSupplyModalOpen] = useState(false)
 
   const totalValue = supplies.reduce((sum: number, s) => sum + s.currentStock * s.purchasePrice, 0)
   const lowStockCount = supplies.filter(s => s.currentStock < s.minStock).length
@@ -66,22 +68,29 @@ export function InventarioClient({ supplies, suppliers }: InventarioClientProps)
             Controla tu stock de insumos y registra compras.
           </p>
         </div>
-        <div className="flex gap-3">
-          {supplies.length > 0 && (
-            <ExportButton
-              data={exportData}
-              filename={`Inventario_${new Date().toISOString().split('T')[0]}`}
-              className="h-12 px-6 rounded-lg font-bold"
-            />
-          )}
-          <button
-            onClick={() => setModalOpen(true)}
-            className="h-12 px-6 rounded-lg bg-primary text-primary-foreground font-bold flex items-center gap-2 hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20"
-          >
-            <Plus size={20} />
-            Registrar Compra
-          </button>
-        </div>
+<div className="flex gap-3">
+            {supplies.length > 0 && (
+              <ExportButton
+                data={exportData}
+                filename={`Inventario_${new Date().toISOString().split('T')[0]}`}
+                className="h-12 px-6 rounded-lg font-bold"
+              />
+            )}
+            <button
+              onClick={() => setSupplyModalOpen(true)}
+              className="h-12 px-6 rounded-lg bg-secondary text-secondary-foreground font-bold flex items-center gap-2 hover:bg-secondary/90 transition-colors shadow-lg shadow-secondary/20"
+            >
+              <Plus size={20} />
+              Nuevo Insumo
+            </button>
+            <button
+              onClick={() => setModalOpen(true)}
+              className="h-12 px-6 rounded-lg bg-primary text-primary-foreground font-bold flex items-center gap-2 hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20"
+            >
+              <Plus size={20} />
+              Registrar Compra
+            </button>
+          </div>
       </div>
 
       {/* Stats */}
@@ -153,13 +162,24 @@ export function InventarioClient({ supplies, suppliers }: InventarioClientProps)
         </CardContent>
       </Card>
 
-      {/* Modal */}
+      {/* Modal Compra */}
       <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)}>
         <div className="p-8">
           <PurchaseForm
             suppliers={suppliers}
+            supplies={supplies.map(s => ({ id: s.id, name: s.name, unit: s.unit }))}
             onSuccess={handleSuccess}
             onClose={() => setModalOpen(false)}
+          />
+        </div>
+      </Modal>
+
+      {/* Modal Crear Insumo */}
+      <Modal isOpen={supplyModalOpen} onClose={() => setSupplyModalOpen(false)}>
+        <div className="p-8">
+          <SupplyForm
+            onSuccess={handleSuccess}
+            onClose={() => setSupplyModalOpen(false)}
           />
         </div>
       </Modal>

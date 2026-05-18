@@ -133,7 +133,6 @@ export function SupplyTable({
         <div className="mt-4">
           <SupplyForm
             supply={editingSupply}
-            suppliers={suppliers}
             onSuccess={() => setEditingSupply(null)}
           />
         </div>

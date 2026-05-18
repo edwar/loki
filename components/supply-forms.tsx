@@ -10,11 +10,9 @@ import { UNIDADES } from '@/lib/constants'
 
 export function SupplyForm({ 
   supply, 
-  suppliers,
   onSuccess 
 }: { 
   supply?: any
-  suppliers: { id: string, name: string }[]
   onSuccess?: () => void
 }) {
   const [currentStock, setCurrentStock] = useState(supply?.currentStock ?? 0)
@@ -64,20 +62,6 @@ export function SupplyForm({
             <SelectContent>
               {UNIDADES.map(u => (
                 <SelectItem key={u} value={u} className="capitalize">{u}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="space-y-2 md:col-span-2">
-          <label className="text-xs font-bold uppercase tracking-widest text-foreground/60">Proveedor Predeterminado</label>
-          <Select name="supplierId" defaultValue={supply?.supplierId ?? 'none'}>
-            <SelectTrigger>
-              <SelectValue placeholder="Seleccionar proveedor" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="none">Sin proveedor</SelectItem>
-              {suppliers.map(s => (
-                <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
               ))}
             </SelectContent>
           </Select>
