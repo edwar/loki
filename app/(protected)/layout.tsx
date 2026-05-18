@@ -23,7 +23,8 @@ import {
   ShieldAlert,
   FileText,
   FileSignature,
-  Tag
+  Tag,
+  Percent
 } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { ThemeToggle } from '@/components/theme-toggle'
@@ -43,6 +44,7 @@ const navigation = [
   { name: 'Proveedores', href: '/proveedores', icon: Truck, roles: ['admin', 'manager'] },
   { name: 'Categorías', href: '/categorias', icon: Tag },
   { name: 'Clientes', href: '/clientes', icon: Users },
+  { name: 'Rentabilidad', href: '/rentabilidad', icon: Percent },
   { name: 'Bienes', href: '/bienes', icon: Building2, roles: ['admin'] },
   { name: 'Equipo', href: '/equipo', icon: Shield, roles: ['admin'] },
   { name: 'Auditoría', href: '/auditoria', icon: ShieldAlert, roles: ['admin'] },

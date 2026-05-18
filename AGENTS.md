@@ -28,3 +28,5 @@ This version has breaking changes — APIs, conventions, and file structure may 
     ```bash
     git checkout main && git pull
     ```
+13. **Usar Componentes UI**: Siempre utilizar los componentes de `@components/ui/` para las interfaces (Button, Select, Input, Card, Dialog, etc.). Nunca usar elementos HTML nativos como `<button>`, `<select>`, `<input>` o `<table>` directamente; usar los wrappers de shadcn/ui en su lugar.
+14. **Imports de Componentes**: Los imports de componentes deben seguir el patrón `@components/ui/nombre-componente` (ej. `import { Button } from '@/components/ui/button'`).

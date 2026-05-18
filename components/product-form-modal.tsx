@@ -21,7 +21,7 @@ export function ProductFormModal({ product, categories, onSuccess, onClose }: Pr
   const [yieldAmount, setYieldAmount] = useState(product?.yield ?? 1)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [categoryInput, setCategoryInput] = useState(product?.category ?? '')
+  const [category, setCategory] = useState(product?.category ?? '')
 
   const isEditing = !!product
   const action = isEditing ? updateProduct.bind(null, product.id) : createProduct
@@ -34,8 +34,8 @@ export function ProductFormModal({ product, categories, onSuccess, onClose }: Pr
     const formData = new FormData(e.currentTarget)
     formData.set('salePrice', salePrice.toString())
     formData.set('yield', yieldAmount.toString())
-    if (categoryInput) {
-      formData.set('category', categoryInput)
+    if (category) {
+      formData.set('category', category)
     }
 
     try {
@@ -82,17 +82,17 @@ export function ProductFormModal({ product, categories, onSuccess, onClose }: Pr
           </div>
           <div className="space-y-2">
             <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Categoría</label>
-            <Input
-              name="category"
-              value={categoryInput}
-              onChange={(e) => setCategoryInput(e.target.value)}
-              list="product-categories"
-              placeholder="Ej: Empanadas"
-              className="h-12"
-            />
-            <datalist id="product-categories">
-              {categories.map(c => <option key={c} value={c} />)}
-            </datalist>
+            <Select value={category} onValueChange={setCategory}>
+              <SelectTrigger className="h-12">
+                <SelectValue placeholder="Selecciona una categoría" />
+              </SelectTrigger>
+              <SelectContent>
+                {categories.map(c => (
+                  <SelectItem key={c} value={c}>{c}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <input type="hidden" name="category" value={category} />
           </div>
 
           <div className="space-y-2">
