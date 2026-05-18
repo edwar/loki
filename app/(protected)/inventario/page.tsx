@@ -13,7 +13,8 @@ export default async function InventarioPage() {
   const supplies = suppliesRaw.map((s: any) => ({
     id: s.id,
     name: s.name,
-    category: s.category,
+    categoryId: s.categoryId,
+    category: s.category?.name || null,
     unit: s.unit,
     currentStock: Number(s.currentStock),
     minStock: Number(s.minStock),

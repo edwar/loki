@@ -2,6 +2,7 @@
 
 import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
+import { convertUnits } from '@/lib/conversions'
 
 export async function getProducts() {
   return prisma.product.findMany({
@@ -18,14 +19,14 @@ export async function getProducts() {
 
 export async function createProduct(formData: FormData) {
   const name = formData.get('name') as string
-  const category = formData.get('category') as string | null
+  const categoryId = formData.get('categoryId') as string | null
   const salePrice = parseFloat(formData.get('salePrice') as string) || 0
   const yieldAmount = parseFloat(formData.get('yield') as string) || 1
 
   await prisma.product.create({
     data: {
       name,
-      category,
+      categoryId: categoryId || null,
       salePrice,
       yield: yieldAmount,
     },
@@ -74,7 +75,7 @@ export async function deleteRecipeItem(id: string) {
 
 export async function updateProduct(id: string, formData: FormData) {
   const name = formData.get('name') as string
-  const category = formData.get('category') as string | null
+  const categoryId = formData.get('categoryId') as string | null
   const salePrice = parseFloat(formData.get('salePrice') as string) || 0
   const yieldAmount = parseFloat(formData.get('yield') as string) || 1
 
@@ -82,7 +83,7 @@ export async function updateProduct(id: string, formData: FormData) {
     where: { id },
     data: {
       name,
-      category,
+      categoryId: categoryId || null,
       salePrice,
       yield: yieldAmount,
     },
@@ -119,8 +120,17 @@ export async function prepareProduct(productId: string, batches: number, actualY
   // 1. Verificar disponibilidad y preparar deducciones
   const supplyUpdates: { id: string; quantity: number; unitCost: number }[] = []
   for (const item of product.recipeItems) {
-    const totalRequired = Number(item.quantityRequired) * batches
     const supply = await prisma.supply.findUnique({ where: { id: item.supplyId } })
+    
+    let totalRequired = Number(item.quantityRequired) * batches
+    
+    // Convertir si las unidades son diferentes
+    if (supply && item.unit && supply.unit !== item.unit) {
+      const converted = convertUnits(totalRequired, item.unit, supply.unit)
+      if (converted !== null) {
+        totalRequired = converted
+      }
+    }
     
     if (!supply || Number(supply.currentStock) < totalRequired) {
       throw new Error(`Insumo insuficiente: ${supply?.name || 'Desconocido'}`)

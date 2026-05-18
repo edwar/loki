@@ -8,7 +8,20 @@ export const UNIDADES = [
   'onza', 
   'pack', 
   'caja', 
-  'bolsa'
+  'bolsa',
+  'cubeta',
+  'par',
+  'docena'
 ] as const
+
+export const UNIDADES_PESO = ['gramo', 'kilogramo', 'libra', 'onza'] as const
+export const UNIDADES_VOLUMEN = ['litro', 'mililitro'] as const
+export const UNIDADES_SIN_CONVERSION = ['unidad', 'pack', 'caja', 'bolsa', 'cubeta', 'par', 'docena'] as const
+
+export const UNIDADES_POR_TIPO: Record<string, string[]> = {
+  peso: [...UNIDADES_PESO],
+  volumen: [...UNIDADES_VOLUMEN],
+  sinConversion: [...UNIDADES_SIN_CONVERSION]
+}
 
 export type Unidad = typeof UNIDADES[number]

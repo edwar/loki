@@ -20,7 +20,7 @@ export const NumericInput = React.forwardRef<HTMLInputElement, NumericInputProps
         setDisplayValue('')
         return
       }
-      
+
       const numValue = typeof value === 'string' ? parseFloat(value) : value
       if (isNaN(numValue)) {
         setDisplayValue('')
@@ -32,11 +32,11 @@ export const NumericInput = React.forwardRef<HTMLInputElement, NumericInputProps
     function formatDisplay(val: string) {
       // Remove all non-numeric characters except decimal point
       let clean = val.replace(/[^\d.]/g, '')
-      
+
       // Prevent multiple decimal points
       const parts = clean.split('.')
       if (parts.length > 2) clean = parts[0] + '.' + parts.slice(1).join('')
-      
+
       // Remove leading zeros (unless it's "0." something)
       if (clean.length > 1 && clean.startsWith('0') && clean[1] !== '.') {
         clean = clean.replace(/^0+/, '')
@@ -49,7 +49,7 @@ export const NumericInput = React.forwardRef<HTMLInputElement, NumericInputProps
       // Add thousands separators for display
       const [integer, decimal] = clean.split('.')
       const formattedInteger = integer.replace(/\B(?=(\d{3})+(?!\d))/g, '.')
-      
+
       return decimal !== undefined ? `${formattedInteger},${decimal}` : formattedInteger
     }
 
@@ -60,7 +60,7 @@ export const NumericInput = React.forwardRef<HTMLInputElement, NumericInputProps
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       const rawValue = e.target.value
-      
+
       // If user is deleting everything
       if (rawValue === '') {
         setDisplayValue('')
@@ -88,7 +88,13 @@ export const NumericInput = React.forwardRef<HTMLInputElement, NumericInputProps
         inputMode="decimal"
         value={displayValue}
         onChange={handleChange}
-        className={cn('font-mono font-bold', className)}
+        className={cn('flex h-12 w-full px-4 py-2 text-sm bg-background/50 border border-border/50 rounded-lg transition-all duration-300',
+          'placeholder:text-muted-foreground/50 font-medium',
+          'focus:outline-none focus:border-primary',
+          'disabled:bg-muted disabled:cursor-not-allowed',
+          'text-foreground',
+          'text-right',
+          className)}
       />
     )
   }

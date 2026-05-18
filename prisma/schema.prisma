@@ -7,6 +7,20 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Category {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  type      String   @default("supply") // supply, product
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+
+  supplies  Supply[]
+  products  Product[]
+
+  @@map("categories")
+}
+
 model Supplier {
   id        String   @id @default(uuid())
   name      String
@@ -45,8 +59,9 @@ model Supply {
   id           String   @id @default(uuid())
   name         String
   sku          String?
-  category     String?
+  categoryId   String?
   unit         String
+  unitsPerPack Decimal? @default(1) @db.Decimal(10, 2)
   currentStock Decimal  @default(0) @db.Decimal(10, 2)
   minStock     Decimal  @default(0) @db.Decimal(10, 2)
   purchasePrice Decimal @default(0) @db.Decimal(10, 2)
@@ -56,6 +71,7 @@ model Supply {
 
   supplierId   String?
   supplier      Supplier?    @relation(fields: [supplierId], references: [id])
+  category     Category?    @relation(fields: [categoryId], references: [id])
 
   purchaseItems PurchaseItem[]
   recipeItems   RecipeItem[]
@@ -67,7 +83,7 @@ model Supply {
 model Product {
   id        String   @id @default(uuid())
   name      String
-  category  String?
+  categoryId String?
   salePrice Decimal  @db.Decimal(10, 2)
   currentStock Decimal @default(0) @db.Decimal(10, 2)
   yield        Decimal @default(1) @db.Decimal(10, 2)
@@ -76,6 +92,8 @@ model Product {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   deletedAt DateTime?
+
+  category   Category?  @relation(fields: [categoryId], references: [id])
 
   recipeItems     RecipeItem[]
   saleItems       SaleItem[]

@@ -6,7 +6,8 @@ import { Input } from '@/components/ui/input'
 import { NumericInput } from '@/components/ui/numeric-input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { createProduct, updateProduct, addRecipeItem } from '@/lib/actions/products'
-import { UNIDADES } from '@/lib/constants'
+import { UNIDADES, UNIDADES_POR_TIPO } from '@/lib/constants'
+import { convertUnits, canConvert, getUnitType, formatUnitForDisplay } from '@/lib/conversions'
 import { Plus } from 'lucide-react'
 
 export function ProductForm({
@@ -94,12 +95,44 @@ export function RecipeForm({
   supplies: { id: string; name: string; unit: string }[]
 }) {
   const [quantity, setQuantity] = useState(0)
+  const [selectedSupplyId, setSelectedSupplyId] = useState('')
+  const [selectedUnit, setSelectedUnit] = useState('')
+  const [formKey, setFormKey] = useState(0)
+
+  const selectedSupply = supplies.find(s => s.id === selectedSupplyId)
+
+  const resetForm = () => {
+    setQuantity(0)
+    setSelectedSupplyId('')
+    setSelectedUnit('')
+    setFormKey(prev => prev + 1)
+  }
+  const supplyUnitType = selectedSupply ? getUnitType(selectedSupply.unit) : null
+
+  const availableUnits = supplyUnitType
+    ? UNIDADES_POR_TIPO[supplyUnitType]
+    : supplyUnitType === null
+      ? ['unidad', 'pack', 'caja', 'bolsa']
+      : UNIDADES
+
+  const canConvertUnits = selectedSupply && selectedUnit
+    ? canConvert(selectedSupply.unit, selectedUnit)
+    : false
+
+  const convertedQuantity = canConvertUnits && selectedSupply && quantity > 0
+    ? convertUnits(quantity, selectedUnit, selectedSupply.unit)
+    : null
+
+  const handleSubmit = async (formData: FormData) => {
+    await addRecipeItem(formData)
+    resetForm()
+  }
 
   return (
-    <form action={addRecipeItem} className="mt-2 p-4 bg-primary/3 rounded-lg border border-primary/10 backdrop-blur-md">
+    <form action={handleSubmit} key={formKey} className="mt-2 p-4 bg-primary/3 rounded-lg border border-primary/10 backdrop-blur-md">
       <input type="hidden" name="productId" value={productId} />
 
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-x-3 gap-y-1.5 items-end">
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-x-3 gap-y-1.5">
         {/* Labels Row */}
         <div className="hidden md:block md:col-span-5 lg:col-span-6">
           <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary/50 ml-1">Insumo</label>
@@ -115,13 +148,18 @@ export function RecipeForm({
         {/* Inputs Row */}
         <div className="md:col-span-5 lg:col-span-6">
           <label className="md:hidden text-[10px] font-bold uppercase tracking-[0.2em] text-primary/50 mb-1 block">Insumo</label>
-          <Select name="supplyId" required>
+          <Select name="supplyId" required value={selectedSupplyId} onValueChange={(val) => {
+              setSelectedSupplyId(val)
+              setSelectedUnit('')
+            }}>
             <SelectTrigger className="h-11 rounded-lg bg-background/60 border-primary/5 hover:border-primary/20 transition-all shadow-sm">
               <SelectValue placeholder="Seleccionar..." />
             </SelectTrigger>
             <SelectContent className="rounded-lg border-primary/10">
               {supplies.map(s => (
-                <SelectItem key={s.id} value={s.id} className="rounded-lg">{s.name}</SelectItem>
+                <SelectItem key={s.id} value={s.id} className="rounded-lg">
+                  {s.name} <span className="text-muted-foreground text-xs">({formatUnitForDisplay(s.unit)})</span>
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -136,17 +174,24 @@ export function RecipeForm({
             className="h-11 rounded-lg bg-background/60 border-primary/5 hover:border-primary/20 transition-all shadow-sm"
           />
           <input type="hidden" name="quantityRequired" value={quantity} />
+          {convertedQuantity !== null && convertedQuantity !== quantity && (
+            <p className="text-[10px] text-muted-foreground mt-1">
+              = {convertedQuantity.toLocaleString('es-CO', { maximumFractionDigits: 2 })} {formatUnitForDisplay(selectedSupply?.unit || '')}
+            </p>
+          )}
         </div>
 
         <div className="md:col-span-3 lg:col-span-3">
           <label className="md:hidden text-[10px] font-bold uppercase tracking-[0.2em] text-primary/50 mb-1 block">Unidad</label>
-          <Select name="unit" required>
+          <Select name="unit" required onValueChange={setSelectedUnit} value={selectedUnit}>
             <SelectTrigger className="h-11 rounded-lg bg-background/60 border-primary/5 hover:border-primary/20 transition-all shadow-sm">
-              <SelectValue placeholder="Unidad" />
+              <SelectValue placeholder={selectedSupply ? `En ${formatUnitForDisplay(selectedSupply.unit)}` : 'Unidad'} />
             </SelectTrigger>
             <SelectContent className="rounded-lg border-primary/10">
-              {UNIDADES.map(u => (
-                <SelectItem key={u} value={u} className="capitalize rounded-lg">{u}</SelectItem>
+              {availableUnits.map(u => (
+                <SelectItem key={u} value={u} className="capitalize rounded-lg">
+                  {u} {u === selectedSupply?.unit && '(del insumo)'}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { NumericInput } from '@/components/ui/numeric-input'
@@ -13,6 +13,13 @@ import {
 } from '@/components/ui/select'
 import { X, Package } from 'lucide-react'
 import { UNIDADES } from '@/lib/constants'
+import { getUnitType } from '@/lib/conversions'
+
+interface Category {
+  id: string
+  name: string
+  type: string
+}
 
 interface SupplyFormProps {
   onSuccess?: () => void
@@ -23,14 +30,35 @@ export function SupplyForm({ onSuccess, onClose }: SupplyFormProps) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [name, setName] = useState('')
-  const [category, setCategory] = useState('')
-  const [unit, setUnit] = useState('unidad')
+  const [categoryId, setCategoryId] = useState('')
+  const [displayUnit, setDisplayUnit] = useState('unidad')
   const [minStock, setMinStock] = useState(1)
+  const [unitsPerPack, setUnitsPerPack] = useState(1)
+  const [categories, setCategories] = useState<Category[]>([])
+
+  useEffect(() => {
+    fetch('/api/categories?type=supply')
+      .then(res => res.json())
+      .then(data => setCategories(data))
+  }, [])
+
+  const unitType = getUnitType(displayUnit)
+  const showUnitsPerPack = !unitType && ['pack', 'caja', 'bolsa', 'cubeta', 'par', 'docena'].includes(displayUnit)
+
+  const getNormalizedUnit = (selectedUnit: string): string => {
+    const type = getUnitType(selectedUnit)
+    if (type === 'peso') return 'gramo'
+    if (type === 'volumen') return 'mililitro'
+    return selectedUnit
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     setError(null)
+
+    const normalizedUnit = getNormalizedUnit(displayUnit)
+    const finalUnitsPerPack = showUnitsPerPack ? unitsPerPack : 1
 
     try {
       const response = await fetch('/api/supplies', {
@@ -38,8 +66,9 @@ export function SupplyForm({ onSuccess, onClose }: SupplyFormProps) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name,
-          category: category || null,
-          unit,
+          categoryId: categoryId || null,
+          unit: normalizedUnit,
+          unitsPerPack: finalUnitsPerPack,
           minStock
         })
       })
@@ -85,17 +114,21 @@ export function SupplyForm({ onSuccess, onClose }: SupplyFormProps) {
 
         <div className="space-y-2">
           <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Categoría</label>
-          <Input
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
-            placeholder="Ej: Harinas, Lácteos, etc."
-            className="h-11"
-          />
+          <Select value={categoryId} onValueChange={setCategoryId}>
+            <SelectTrigger className="h-11">
+              <SelectValue placeholder="Seleccionar categoría..." />
+            </SelectTrigger>
+            <SelectContent>
+              {categories.map(cat => (
+                <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         <div className="space-y-2">
           <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Unidad</label>
-          <Select value={unit} onValueChange={setUnit}>
+          <Select value={displayUnit} onValueChange={setDisplayUnit}>
             <SelectTrigger className="h-11"><SelectValue /></SelectTrigger>
             <SelectContent>
               {UNIDADES.map((u) => (
@@ -103,7 +136,24 @@ export function SupplyForm({ onSuccess, onClose }: SupplyFormProps) {
               ))}
             </SelectContent>
           </Select>
+          {unitType && (
+            <p className="text-[10px] text-muted-foreground">
+              Se guardará como: {getNormalizedUnit(displayUnit)}
+            </p>
+          )}
         </div>
+
+        {showUnitsPerPack && (
+          <div className="space-y-2">
+            <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
+              Unidades por {displayUnit}
+            </label>
+            <NumericInput value={unitsPerPack} onChange={setUnitsPerPack} />
+            <p className="text-[10px] text-muted-foreground">
+              Ej: Una {displayUnit} contiene X unidades (se usará para calcular el stock real)
+            </p>
+          </div>
+        )}
 
         <div className="space-y-2">
           <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Stock Mínimo</label>

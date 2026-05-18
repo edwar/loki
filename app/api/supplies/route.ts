@@ -4,7 +4,7 @@ import { prisma } from '@/lib/prisma'
 export async function POST(request: Request) {
   try {
     const body = await request.json()
-    const { name, category, unit, minStock, supplierId } = body
+    const { name, categoryId, unit, unitsPerPack, minStock } = body
 
     if (!name || !unit) {
       return NextResponse.json(
@@ -16,12 +16,12 @@ export async function POST(request: Request) {
     const supply = await prisma.supply.create({
       data: {
         name,
-        category: category || null,
+        categoryId: categoryId || null,
         unit,
+        unitsPerPack: unitsPerPack || 1,
         minStock: minStock || 0,
         currentStock: 0,
-        purchasePrice: 0,
-        supplierId: supplierId || null
+        purchasePrice: 0
       }
     })
 

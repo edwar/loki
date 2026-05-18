@@ -4,6 +4,7 @@ import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { NumericInput } from '@/components/ui/numeric-input'
 import {
   Select,
   SelectContent,
@@ -89,14 +90,15 @@ export function PurchaseForm({ suppliers, supplies = [], onSuccess, onClose }: P
       if (supply) {
         newItems[index].supplyName = supply.name
         newItems[index].unidad = supply.unit
+      } else {
+        newItems[index].supplyName = ''
+        newItems[index].unidad = 'unidad'
       }
     }
 
     if (field === 'cantidad' || field === 'precioUnitario') {
-      const rawQty = typeof newItems[index].cantidad === 'string' ? newItems[index].cantidad : String(newItems[index].cantidad)
-      const qty = parseFloat(rawQty.replace(/\./g, '')) || 0
-      const rawPrice = typeof newItems[index].precioUnitario === 'string' ? newItems[index].precioUnitario : String(newItems[index].precioUnitario)
-      const price = parseFloat(rawPrice.replace(/\./g, '')) || 0
+      const qty = Number(newItems[index].cantidad) || 0
+      const price = Number(newItems[index].precioUnitario) || 0
       newItems[index].subtotal = qty * price
     }
 
@@ -138,18 +140,14 @@ export function PurchaseForm({ suppliers, supplies = [], onSuccess, onClose }: P
           discountPercentage: descuentoPorcentaje,
           taxPercentage: impuestoPorcentaje,
           purchaseDate: new Date(purchaseDate),
-          items: items.map((item) => {
-            const rawQty = typeof item.cantidad === 'string' ? item.cantidad : String(item.cantidad)
-            const rawPrice = typeof item.precioUnitario === 'string' ? item.precioUnitario : String(item.precioUnitario)
-            return {
-              supplyId: item.supplyId,
-              supplyName: item.supplyName || item.supplyId,
-              quantity: parseFloat(rawQty.replace(/\./g, '')) || 0,
-              unit: item.unidad || 'unidad',
-              unitPrice: parseFloat(rawPrice.replace(/\./g, '')) || 0,
-              subtotal: item.subtotal,
-            }
-          }),
+          items: items.map((item) => ({
+            supplyId: item.supplyId,
+            supplyName: item.supplyName || item.supplyId,
+            quantity: Number(item.cantidad) || 0,
+            unit: item.unidad || 'unidad',
+            unitPrice: Number(item.precioUnitario) || 0,
+            subtotal: item.subtotal,
+          })),
         }),
       })
 
@@ -191,6 +189,10 @@ export function PurchaseForm({ suppliers, supplies = [], onSuccess, onClose }: P
   }
 
   const { subtotal, total } = calculateTotal()
+
+  const availableSupplies = localSupplies.filter(supply => 
+    !items.some(item => item.supplyId === supply.id)
+  )
 
   return (
     <div className="flex flex-col h-full">
@@ -252,14 +254,6 @@ export function PurchaseForm({ suppliers, supplies = [], onSuccess, onClose }: P
           </div>
 
           <div className="space-y-2">
-            {/* Header */}
-            <div className="grid grid-cols-12 gap-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground px-1">
-              <div className="col-span-4">Producto</div>
-              <div className="col-span-2">Cantidad</div>
-              <div className="col-span-2">Unidad</div>
-              <div className="col-span-3">Precio</div>
-              <div className="col-span-1"></div>
-            </div>
 
             {items.map((item, index) => (
               <div key={item.id} className="p-3 bg-muted/30 rounded-lg space-y-3">
@@ -268,7 +262,10 @@ export function PurchaseForm({ suppliers, supplies = [], onSuccess, onClose }: P
                   <div className="space-y-1">
                     <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Producto</label>
                     <Combobox
-                      options={localSupplies.map(s => ({ value: s.id, label: s.name }))}
+                      options={[
+                        ...(item.supplyId ? localSupplies.filter(s => s.id === item.supplyId) : []),
+                        ...localSupplies.filter(s => !items.some(i => i.supplyId === s.id))
+                      ].map(s => ({ value: s.id, label: s.name }))}
                       value={item.supplyId}
                       onValueChange={async (val) => {
                         const existing = localSupplies.find(s => s.id === val)
@@ -289,37 +286,26 @@ export function PurchaseForm({ suppliers, supplies = [], onSuccess, onClose }: P
                   <div className="grid grid-cols-2 gap-2">
                     <div className="space-y-1">
                       <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Cantidad</label>
-                      <Input
-                        type="text"
-                        inputMode="numeric"
-                        value={item.cantidad.toLocaleString('es-CO')}
-                        onChange={(e) => {
-                          const raw = e.target.value.replace(/\./g, '')
-                          handleItemChange(index, 'cantidad', parseInt(raw, 10) || 0)
-                        }}
-                        onFocus={(e) => e.target.select()}
-                        className="h-11 text-right"
+                      <NumericInput
+                        value={item.cantidad}
+                        onChange={(val) => handleItemChange(index, 'cantidad', val)}
+                        className="h-11"
                       />
-                    </div>
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Unidad</label>
-                      <Select value={item.unidad || 'unidad'} onValueChange={(v) => handleItemChange(index, 'unidad', v)}>
-                        <SelectTrigger className="h-11"><SelectValue /></SelectTrigger>
-                        <SelectContent>
-                          {UNIDADES.map(u => <SelectItem key={u} value={u}>{u}</SelectItem>)}
-                        </SelectContent>
-                      </Select>
                     </div>
                   </div>
                   <div className="grid grid-cols-5 gap-2 items-end">
                     <div className="col-span-4 space-y-1">
-                      <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Precio</label>
+                      <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Precio por {item.unidad}</label>
                       <Input
                         type="text"
-                        inputMode="numeric"
-                        value={item.precioUnitario.toLocaleString('es-CO')}
+                        inputMode="decimal"
+                        value={item.precioUnitario.toLocaleString('es-CO', {
+                          minimumFractionDigits: 0,
+                          maximumFractionDigits: 2,
+                          useGrouping: true
+                        })}
                         onChange={(e) => {
-                          const raw = e.target.value.replace(/\./g, '')
+                          const raw = e.target.value.replace(/\./g, '').replace(',', '.')
                           handleItemChange(index, 'precioUnitario', parseFloat(raw) || 0)
                         }}
                         onFocus={(e) => e.target.select()}
@@ -346,9 +332,13 @@ export function PurchaseForm({ suppliers, supplies = [], onSuccess, onClose }: P
 
                 {/* Desktop: inline layout */}
                 <div className="hidden md:grid grid-cols-12 gap-2 items-end">
-                  <div className="col-span-4">
+                  <div className="col-span-5">
+                    <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1 block">Producto</label>
                     <Combobox
-                      options={localSupplies.map(s => ({ value: s.id, label: s.name }))}
+                      options={[
+                        ...(item.supplyId ? localSupplies.filter(s => s.id === item.supplyId) : []),
+                        ...localSupplies.filter(s => !items.some(i => i.supplyId === s.id))
+                      ].map(s => ({ value: s.id, label: s.name }))}
                       value={item.supplyId}
                       onValueChange={async (val) => {
                         const existing = localSupplies.find(s => s.id === val)
@@ -366,39 +356,25 @@ export function PurchaseForm({ suppliers, supplies = [], onSuccess, onClose }: P
                       allowCustom
                     />
                   </div>
-                  <div className="col-span-2">
-                    <Input
-                      type="text"
-                      inputMode="numeric"
-                      value={item.cantidad.toLocaleString('es-CO')}
-                      onChange={(e) => {
-                        const raw = e.target.value.replace(/\./g, '')
-                        handleItemChange(index, 'cantidad', parseInt(raw, 10) || 0)
-                      }}
-                      onFocus={(e) => e.target.select()}
-                      className="h-11 text-right"
+                  <div className="col-span-3">
+                    <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1 block">Cantidad</label>
+                    <NumericInput
+                      value={item.cantidad}
+                      onChange={(val) => handleItemChange(index, 'cantidad', val)}
+                      className="h-11"
                     />
-                  </div>
-                  <div className="col-span-2">
-                    <Select value={item.unidad || 'unidad'} onValueChange={(v) => handleItemChange(index, 'unidad', v)}>
-                      <SelectTrigger className="h-11"><SelectValue /></SelectTrigger>
-                      <SelectContent>
-                        {UNIDADES.map(u => <SelectItem key={u} value={u}>{u}</SelectItem>)}
-                      </SelectContent>
-                    </Select>
                   </div>
                   <div className="col-span-3">
-                    <Input
-                      type="text"
-                      inputMode="numeric"
-                      value={item.precioUnitario.toLocaleString('es-CO')}
-                      onChange={(e) => {
-                        const raw = e.target.value.replace(/\./g, '')
-                        handleItemChange(index, 'precioUnitario', parseFloat(raw) || 0)
-                      }}
-                      onFocus={(e) => e.target.select()}
-                      className="h-11 text-right"
-                    />
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                        Precio por {item.unidad}
+                      </label>
+                      <NumericInput
+                        value={item.precioUnitario}
+                        onChange={(val) => handleItemChange(index, 'precioUnitario', val)}
+                        className="h-11"
+                      />
+                    </div>
                   </div>
                   <div className="col-span-1 flex justify-end">
                     <Button
