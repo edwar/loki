@@ -504,13 +504,13 @@ El SEO fue identificado como pendiente en la sección 9. Ya implementado:
 
 **Impacto**: Alto — Facilita la venta B2B y pedidos grandes.
 
-#### C. Métricas de Rentabilidad
+#### C. Métricas de Rentabilidad ✅ Implementado
 
-- [ ] **Costo por producto** (calculado desde recetas)
-- [ ] **Margen de ganancia** por producto (precio venta - costo)
-- [ ] **Rentabilidad por categoría** de productos
-- [ ] Dashboard de margen de ganancia
-- [ ] Alertas cuando el margen baje de阈值 configurable
+- [x] **Costo por producto** (calculado desde recetas)
+- [x] **Margen de ganancia** por producto (precio venta - costo)
+- [x] **Rentabilidad por categoría** de productos
+- [x] Dashboard de margen de ganancia (`/rentabilidad`)
+- [x] Alertas cuando el margen baje de umbral configurable
 
 **Impacto**: Medio — Permite identificar productos más rentables.
 
@@ -524,13 +524,13 @@ El SEO fue identificado como pendiente en la sección 9. Ya implementado:
 
 **Impacto**: Medio — Esencial para productos perecederos (panadería, repostería).
 
-#### E. Sistema de Alertas Automáticas
+#### E. Sistema de Alertas Automáticas ✅ Implementado
 
-- [ ] Notificaciones en dashboard de stock bajo
+- [x] Notificaciones en dashboard de stock bajo
 - [ ] Alertas de insumos próximos a vencer
-- [ ] Notificaciones de gastos elevados (超出 umbral)
+- [x] Notificaciones de gastos elevados (superan umbral del 200% del promedio)
 - [ ] Resumen semanal por email (opcional)
-- [ ] Centro de notificaciones en la UI
+- [x] Centro de notificaciones en la UI (dropdown en sidebar)
 
 **Impacto**: Medio — Mejora la operación diaria.
 
@@ -580,9 +580,9 @@ El SEO fue identificado como pendiente en la sección 9. Ya implementado:
 |-----------|--------|----------------|
 | 1 | SEO | ✅ Completado |
 | 2 | Facturación | ✅ Completado |
-| 3 | Métricas de Rentabilidad | Información de negocio crítica |
-| 4 | Presupuestos | Facilita venta B2B |
-| 5 | Alertas Automáticas | Mejora operación diaria |
+| 3 | Métricas de Rentabilidad | ✅ Completado |
+| 4 | Alertas Automáticas | ✅ Completado |
+| 5 | Presupuestos | Facilita venta B2B |
 | 6 | Control de Lotes | Solo si hay productos perecederos |
 
 ---
