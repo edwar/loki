@@ -12,6 +12,7 @@ import { ConfirmationModal } from '@/components/ui/confirmation-modal'
 import { Modal } from '@/components/ui/modal'
 import { SupplierFormModal } from '@/components/supplier-form-modal'
 import { EmptyState } from '@/components/ui/empty-state'
+import { ExportButton } from '@/components/ui/export-button'
 
 interface Supplier {
   id: string
@@ -71,12 +72,25 @@ export function ProveedoresClient({ suppliers }: ProveedoresClientProps) {
             Gestiona tus fuentes de abastecimiento y relaciones comerciales.
           </p>
         </div>
-        <Button
-          onClick={handleOpenNew}
-        >
-          <Plus size={20} />
-          Nuevo Proveedor
-        </Button>
+        <div className="flex gap-3">
+          {suppliers.length > 0 && (
+            <ExportButton
+              data={suppliers.map(s => ({
+                'Nombre': s.name,
+                'Teléfono': s.phone || '',
+                'Email': s.email || '',
+                'Dirección': s.address || '',
+                'Compras Realizadas': s.purchaseCount
+              }))}
+              filename="Proveedores"
+              className="h-12 px-6 rounded-lg font-bold"
+            />
+          )}
+          <Button onClick={handleOpenNew}>
+            <Plus size={20} />
+            Nuevo Proveedor
+          </Button>
+        </div>
       </div>
 
       {/* Stats */}
