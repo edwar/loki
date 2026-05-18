@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { Prisma } from '@prisma/client'
 
 export async function POST(request: Request) {
   try {
@@ -13,17 +14,17 @@ export async function POST(request: Request) {
       )
     }
 
-    const supply = await prisma.supply.create({
-      data: {
-        name,
-        categoryId: categoryId || null,
-        unit,
-        unitsPerPack: unitsPerPack || 1,
-        minStock: minStock || 0,
-        currentStock: 0,
-        purchasePrice: 0
-      }
-    })
+    const data: Prisma.SupplyCreateInput = {
+      name,
+      category: categoryId ? { connect: { id: categoryId } } : undefined,
+      unit,
+      unitsPerPack: unitsPerPack ? Number(unitsPerPack) : 1,
+      minStock: minStock || 0,
+      currentStock: 0,
+      purchasePrice: 0
+    }
+
+    const supply = await prisma.supply.create({ data })
 
     return NextResponse.json(supply)
   } catch (error) {

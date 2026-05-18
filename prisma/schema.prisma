@@ -8,27 +8,27 @@ datasource db {
 }
 
 model Category {
-  id        String   @id @default(uuid())
-  name      String   @unique
-  type      String   @default("supply") // supply, product
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id        String    @id @default(uuid())
+  name      String    @unique
+  type      String    @default("supply") // supply, product
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
   deletedAt DateTime?
 
-  supplies  Supply[]
-  products  Product[]
+  supplies Supply[]
+  products Product[]
 
   @@map("categories")
 }
 
 model Supplier {
-  id        String   @id @default(uuid())
+  id        String    @id @default(uuid())
   name      String
   email     String?
   phone     String?
   address   String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
   deletedAt DateTime?
 
   purchases PurchaseOrder[]
@@ -38,15 +38,15 @@ model Supplier {
 }
 
 model Customer {
-  id             String   @id @default(uuid())
+  id             String    @id @default(uuid())
   name           String
   email          String?
   phone          String?
   address        String?
   tin            String?
-  totalPurchases Decimal  @default(0) @db.Decimal(12, 2)
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  totalPurchases Decimal   @default(0) @db.Decimal(12, 2)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
   deletedAt      DateTime?
 
   sales    DailySale[]
@@ -56,61 +56,61 @@ model Customer {
 }
 
 model Supply {
-  id           String   @id @default(uuid())
-  name         String
-  sku          String?
-  categoryId   String?
-  unit         String
-  unitsPerPack Decimal? @default(1) @db.Decimal(10, 2)
-  currentStock Decimal  @default(0) @db.Decimal(10, 2)
-  minStock     Decimal  @default(0) @db.Decimal(10, 2)
-  purchasePrice Decimal @default(0) @db.Decimal(10, 2)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  deletedAt    DateTime?
+  id            String    @id @default(uuid())
+  name          String
+  sku           String?
+  categoryId    String?
+  unit          String
+  unitsPerPack  Int?      @default(1)
+  currentStock  Decimal   @default(0) @db.Decimal(10, 2)
+  minStock      Decimal   @default(0) @db.Decimal(10, 2)
+  purchasePrice Decimal   @default(0) @db.Decimal(10, 2)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  deletedAt     DateTime?
 
-  supplierId   String?
-  supplier      Supplier?    @relation(fields: [supplierId], references: [id])
-  category     Category?    @relation(fields: [categoryId], references: [id])
+  supplierId String?
+  supplier   Supplier? @relation(fields: [supplierId], references: [id])
+  category   Category? @relation(fields: [categoryId], references: [id])
 
-  purchaseItems PurchaseItem[]
-  recipeItems   RecipeItem[]
+  purchaseItems   PurchaseItem[]
+  recipeItems     RecipeItem[]
   productionItems ProductionItem[]
 
   @@map("supplies")
 }
 
 model Product {
-  id        String   @id @default(uuid())
-  name      String
-  categoryId String?
-  salePrice Decimal  @db.Decimal(10, 2)
-  currentStock Decimal @default(0) @db.Decimal(10, 2)
-  yield        Decimal @default(1) @db.Decimal(10, 2)
+  id           String    @id @default(uuid())
+  name         String
+  categoryId   String?
+  salePrice    Decimal   @db.Decimal(10, 2)
+  currentStock Decimal   @default(0) @db.Decimal(10, 2)
+  yield        Decimal   @default(1) @db.Decimal(10, 2)
   imageUrl     String?
-  isActive  Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  deletedAt DateTime?
+  isActive     Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  deletedAt    DateTime?
 
-  category   Category?  @relation(fields: [categoryId], references: [id])
+  category Category? @relation(fields: [categoryId], references: [id])
 
-  recipeItems     RecipeItem[]
-  saleItems       SaleItem[]
-  productionLogs  ProductionLog[]
-  invoiceItems    InvoiceItem[]
+  recipeItems    RecipeItem[]
+  saleItems      SaleItem[]
+  productionLogs ProductionLog[]
+  invoiceItems   InvoiceItem[]
 
   @@map("products")
 }
 
 model RecipeItem {
-  id              String   @id @default(uuid())
-  productId       String
-  supplyId        String
-  quantityRequired Decimal @db.Decimal(10, 2)
-  unit            String
-  createdAt       DateTime @default(now())
-  deletedAt       DateTime?
+  id               String    @id @default(uuid())
+  productId        String
+  supplyId         String
+  quantityRequired Decimal   @db.Decimal(10, 2)
+  unit             String
+  createdAt        DateTime  @default(now())
+  deletedAt        DateTime?
 
   product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
   supply  Supply  @relation(fields: [supplyId], references: [id])
@@ -120,53 +120,53 @@ model RecipeItem {
 }
 
 model Property {
-  id            String   @id @default(uuid())
+  id            String    @id @default(uuid())
   name          String
   type          String
   address       String?
-  purchaseValue Decimal @db.Decimal(12, 2)
-  currentValue  Decimal @db.Decimal(12, 2)
+  purchaseValue Decimal   @db.Decimal(12, 2)
+  currentValue  Decimal   @db.Decimal(12, 2)
   purchaseDate  DateTime?
   description   String?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
   deletedAt     DateTime?
 
   @@map("properties")
 }
 
 model PurchaseOrder {
-  id              String    @id @default(uuid())
-  supplierId      String?
-  totalAmount     Decimal   @default(0) @db.Decimal(12, 2)
-  subtotal        Decimal   @default(0) @db.Decimal(12, 2)
-  discountPercentage Decimal @default(0) @db.Decimal(5, 2)
-  taxPercentage    Decimal   @default(0) @db.Decimal(5, 2)
-  status          String    @default("pending")
-  attachmentUrl   String?
-  aiExtractedData Json?
-  purchaseDate    DateTime  @default(now())
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-  deletedAt       DateTime?
+  id                 String    @id @default(uuid())
+  supplierId         String?
+  totalAmount        Decimal   @default(0) @db.Decimal(12, 2)
+  subtotal           Decimal   @default(0) @db.Decimal(12, 2)
+  discountPercentage Decimal   @default(0) @db.Decimal(5, 2)
+  taxPercentage      Decimal   @default(0) @db.Decimal(5, 2)
+  status             String    @default("pending")
+  attachmentUrl      String?
+  aiExtractedData    Json?
+  purchaseDate       DateTime  @default(now())
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+  deletedAt          DateTime?
 
-  supplier     Supplier?       @relation(fields: [supplierId], references: [id])
+  supplier      Supplier?      @relation(fields: [supplierId], references: [id])
   purchaseItems PurchaseItem[]
 
   @@map("purchase_orders")
 }
 
 model PurchaseItem {
-  id            String   @id @default(uuid())
+  id              String    @id @default(uuid())
   purchaseOrderId String
-  supplyId      String?
-  supplyName    String?
-  quantity      Decimal  @db.Decimal(10, 2)
-  unit          String   @default("unidad")
-  unitPrice     Decimal  @db.Decimal(10, 2)
-  subtotal      Decimal  @db.Decimal(12, 2)
-  createdAt     DateTime @default(now())
-  deletedAt     DateTime?
+  supplyId        String?
+  supplyName      String?
+  quantity        Decimal   @db.Decimal(10, 2)
+  unit            String    @default("unidad")
+  unitPrice       Decimal   @db.Decimal(10, 2)
+  subtotal        Decimal   @db.Decimal(12, 2)
+  createdAt       DateTime  @default(now())
+  deletedAt       DateTime?
 
   purchaseOrder PurchaseOrder @relation(fields: [purchaseOrderId], references: [id], onDelete: Cascade)
   supply        Supply?       @relation(fields: [supplyId], references: [id])
@@ -175,25 +175,25 @@ model PurchaseItem {
 }
 
 model IndirectCost {
-  id          String   @id @default(uuid())
+  id          String    @id @default(uuid())
   type        String
-  amount      Decimal  @db.Decimal(12, 2)
+  amount      Decimal   @db.Decimal(12, 2)
   description String?
-  date        DateTime @default(now())
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  date        DateTime  @default(now())
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
   deletedAt   DateTime?
 
   @@map("indirect_costs")
 }
 
 model DailySale {
-  id          String   @id @default(uuid())
+  id          String    @id @default(uuid())
   customerId  String?
-  totalAmount Decimal  @default(0) @db.Decimal(12, 2)
-  date        DateTime @default(now())
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  totalAmount Decimal   @default(0) @db.Decimal(12, 2)
+  date        DateTime  @default(now())
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
   deletedAt   DateTime?
 
   customer  Customer?  @relation(fields: [customerId], references: [id])
@@ -203,14 +203,14 @@ model DailySale {
 }
 
 model SaleItem {
-  id         String   @id @default(uuid())
+  id          String    @id @default(uuid())
   dailySaleId String
-  productId  String
-  quantity   Int
-  unitPrice  Decimal  @db.Decimal(10, 2)
-  subtotal   Decimal  @db.Decimal(12, 2)
-  createdAt  DateTime @default(now())
-  deletedAt  DateTime?
+  productId   String
+  quantity    Int
+  unitPrice   Decimal   @db.Decimal(10, 2)
+  subtotal    Decimal   @db.Decimal(12, 2)
+  createdAt   DateTime  @default(now())
+  deletedAt   DateTime?
 
   dailySale DailySale @relation(fields: [dailySaleId], references: [id], onDelete: Cascade)
   product   Product   @relation(fields: [productId], references: [id])
@@ -219,14 +219,14 @@ model SaleItem {
 }
 
 model User {
-  id            String   @id @default(cuid())
-  name          String
-  email         String   @unique
-  password      String
-  role          String   @default("employee") // admin, manager, employee
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  deletedAt     DateTime?
+  id        String    @id @default(cuid())
+  name      String
+  email     String    @unique
+  password  String
+  role      String    @default("employee") // admin, manager, employee
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
 
   @@map("users")
 }
@@ -252,31 +252,31 @@ model VerificationToken {
 }
 
 model ProductionLog {
-  id            String   @id @default(uuid())
+  id            String    @id @default(uuid())
   productId     String
-  expectedYield Decimal  @db.Decimal(10, 2)
-  actualYield   Decimal  @db.Decimal(10, 2)
-  batches       Decimal  @db.Decimal(10, 2)
-  date          DateTime @default(now())
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  expectedYield Decimal   @db.Decimal(10, 2)
+  actualYield   Decimal   @db.Decimal(10, 2)
+  batches       Decimal   @db.Decimal(10, 2)
+  date          DateTime  @default(now())
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
   deletedAt     DateTime?
 
-  product       Product  @relation(fields: [productId], references: [id])
-  items         ProductionItem[]
+  product Product          @relation(fields: [productId], references: [id])
+  items   ProductionItem[]
 
   @@map("production_logs")
 }
 
 model ProductionItem {
-  id               String   @id @default(uuid())
+  id               String  @id @default(uuid())
   productionLogId  String
   supplyId         String
-  quantityConsumed Decimal  @db.Decimal(10, 2)
-  unitCost         Decimal  @db.Decimal(10, 2)
-  
-  productionLog    ProductionLog @relation(fields: [productionLogId], references: [id], onDelete: Cascade)
-  supply           Supply        @relation(fields: [supplyId], references: [id])
+  quantityConsumed Decimal @db.Decimal(10, 2)
+  unitCost         Decimal @db.Decimal(10, 2)
+
+  productionLog ProductionLog @relation(fields: [productionLogId], references: [id], onDelete: Cascade)
+  supply        Supply        @relation(fields: [supplyId], references: [id])
 
   @@map("production_items")
 }
@@ -312,45 +312,45 @@ model BusinessSettings {
 }
 
 model Invoice {
-  id              String   @id @default(uuid())
-  folio           String   @unique // Folio secuencial: FAC-0001
+  id              String    @id @default(uuid())
+  folio           String    @unique // Folio secuencial: FAC-0001
   customerId      String?
   customerName    String
   customerTin     String?
   customerAddress String?
   customerEmail   String?
-  subtotal        Decimal  @default(0) @db.Decimal(12, 2)
-  taxRate         Decimal  @default(16) @db.Decimal(5, 2)
-  taxAmount       Decimal  @default(0) @db.Decimal(12, 2)
-  total           Decimal  @default(0) @db.Decimal(12, 2)
-  status          String   @default("draft") // draft, issued, paid, cancelled
-  paymentMethod   String?  // efectivo, transferencia, tarjeta
-  paymentStatus   String   @default("pending") // pending, paid, partial
+  subtotal        Decimal   @default(0) @db.Decimal(12, 2)
+  taxRate         Decimal   @default(16) @db.Decimal(5, 2)
+  taxAmount       Decimal   @default(0) @db.Decimal(12, 2)
+  total           Decimal   @default(0) @db.Decimal(12, 2)
+  status          String    @default("draft") // draft, issued, paid, cancelled
+  paymentMethod   String? // efectivo, transferencia, tarjeta
+  paymentStatus   String    @default("pending") // pending, paid, partial
   notes           String?
-  issueDate       DateTime @default(now())
+  issueDate       DateTime  @default(now())
   dueDate         DateTime?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
   deletedAt       DateTime?
 
-  customer      Customer?     @relation(fields: [customerId], references: [id])
-  invoiceItems  InvoiceItem[]
+  customer     Customer?     @relation(fields: [customerId], references: [id])
+  invoiceItems InvoiceItem[]
 
   @@map("invoices")
 }
 
 model InvoiceItem {
-  id          String   @id @default(uuid())
+  id          String    @id @default(uuid())
   invoiceId   String
   productId   String?
   productName String
-  quantity    Decimal  @db.Decimal(10, 2)
-  unitPrice   Decimal  @db.Decimal(10, 2)
-  subtotal    Decimal  @db.Decimal(12, 2)
-  createdAt   DateTime @default(now())
+  quantity    Decimal   @db.Decimal(10, 2)
+  unitPrice   Decimal   @db.Decimal(10, 2)
+  subtotal    Decimal   @db.Decimal(12, 2)
+  createdAt   DateTime  @default(now())
   deletedAt   DateTime?
 
-  invoice Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  invoice Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
   product Product? @relation(fields: [productId], references: [id])
 
   @@map("invoice_items")
