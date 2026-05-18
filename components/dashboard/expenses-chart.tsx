@@ -12,7 +12,6 @@ import {
 import { formatCurrency } from '@/lib/utils'
 import { PieChart as PieIcon, Receipt } from 'lucide-react'
 import { EmptyState } from '@/components/ui/empty-state'
-import { Button } from '../ui/button'
 
 interface ExpensesChartProps {
   data: { name: string; value: number }[]
@@ -33,14 +32,11 @@ export function ExpensesChart({ data }: ExpensesChartProps) {
 
   return (
     <Card className="rounded-lg border-border/40 bg-card/30 backdrop-blur-md overflow-hidden">
-      <CardHeader className="flex flex-row items-center justify-between pb-2">
-        <div className="space-y-1">
-          <CardTitle className="text-xl font-bold font-display">Distribución de Gastos</CardTitle>
-          <p className="text-xs text-muted-foreground font-medium">Por categoría en el periodo seleccionado</p>
-        </div>
-        <div className="p-2 rounded-lg bg-rose-500/10 text-rose-500">
+      <CardHeader className='p-2'>
+        <CardTitle className="text-base font-bold flex items-center gap-2">
           <PieIcon size={20} />
-        </div>
+          Distribución de Gastos
+        </CardTitle>
       </CardHeader>
       <CardContent className="px-2 pt-4">
         <div className="h-[300px] w-full">
@@ -78,7 +74,7 @@ export function ExpensesChart({ data }: ExpensesChartProps) {
                   content={({ active, payload }) => {
                     if (active && payload && payload.length) {
                       return (
-                        <div className="bg-background/95 backdrop-blur-sm border border-border/50 p-3 rounded-lg shadow-xl">
+                        <div className="bg-background/95 backdrop-blur-sm rounded-lg">
                           <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">
                             {payload[0].name}
                           </p>

@@ -19,15 +19,14 @@ interface RecentItemRowProps {
 
 function RecentItemRow({ title, date, amount, icon: Icon, isNegative }: RecentItemRowProps) {
   return (
-    <div className="group flex items-center justify-between p-4 rounded-lg hover:bg-accent/30 transition-all duration-300">
-      <div className="flex items-center gap-4">
-        <div className="w-12 h-12 rounded-lg bg-background border border-border/50 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
-          <Icon size={20} className="text-primary/70" />
+    <div className="group flex items-center justify-between p-2.5 rounded-lg hover:bg-accent/30 transition-all duration-300">
+      <div className="flex items-center gap-3">
+        <div className="w-10 h-10 rounded-lg bg-background border border-border/50 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
+          <Icon size={16} className="text-primary/70" />
         </div>
         <div>
-          <p className="text-sm font-bold text-foreground group-hover:text-primary transition-colors">{title}</p>
+          <p className="text-sm font-bold text-foreground group-hover:text-primary transition-colors truncate max-w-[200px]">{title}</p>
           <div className="flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
-            <BarChart3 size={10} />
             {formatDate(date)}
           </div>
         </div>
@@ -36,7 +35,6 @@ function RecentItemRow({ title, date, amount, icon: Icon, isNegative }: RecentIt
         <p className={cn("text-sm font-bold", isNegative ? "text-rose-500" : "text-foreground")}>
           {isNegative ? '-' : ''}{formatCurrency(amount)}
         </p>
-        <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-tighter">Exitosa</p>
       </div>
     </div>
   )
@@ -53,12 +51,12 @@ export function RecentActivityCard({ recentSales, recentExpenses }: RecentActivi
   const router = useRouter()
 
   return (
-    <div className="lg:col-span-8 space-y-6">
+    <div className="lg:col-span-8 space-y-4">
       <Card className="rounded-lg border-border/40 bg-card/30 backdrop-blur-md overflow-hidden">
-        <div className="p-8 pb-0 flex items-center justify-between">
-          <div>
-            <CardTitle className="text-2xl font-bold font-display tracking-tight">Actividad Reciente</CardTitle>
-            <p className="text-sm text-muted-foreground font-medium mt-1">Ventas y egresos del día</p>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <BarChart3 size={20} />
+            <CardTitle className="text-base font-bold font-display">Actividad Reciente</CardTitle>
           </div>
           <Link href="/ventas">
             <Button variant="ghost" className="rounded-lg text-xs font-bold text-primary hover:bg-primary/5">
@@ -66,7 +64,7 @@ export function RecentActivityCard({ recentSales, recentExpenses }: RecentActivi
             </Button>
           </Link>
         </div>
-        <CardContent className="p-4 pt-6 space-y-2">
+        <CardContent className="p-3 pt-3 space-y-1">
           {!hasActivity ? (
             <EmptyState
               icon={BarChart3}
