@@ -22,7 +22,8 @@ import {
   Shield,
   ShieldAlert,
   FileText,
-  FileSignature
+  FileSignature,
+  Tag
 } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { ThemeToggle } from '@/components/theme-toggle'
@@ -39,6 +40,7 @@ const navigation = [
   { name: 'Facturación', href: '/facturas', icon: FileSignature },
   { name: 'Gastos', href: '/gastos', icon: Receipt },
   { name: 'Proveedores', href: '/proveedores', icon: Truck, roles: ['admin', 'manager'] },
+  { name: 'Categorías', href: '/categorias', icon: Tag },
   { name: 'Clientes', href: '/clientes', icon: Users },
   { name: 'Bienes', href: '/bienes', icon: Building2, roles: ['admin'] },
   { name: 'Equipo', href: '/equipo', icon: Shield, roles: ['admin'] },

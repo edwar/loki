@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { formatCurrency, cn } from '@/lib/utils'
 import { Trash2, Edit2, Package } from 'lucide-react'
 import { deleteSupply } from '@/lib/actions/supplies'
-import { Dialog } from '@/components/ui/dialog'
+import { Modal } from '@/components/ui/modal'
 import { SupplyForm } from './supply-forms'
 import { ConfirmationModal } from './ui/confirmation-modal'
 
@@ -125,18 +125,18 @@ export function SupplyTable({
           )}
         </TableBody>
       </Table>
-      <Dialog
+      <Modal
         isOpen={!!editingSupply}
         onClose={() => setEditingSupply(null)}
         title="Editar Insumo"
       >
-        <div className="mt-4">
+        <div className="p-8">
           <SupplyForm
             supply={editingSupply}
             onSuccess={() => setEditingSupply(null)}
           />
         </div>
-      </Dialog>
+      </Modal>
       {/* Delete Confirmation Modal */}
       <ConfirmationModal
         isOpen={!!deletingSupply}
