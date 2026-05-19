@@ -82,6 +82,15 @@ export async function deleteRecipeItem(id: string) {
   revalidatePath('/productos')
 }
 
+export async function updateRecipeItem(id: string, quantityRequired: number, unit: string) {
+  await prisma.recipeItem.update({
+    where: { id },
+    data: { quantityRequired, unit },
+  })
+
+  revalidatePath('/productos')
+}
+
 export async function updateProduct(id: string, formData: FormData) {
   const name = formData.get('name') as string
   const categoryName = formData.get('category') as string | null

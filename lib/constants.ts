@@ -25,3 +25,15 @@ export const UNIDADES_POR_TIPO: Record<string, string[]> = {
 }
 
 export type Unidad = typeof UNIDADES[number]
+
+export const UNIDADES_RECETA = [
+  'kg',
+  'g',
+  'L',
+  'mL',
+  'ud',
+  'pza',
+  'paq'
+] as const
+
+export type UnidadReceta = typeof UNIDADES_RECETA[number]

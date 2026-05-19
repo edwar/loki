@@ -7,7 +7,10 @@ import { Button } from '@/components/ui/button'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { formatCurrency, cn } from '@/lib/utils'
 import { Trash2, ShoppingBag, Edit2, ChevronDown, Plus } from 'lucide-react'
-import { deleteProduct, deleteRecipeItem, prepareProduct } from '@/lib/actions/products'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { UNIDADES_POR_TIPO } from '@/lib/constants'
+import { getUnitType } from '@/lib/conversions'
+import { deleteProduct, deleteRecipeItem, prepareProduct, updateRecipeItem } from '@/lib/actions/products'
 import { RecipeForm } from './product-forms'
 import { NumericInput } from './ui/numeric-input'
 import { ConfirmationModal } from './ui/confirmation-modal'
@@ -30,6 +33,9 @@ export function ProductCard({
   const [isProducing, setIsProducing] = useState(false)
   const [recipeItemToDelete, setRecipeItemToDelete] = useState<string | null>(null)
   const [productToDelete, setProductToDelete] = useState<string | null>(null)
+  const [editingRecipeItem, setEditingRecipeItem] = useState<any | null>(null)
+  const [editQuantity, setEditQuantity] = useState<number>(0)
+  const [editUnit, setEditUnit] = useState<string>('')
   const [actualYield, setActualYield] = useState<number>(0)
   const [isPending, startTransition] = useTransition()
 
@@ -257,15 +263,30 @@ export function ProductCard({
                               {formatCurrency(cost)}
                             </TableCell>
                             <TableCell className="py-2.5 text-right">
-                              <Button
-                                type="button"
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => setRecipeItemToDelete(item.id)}
-                                className="h-6 w-6 p-0 rounded-lg hover:bg-rose-500/10 hover:text-rose-500 transition-colors group"
-                              >
-                                <Trash2 className='w-4 h-4 group-hover:text-rose-500' />
-                              </Button>
+                              <div className="flex items-center justify-end gap-1">
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => {
+                                    setEditQuantity(Number(item.quantityRequired))
+                                    setEditUnit(item.unit)
+                                    setEditingRecipeItem(item)
+                                  }}
+                                  className="h-6 w-6 p-0 rounded-lg hover:bg-primary/10 hover:text-primary transition-colors group"
+                                >
+                                  <Edit2 className='w-4 h-4 group-hover:text-primary' />
+                                </Button>
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => setRecipeItemToDelete(item.id)}
+                                  className="h-6 w-6 p-0 rounded-lg hover:bg-rose-500/10 hover:text-rose-500 transition-colors group"
+                                >
+                                  <Trash2 className='w-4 h-4 group-hover:text-rose-500' />
+                                </Button>
+                              </div>
                             </TableCell>
                           </TableRow>
                         )
@@ -347,6 +368,65 @@ export function ProductCard({
         confirmText="Quitar Insumo"
         variant="danger"
       />
+
+      <ConfirmationModal
+        isOpen={editingRecipeItem !== null}
+        onClose={() => setEditingRecipeItem(null)}
+        onConfirm={() => {
+          if (!editingRecipeItem) return
+          startTransition(async () => {
+            await updateRecipeItem(editingRecipeItem.id, editQuantity, editUnit)
+            setEditingRecipeItem(null)
+          })
+        }}
+        title="Editar Insumo"
+        description=""
+        confirmText="Guardar Cambios"
+        variant="primary"
+      >
+        <div className="space-y-4 pt-2">
+          <div className="p-4 bg-muted/30 rounded-lg">
+            <p className="text-sm font-bold text-foreground mb-1">{editingRecipeItem?.supply?.name}</p>
+            <p className="text-xs text-muted-foreground">
+              {formatCurrency(Number(editingRecipeItem?.supply?.purchasePrice) || 0)} / {editingRecipeItem?.supply?.unit}
+            </p>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <label className="text-xs font-bold uppercase tracking-widest text-foreground">
+                Cantidad
+              </label>
+              <NumericInput
+                value={editQuantity}
+                onChange={setEditQuantity}
+                className="h-12"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-xs font-bold uppercase tracking-widest text-foreground">
+                Unidad
+              </label>
+              {(() => {
+                const supplyUnit = editingRecipeItem?.supply?.unit
+                const unitType = supplyUnit ? getUnitType(supplyUnit) : null
+                const availableUnits = unitType ? UNIDADES_POR_TIPO[unitType] : UNIDADES_POR_TIPO.sinConversion || ['unidad', 'pack', 'caja', 'bolsa']
+                return (
+                  <Select value={editUnit} onValueChange={setEditUnit}>
+                    <SelectTrigger className="h-12">
+                      <SelectValue placeholder="Seleccionar" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {availableUnits.map((u: string) => (
+                        <SelectItem key={u} value={u}>{u}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )
+              })()}
+            </div>
+          </div>
+        </div>
+      </ConfirmationModal>
     </>
   )
 }
