@@ -74,6 +74,7 @@ export function GastosClient({ expenses }: GastosClientProps) {
         </div>
         <Button
           onClick={handleOpenNew}
+          className="w-full md:w-auto"
         >
           <Plus size={20} />
           Nuevo Gasto

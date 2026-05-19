@@ -81,9 +81,9 @@ export function RentabilidadClient({ data, threshold }: Props) {
             Análisis de costos, márgenes y rentabilidad por producto.
           </p>
         </div>
-        <div className="flex items-center gap-3">
-          <Link href="/productos">
-            <Button className="font-bold">
+        <div className="w-full md:w-auto flex flex-col sm:flex-row gap-3 items-center">
+          <Link href="/productos" className='w-full md:w-auto'>
+            <Button className="font-bold w-full sm:w-auto">
               Gestión de Recetas
             </Button>
           </Link>

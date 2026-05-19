@@ -72,7 +72,7 @@ export function ProveedoresClient({ suppliers }: ProveedoresClientProps) {
             Gestiona tus fuentes de abastecimiento y relaciones comerciales.
           </p>
         </div>
-        <div className="flex gap-3">
+        <div className="w-full md:w-auto flex flex-col sm:flex-row gap-3 items-center">
           {suppliers.length > 0 && (
             <ExportButton
               data={suppliers.map(s => ({
@@ -86,7 +86,7 @@ export function ProveedoresClient({ suppliers }: ProveedoresClientProps) {
               className="h-12 px-6 rounded-lg font-bold"
             />
           )}
-          <Button onClick={handleOpenNew}>
+          <Button onClick={handleOpenNew} className='w-full md:w-auto'>
             <Plus size={20} />
             Nuevo Proveedor
           </Button>

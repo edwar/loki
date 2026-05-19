@@ -22,7 +22,7 @@ export function DashboardFilters() {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
-  
+
   const currentRange = searchParams.get('range') || '30d'
 
   const handleRangeChange = (value: string) => {
@@ -32,13 +32,13 @@ export function DashboardFilters() {
   }
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="w-full md:w-auto flex items-center gap-2">
       <div className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-accent/50 border border-border/50 text-muted-foreground">
         <Calendar size={14} />
         <span className="text-[10px] font-bold uppercase tracking-widest">Periodo</span>
       </div>
       <Select value={currentRange} onValueChange={handleRangeChange}>
-        <SelectTrigger className="h-10 w-[180px] rounded-lg bg-background/60 border-primary/5 hover:border-primary/20 transition-all shadow-sm font-medium">
+        <SelectTrigger className="h-10 w-full md:w-[180px] rounded-lg bg-background/60 border-primary/5 hover:border-primary/20 transition-all shadow-sm font-medium">
           <SelectValue placeholder="Seleccionar periodo" />
         </SelectTrigger>
         <SelectContent className="rounded-lg border-primary/10">

@@ -85,7 +85,7 @@ export function InventarioClient({ supplies, suppliers }: InventarioClientProps)
             Controla tu stock de insumos y registra compras.
           </p>
         </div>
-        <div className="flex gap-3">
+        <div className="w-full md:w-auto flex flex-col sm:flex-row gap-3">
           {supplies.length > 0 && (
             <ExportButton
               data={exportData}

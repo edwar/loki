@@ -93,7 +93,7 @@ export function NewProductionModal({ products }: { products: Product[] }) {
     <>
       <Button
         onClick={() => setOpen(true)}
-        className="rounded-lg h-12 px-6 font-bold shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 active:scale-95 transition-all"
+        className="w-full md:w-auto rounded-lg h-12 px-6 font-bold shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 active:scale-95 transition-all"
       >
         <Plus size={20} className="mr-2" />
         Nueva Producción
