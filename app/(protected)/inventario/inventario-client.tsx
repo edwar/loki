@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { formatCurrency, cn } from '@/lib/utils'
-import { Package, TrendingUp, AlertCircle, Plus } from 'lucide-react'
+import { Package, TrendingUp, AlertCircle, Plus, ChevronLeft, ChevronRight } from 'lucide-react'
 import { SupplyTable } from '@/components/supply-table'
 import { ExportButton } from '@/components/ui/export-button'
 import { formatDate } from '@/lib/utils'
@@ -12,6 +12,7 @@ import { Modal } from '@/components/ui/modal'
 import { PurchaseForm } from '@/components/purchase-form'
 import { SupplyForm } from '@/components/supply-form'
 import { Button } from '@/components/ui/button'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
 interface Supplier {
   id: string
@@ -39,9 +40,24 @@ export function InventarioClient({ supplies, suppliers }: InventarioClientProps)
   const router = useRouter()
   const [modalOpen, setModalOpen] = useState(false)
   const [supplyModalOpen, setSupplyModalOpen] = useState(false)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [itemsPerPage, setItemsPerPage] = useState(5)
 
   const totalValue = supplies.reduce((sum: number, s) => sum + s.currentStock * s.purchasePrice, 0)
   const lowStockCount = supplies.filter(s => s.currentStock < s.minStock).length
+
+  const totalPages = Math.ceil(supplies.length / itemsPerPage)
+  const startIndex = (currentPage - 1) * itemsPerPage
+  const paginatedSupplies = supplies.slice(startIndex, startIndex + itemsPerPage)
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page)
+  }
+
+  const handleItemsPerPageChange = (value: string) => {
+    setItemsPerPage(Number(value))
+    setCurrentPage(1)
+  }
 
   const exportData = supplies.map((supply) => ({
     'Nombre': supply.name,
@@ -158,8 +174,62 @@ export function InventarioClient({ supplies, suppliers }: InventarioClientProps)
           <CardTitle className="text-xl">Detalle de Existencias</CardTitle>
         </CardHeader>
         <CardContent className="p-0 [&>div]:border-0 [&>div]:shadow-none [&>div]:rounded-none [&>div]:bg-transparent">
-          <SupplyTable supplies={supplies} suppliers={suppliers} />
+          <SupplyTable supplies={paginatedSupplies} suppliers={suppliers} />
         </CardContent>
+
+        {/* Pagination */}
+        <div className="px-8 py-6 border-t border-border/30 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-2 text-sm">
+            <span className="text-muted-foreground font-medium">Mostrar:</span>
+            <Select value={itemsPerPage.toString()} onValueChange={handleItemsPerPageChange}>
+              <SelectTrigger className="w-20 h-9">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="5">5</SelectItem>
+                <SelectItem value="10">10</SelectItem>
+                <SelectItem value="50">50</SelectItem>
+              </SelectContent>
+            </Select>
+            <span className="text-muted-foreground font-medium ml-2">
+              de {supplies.length} insumos
+            </span>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-9 rounded-lg"
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 1}
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </Button>
+            <div className="flex items-center gap-1">
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                <Button
+                  key={page}
+                  variant={currentPage === page ? "primary" : "outline"}
+                  size="sm"
+                  className={cn("h-9 w-9 rounded-lg", currentPage === page && "pointer-events-none")}
+                  onClick={() => handlePageChange(page)}
+                >
+                  {page}
+                </Button>
+              ))}
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-9 rounded-lg"
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage === totalPages || totalPages === 0}
+            >
+              <ChevronRight className="w-4 h-4" />
+            </Button>
+          </div>
+        </div>
       </Card>
 
       {/* Modal Compra */}
