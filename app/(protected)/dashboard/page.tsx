@@ -276,10 +276,10 @@ export default async function DashboardPage(props: {
           <h1 className="text-4xl font-extrabold tracking-tight font-display">Resumen Ejecutivo</h1>
           <p className="text-muted-foreground font-medium mt-1">Sincronización en tiempo real de tu operación.</p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="w-full md:w-auto flex flex-col sm:flex-row items-center gap-3">
           <DashboardFilters />
-          <Link href="/ventas">
-            <Button className="font-bold shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 active:scale-95 transition-all">
+          <Link href="/ventas" className='w-full'>
+            <Button className="w-full sm:w-auto font-bold shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 active:scale-95 transition-all">
               <Plus size={20} className="mr-2" />
               Nueva Venta
             </Button>

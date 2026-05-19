@@ -100,7 +100,7 @@ export function VentasClient({ products, customers, sales }: VentasClientProps) 
             Registro de transacciones y facturación en tiempo real.
           </p>
         </div>
-        <div className="flex gap-3">
+        <div className="w-full md:w-auto flex flex-col sm:flex-row gap-3">
           {sales.length > 0 && (
             <ExportButton
               data={exportData}

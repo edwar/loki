@@ -116,7 +116,7 @@ export function FacturasClient({ invoices, customers, products, businessSettings
           <h1 className="text-2xl font-bold">Facturación</h1>
           <p className="text-muted-foreground">Gestión de facturas y folios</p>
         </div>
-        <div className="flex gap-2">
+        <div className="w-full md:w-auto flex flex-col sm:flex-row gap-2">
           <Button variant="outline" onClick={() => setSettingsOpen(true)}>
             <Settings className="h-4 w-4 mr-2" />
             Configuración
@@ -250,7 +250,7 @@ export function FacturasClient({ invoices, customers, products, businessSettings
           onSuccess={handleSuccess}
           customers={customers}
           products={products}
-businessSettings={localSettings}
+          businessSettings={localSettings}
         />
       )}
 
