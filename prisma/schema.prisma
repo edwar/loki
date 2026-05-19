@@ -76,6 +76,7 @@ model Supply {
   purchaseItems   PurchaseItem[]
   recipeItems     RecipeItem[]
   productionItems ProductionItem[]
+  consumableUsages ConsumableUsage[]
 
   @@map("supplies")
 }
@@ -354,4 +355,18 @@ model InvoiceItem {
   product Product? @relation(fields: [productId], references: [id])
 
   @@map("invoice_items")
+}
+
+model ConsumableUsage {
+  id        String   @id @default(uuid())
+  supplyId  String
+  quantity  Int
+  reason    String   @default("sale") // sale, damage, loss
+  notes     String?
+  createdAt DateTime @default(now())
+  deletedAt DateTime?
+
+  supply Supply @relation(fields: [supplyId], references: [id])
+
+  @@map("consumable_usages")
 }

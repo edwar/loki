@@ -19,6 +19,7 @@ import {
   Building2,
   ChevronRight,
   Factory,
+  Coffee,
   Shield,
   ShieldAlert,
   FileText,
@@ -63,6 +64,7 @@ const navigation: NavSection[] = [
       { name: 'Inventario', href: '/inventario', icon: Package, roles: ['admin', 'manager'] },
       { name: 'Producción', href: '/produccion', icon: Factory },
       { name: 'Productos', href: '/productos', icon: ShoppingBag },
+      { name: 'Consumibles', href: '/consumibles', icon: Coffee },
     ]
   },
   {

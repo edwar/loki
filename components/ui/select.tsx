@@ -40,7 +40,7 @@ const SelectContent = React.forwardRef<
     <SelectPrimitive.Content
       ref={ref}
       className={cn(
-        'relative z-10001 min-w-32 overflow-hidden rounded-lg border border-border/50 bg-card shadow-xl animate-in fade-in-0 zoom-in-95',
+        'relative z-10001 min-w-32 max-h-[300px] overflow-hidden rounded-lg border border-border/50 bg-card shadow-xl animate-in fade-in-0 zoom-in-95',
         position === 'popper' &&
         'translate-y-1 data-[side=bottom]:translate-y-1 data-[side=left]:-translate-x-1 data-[side=right]:translate-x-1 data-[side=top]:-translate-y-1',
         className
@@ -50,7 +50,7 @@ const SelectContent = React.forwardRef<
     >
       <SelectPrimitive.Viewport
         className={cn(
-          'p-2',
+          'p-2 max-h-[256px] overflow-y-auto',
           position === 'popper' &&
           'h-(--radix-select-trigger-height) w-full min-w-(--radix-select-trigger-width)'
         )}
