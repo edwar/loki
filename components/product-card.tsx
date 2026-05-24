@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useTransition } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -14,7 +14,7 @@ import { deleteProduct, deleteRecipeItem, prepareProduct, updateRecipeItem } fro
 import { RecipeForm } from './product-forms'
 import { NumericInput } from './ui/numeric-input'
 import { ConfirmationModal } from './ui/confirmation-modal'
-import { useTransition } from 'react'
+import { sileo as toast } from 'sileo'
 
 export function ProductCard({
   product,
@@ -231,7 +231,7 @@ export function ProductCard({
               )}
 
               {allSupplies.length > 0 && (
-                <RecipeForm productId={product.id} supplies={allSupplies} />
+                <RecipeForm productId={product.id} supplies={allSupplies} onSuccess={invalidateProducts} />
               )}
 
               {product.recipeItems.length === 0 ? (
@@ -253,48 +253,17 @@ export function ProductCard({
                       {product.recipeItems.map((item: any) => {
                         const cost = (Number(item.quantityRequired) || 0) * (Number(item.supply?.purchasePrice) || 0)
                         return (
-                          <TableRow key={item.id} className="group/row hover:bg-accent/5">
-                            <TableCell className="py-2.5 font-semibold text-sm">
-                              {item.supply.name}
-                              <span className="block text-[10px] text-muted-foreground font-normal">
-                                {formatCurrency(Number(item.supply?.purchasePrice) || 0)} / {item.supply?.unit}
-                              </span>
-                            </TableCell>
-                            <TableCell className="py-2.5">
-                              <span className="text-[10px] font-bold px-2 py-0.5 bg-accent/50 text-muted-foreground rounded-md">
-                                {Number(item.quantityRequired)} {item.unit}
-                              </span>
-                            </TableCell>
-                            <TableCell className="py-2.5 text-right font-medium text-xs">
-                              {formatCurrency(cost)}
-                            </TableCell>
-                            <TableCell className="py-2.5 text-right">
-                              <div className="flex items-center justify-end gap-1">
-                                <Button
-                                  type="button"
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => {
-                                    setEditQuantity(Number(item.quantityRequired))
-                                    setEditUnit(item.unit)
-                                    setEditingRecipeItem(item)
-                                  }}
-                                  className="h-6 w-6 p-0 rounded-lg hover:bg-primary/10 hover:text-primary transition-colors group"
-                                >
-                                  <Edit2 className='w-4 h-4 group-hover:text-primary' />
-                                </Button>
-                                <Button
-                                  type="button"
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => setRecipeItemToDelete(item.id)}
-                                  className="h-6 w-6 p-0 rounded-lg hover:bg-rose-500/10 hover:text-rose-500 transition-colors group"
-                                >
-                                  <Trash2 className='w-4 h-4 group-hover:text-rose-500' />
-                                </Button>
-                              </div>
-                            </TableCell>
-                          </TableRow>
+                          <RecipeItemRow
+                            key={item.id}
+                            item={item}
+                            cost={cost}
+                            onEdit={(item) => {
+                              setEditQuantity(Number(item.quantityRequired))
+                              setEditUnit(item.unit)
+                              setEditingRecipeItem(item)
+                            }}
+                            onDelete={(id) => setRecipeItemToDelete(id)}
+                          />
                         )
                       })}
                     </TableBody>
@@ -365,9 +334,11 @@ export function ProductCard({
         onClose={() => setRecipeItemToDelete(null)}
         onConfirm={() => {
           if (!recipeItemToDelete) return
+          const id = recipeItemToDelete
+          setRecipeItemToDelete(null)
           startTransition(async () => {
-            await deleteRecipeItem(recipeItemToDelete)
-            setRecipeItemToDelete(null)
+            await deleteRecipeItem(id)
+            toast.warning({ title: 'Insumo quitado de la receta' })
             invalidateProducts()
           })
         }}
@@ -437,5 +408,53 @@ export function ProductCard({
         </div>
       </ConfirmationModal>
     </>
+  )
+}
+
+function RecipeItemRow({ item, cost, onEdit, onDelete }: {
+  item: any
+  cost: number
+  onEdit: (item: any) => void
+  onDelete: (id: string) => void
+}) {
+  return (
+    <TableRow className="group/row hover:bg-accent/5">
+      <TableCell className="py-2.5 font-semibold text-sm">
+        {item.supply.name}
+        <span className="block text-[10px] text-muted-foreground font-normal">
+          {formatCurrency(Number(item.supply?.purchasePrice) || 0)} / {item.supply?.unit}
+        </span>
+      </TableCell>
+      <TableCell className="py-2.5">
+        <span className="text-[10px] font-bold px-2 py-0.5 bg-accent/50 text-muted-foreground rounded-md">
+          {Number(item.quantityRequired)} {item.unit}
+        </span>
+      </TableCell>
+      <TableCell className="py-2.5 text-right font-medium text-xs">
+        {formatCurrency(cost)}
+      </TableCell>
+      <TableCell className="py-2.5 text-right">
+        <div className="flex items-center justify-end gap-1">
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={() => onEdit(item)}
+            className="h-6 w-6 p-0 rounded-lg hover:bg-primary/10 hover:text-primary transition-colors group"
+          >
+            <Edit2 className='w-4 h-4 group-hover:text-primary' />
+          </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={() => onDelete(item.id)}
+            className="h-6 w-6 p-0 rounded-lg hover:bg-rose-500/10 hover:text-rose-500 transition-colors group"
+          >
+            <Trash2 className='w-4 h-4 group-hover:text-rose-500' />
+          </Button>
+        </div>
+      </TableCell>
+    </TableRow>
   )
 }

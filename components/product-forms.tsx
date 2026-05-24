@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { createProduct, updateProduct, addRecipeItem } from '@/lib/actions/products'
 import { UNIDADES, UNIDADES_POR_TIPO } from '@/lib/constants'
 import { convertUnits, canConvert, getUnitType, formatUnitForDisplay } from '@/lib/conversions'
+import { sileo as toast } from 'sileo'
 import { Plus } from 'lucide-react'
 
 export function ProductForm({
@@ -89,15 +90,16 @@ export function ProductForm({
 
 export function RecipeForm({
   productId,
-  supplies
+  supplies,
+  onSuccess
 }: {
   productId: string,
-  supplies: { id: string; name: string; unit: string }[]
+  supplies: { id: string; name: string; unit: string; unitsPerPack: number }[]
+  onSuccess?: () => void
 }) {
   const [quantity, setQuantity] = useState(0)
   const [selectedSupplyId, setSelectedSupplyId] = useState('')
   const [selectedUnit, setSelectedUnit] = useState('')
-  const [formKey, setFormKey] = useState(0)
 
   const selectedSupply = supplies.find(s => s.id === selectedSupplyId)
 
@@ -105,9 +107,10 @@ export function RecipeForm({
     setQuantity(0)
     setSelectedSupplyId('')
     setSelectedUnit('')
-    setFormKey(prev => prev + 1)
   }
+
   const supplyUnitType = selectedSupply ? getUnitType(selectedSupply.unit) : null
+  const isContainerUnit = selectedSupply && supplyUnitType === null && selectedSupply.unit !== 'unidad' && (selectedSupply.unitsPerPack || 1) > 1
 
   const availableUnits = supplyUnitType
     ? UNIDADES_POR_TIPO[supplyUnitType]
@@ -125,11 +128,13 @@ export function RecipeForm({
 
   const handleSubmit = async (formData: FormData) => {
     await addRecipeItem(formData)
+    toast.success({ title: 'Insumo agregado a la receta' })
     resetForm()
+    onSuccess?.()
   }
 
   return (
-    <form action={handleSubmit} key={formKey} className="mt-2 p-4 bg-primary/3 rounded-lg border border-primary/10 backdrop-blur-md">
+    <form action={handleSubmit} className="mt-2 p-4 bg-primary/3 rounded-lg border border-primary/10 backdrop-blur-md">
       <input type="hidden" name="productId" value={productId} />
 
       <div className="grid grid-cols-1 md:grid-cols-12 gap-x-3 gap-y-1.5">
@@ -150,7 +155,14 @@ export function RecipeForm({
           <label className="md:hidden text-[10px] font-bold uppercase tracking-[0.2em] text-primary/50 mb-1 block">Insumo</label>
           <Select name="supplyId" required value={selectedSupplyId} onValueChange={(val) => {
               setSelectedSupplyId(val)
-              setSelectedUnit('')
+              const s = supplies.find(s => s.id === val)
+              if (s) {
+                const unitType = getUnitType(s.unit)
+                const isContainer = unitType === null && s.unit !== 'unidad' && (s.unitsPerPack || 1) > 1
+                setSelectedUnit(isContainer ? 'unidad' : s.unit)
+              } else {
+                setSelectedUnit('')
+              }
             }}>
             <SelectTrigger className="h-11 rounded-lg bg-background/60 border-primary/5 hover:border-primary/20 transition-all shadow-sm">
               <SelectValue placeholder="Seleccionar..." />
