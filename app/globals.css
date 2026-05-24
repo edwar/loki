@@ -376,6 +376,45 @@ body {
   animation-delay: 0.2s;
 }
 
+.stagger-5 { animation-delay: 0.25s; }
+.stagger-6 { animation-delay: 0.3s; }
+.stagger-7 { animation-delay: 0.35s; }
+.stagger-8 { animation-delay: 0.4s; }
+.stagger-9 { animation-delay: 0.45s; }
+.stagger-10 { animation-delay: 0.5s; }
+.stagger-11 { animation-delay: 0.55s; }
+.stagger-12 { animation-delay: 0.6s; }
+.stagger-13 { animation-delay: 0.65s; }
+.stagger-14 { animation-delay: 0.7s; }
+.stagger-15 { animation-delay: 0.75s; }
+.stagger-16 { animation-delay: 0.8s; }
+.stagger-17 { animation-delay: 0.85s; }
+.stagger-18 { animation-delay: 0.9s; }
+.stagger-19 { animation-delay: 0.95s; }
+.stagger-20 { animation-delay: 1s; }
+
+/* Staggered table rows */
+.stagger-rows tbody tr {
+  animation: fadeIn 0.3s ease-out forwards;
+  opacity: 0;
+}
+
+.stagger-rows tbody tr:nth-child(1) { animation-delay: 0.02s; }
+.stagger-rows tbody tr:nth-child(2) { animation-delay: 0.04s; }
+.stagger-rows tbody tr:nth-child(3) { animation-delay: 0.06s; }
+.stagger-rows tbody tr:nth-child(4) { animation-delay: 0.08s; }
+.stagger-rows tbody tr:nth-child(5) { animation-delay: 0.1s; }
+.stagger-rows tbody tr:nth-child(6) { animation-delay: 0.12s; }
+.stagger-rows tbody tr:nth-child(7) { animation-delay: 0.14s; }
+.stagger-rows tbody tr:nth-child(8) { animation-delay: 0.16s; }
+.stagger-rows tbody tr:nth-child(9) { animation-delay: 0.18s; }
+.stagger-rows tbody tr:nth-child(10) { animation-delay: 0.2s; }
+.stagger-rows tbody tr:nth-child(11) { animation-delay: 0.22s; }
+.stagger-rows tbody tr:nth-child(12) { animation-delay: 0.24s; }
+.stagger-rows tbody tr:nth-child(13) { animation-delay: 0.26s; }
+.stagger-rows tbody tr:nth-child(14) { animation-delay: 0.28s; }
+.stagger-rows tbody tr:nth-child(15) { animation-delay: 0.3s; }
+
 /* Scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
@@ -459,43 +498,27 @@ body {
   }
 }
 
-/* View Transition API - Theme switch animation */
-@view-transition {
-  navigation: auto;
+/* View Transitions */
+::view-transition-old(page-content) {
+  animation: 0.2s ease-out both fade-out;
 }
 
-::view-transition-old(root),
-::view-transition-new(root) {
-  animation-duration: 0.3s;
-  animation-timing-function: ease-out;
-  mix-blend-mode: normal;
+::view-transition-new(page-content) {
+  animation: 0.3s ease-out 0.05s both fade-in;
 }
 
-::view-transition-old(root) {
-  animation-name: slide-out;
+@keyframes fade-out {
+  to { opacity: 0; }
 }
 
-::view-transition-new(root) {
-  animation-name: slide-in;
+@keyframes fade-in {
+  from { opacity: 0; }
 }
 
-@keyframes slide-out {
-  from {
-    clip-path: inset(0);
-  }
-
-  to {
-    clip-path: inset(0 0 100% 0);
-  }
-}
-
-@keyframes slide-in {
-  from {
-    clip-path: inset(0 0 100% 0);
-  }
-
-  to {
-    clip-path: inset(0);
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none;
   }
 }
 
