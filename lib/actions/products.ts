@@ -210,3 +210,21 @@ export async function prepareProduct(productId: string, batches: number, actualY
   revalidatePath('/ventas')
   revalidatePath('/')
 }
+
+export async function consumeProduct(productId: string, quantity: number) {
+  const product = await prisma.product.findUnique({
+    where: { id: productId },
+  })
+  if (!product) throw new Error('Producto no encontrado')
+  if (quantity <= 0) throw new Error('La cantidad debe ser mayor a 0')
+  if (Number(product.currentStock) < quantity) {
+    throw new Error(`Stock insuficiente. Disponible: ${Number(product.currentStock)}`)
+  }
+
+  await prisma.product.update({
+    where: { id: productId },
+    data: { currentStock: { decrement: quantity } },
+  })
+
+  revalidatePath('/productos')
+}
