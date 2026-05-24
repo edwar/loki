@@ -1,17 +1,17 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Button } from '@/components/ui/button'
 import { Users, Plus, Phone, Mail, MapPin, Edit2, Trash2 } from 'lucide-react'
-import { deleteCustomer } from '@/lib/actions/customers'
 import { ConfirmationModal } from '@/components/ui/confirmation-modal'
 import { Modal } from '@/components/ui/modal'
 import { CustomerFormModal } from '@/components/customer-form-modal'
 import { EmptyState } from '@/components/ui/empty-state'
 import { ExportButton } from '@/components/ui/export-button'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { deleteCustomer } from '@/lib/actions/customers'
 
 interface Customer {
   id: string
@@ -26,15 +26,45 @@ interface ClientesClientProps {
   customers: Customer[]
 }
 
-export function ClientesClient({ customers }: ClientesClientProps) {
-  const router = useRouter()
+export function ClientesClient({ customers: initialCustomers }: ClientesClientProps) {
+  const queryClient = useQueryClient()
   const [modalOpen, setModalOpen] = useState(false)
   const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null)
   const [deletingCustomer, setDeletingCustomer] = useState<Customer | null>(null)
-  const [isDeleting, setIsDeleting] = useState(false)
+
+  const { data: customers } = useQuery({
+    queryKey: ['customers'],
+    queryFn: async () => {
+      const res = await fetch('/api/customers')
+      if (!res.ok) throw new Error('Error al cargar clientes')
+      return res.json()
+    },
+    initialData: initialCustomers,
+  })
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => deleteCustomer(id),
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey: ['customers'] })
+      const previous = queryClient.getQueryData<Customer[]>(['customers'])
+      queryClient.setQueryData<Customer[]>(['customers'], (old) =>
+        old?.filter((c) => c.id !== id) ?? []
+      )
+      setDeletingCustomer(null)
+      return { previous }
+    },
+    onError: (_err, _id, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(['customers'], context.previous)
+      }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['customers'] })
+    },
+  })
 
   const handleSuccess = () => {
-    router.refresh()
+    queryClient.invalidateQueries({ queryKey: ['customers'] })
   }
 
   const handleOpenNew = () => {
@@ -47,20 +77,6 @@ export function ClientesClient({ customers }: ClientesClientProps) {
     setModalOpen(true)
   }
 
-  const handleDelete = async () => {
-    if (!deletingCustomer) return
-    setIsDeleting(true)
-    try {
-      await deleteCustomer(deletingCustomer.id)
-      setDeletingCustomer(null)
-      router.refresh()
-    } catch (error) {
-      console.error('Error deleting customer:', error)
-    } finally {
-      setIsDeleting(false)
-    }
-  }
-
   return (
     <div className="space-y-8 animate-fade-in">
       {/* Header */}
@@ -71,9 +87,7 @@ export function ClientesClient({ customers }: ClientesClientProps) {
             Administra tu base de datos y fideliza a tus compradores.
           </p>
         </div>
-        <Button
-          onClick={handleOpenNew}
-        >
+        <Button onClick={handleOpenNew}>
           <Plus size={20} />
           Nuevo Cliente
         </Button>
@@ -90,7 +104,7 @@ export function ClientesClient({ customers }: ClientesClientProps) {
               </div>
               <div>
                 <p className="text-[10px] font-bold uppercase tracking-widest text-primary">Clientes Registrados</p>
-                <p className="text-3xl font-extrabold">{customers.length}</p>
+                <p className="text-3xl font-extrabold">{(customers ?? []).length}</p>
               </div>
             </div>
           </CardContent>
@@ -105,7 +119,7 @@ export function ClientesClient({ customers }: ClientesClientProps) {
               </div>
               <div>
                 <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-600 dark:text-emerald-400">Clientes Activos</p>
-                <p className="text-3xl font-extrabold">{customers.filter(c => c.saleCount > 0).length}</p>
+                <p className="text-3xl font-extrabold">{(customers ?? []).filter((c: Customer) => c.saleCount > 0).length}</p>
               </div>
             </div>
           </CardContent>
@@ -113,7 +127,7 @@ export function ClientesClient({ customers }: ClientesClientProps) {
       </div>
 
       {/* Table */}
-      {customers.length === 0 ? (
+      {(customers?.length ?? 0) === 0 ? (
         <EmptyState
           icon={Users}
           title="No hay clientes registrados"
@@ -137,7 +151,7 @@ export function ClientesClient({ customers }: ClientesClientProps) {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {customers.map((customer) => (
+                {(customers ?? []).map((customer: Customer) => (
                   <TableRow key={customer.id} className="hover:bg-accent/30 group transition-colors">
                     <TableCell className="py-4">
                       <div className="flex flex-col">
@@ -209,8 +223,8 @@ export function ClientesClient({ customers }: ClientesClientProps) {
       <ConfirmationModal
         isOpen={!!deletingCustomer}
         onClose={() => setDeletingCustomer(null)}
-        onConfirm={handleDelete}
-        loading={isDeleting}
+        onConfirm={() => deletingCustomer && deleteMutation.mutate(deletingCustomer.id)}
+        loading={deleteMutation.isPending}
         title="¿Eliminar cliente?"
         description={`¿Estás seguro de que deseas eliminar a "${deletingCustomer?.name}"? Esta acción no se puede deshacer.`}
         confirmText="Eliminar Cliente"

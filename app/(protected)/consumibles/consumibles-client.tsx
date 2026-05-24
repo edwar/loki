@@ -8,7 +8,7 @@ import { NumericInput } from '@/components/ui/numeric-input'
 import { formatCurrency, formatDate } from '@/lib/utils'
 import { Package, Plus, Trash2, AlertCircle } from 'lucide-react'
 import { registerConsumableUsage } from '@/lib/actions/consumables'
-import { useRouter } from 'next/navigation'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { EmptyState } from '@/components/ui/empty-state'
 
 interface Supply {
@@ -33,43 +33,67 @@ interface ConsumiblesClientProps {
   history: HistoryItem[]
 }
 
-export function ConsumiblesClient({ supplies, history }: ConsumiblesClientProps) {
-  const router = useRouter()
+export function ConsumiblesClient({ supplies: initialSupplies, history: initialHistory }: ConsumiblesClientProps) {
+  const queryClient = useQueryClient()
   const [selectedSupplyId, setSelectedSupplyId] = useState('')
   const [quantity, setQuantity] = useState(1)
   const [reason, setReason] = useState('sale')
   const [notes, setNotes] = useState('')
-  const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const selectedSupply = supplies.find(s => s.id === selectedSupplyId)
+  const { data: supplies } = useQuery<Supply[]>({
+    queryKey: ['consumables-supplies'],
+    queryFn: async () => {
+      const res = await fetch('/api/consumables')
+      if (!res.ok) throw new Error('Error al cargar consumibles')
+      const data = await res.json()
+      return data.supplies
+    },
+    initialData: initialSupplies,
+  })
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!selectedSupplyId) return
+  const { data: history } = useQuery<HistoryItem[]>({
+    queryKey: ['consumables-history'],
+    queryFn: async () => {
+      const res = await fetch('/api/consumables')
+      if (!res.ok) throw new Error('Error al cargar historial')
+      const data = await res.json()
+      return data.history
+    },
+    initialData: initialHistory,
+  })
 
-    setLoading(true)
-    setError(null)
+  const selectedSupply = (supplies ?? []).find((s: Supply) => s.id === selectedSupplyId)
 
-    try {
+  const registerMutation = useMutation({
+    mutationFn: async () => {
       const formData = new FormData()
       formData.set('supplyId', selectedSupplyId)
       formData.set('quantity', quantity.toString())
       formData.set('reason', reason)
       if (notes) formData.set('notes', notes)
-
       await registerConsumableUsage(formData)
-      
+    },
+    onSuccess: () => {
       setSelectedSupplyId('')
       setQuantity(1)
       setReason('sale')
       setNotes('')
-      router.refresh()
-    } catch (err: any) {
+      setError(null)
+    },
+    onError: (err: Error) => {
       setError(err.message)
-    } finally {
-      setLoading(false)
-    }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['consumables-history'] })
+      queryClient.invalidateQueries({ queryKey: ['consumables-supplies'] })
+    },
+  })
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!selectedSupplyId) return
+    registerMutation.mutate()
   }
 
   const getReasonLabel = (r: string) => {
@@ -181,11 +205,11 @@ export function ConsumiblesClient({ supplies, history }: ConsumiblesClientProps)
 
             <Button
               type="submit"
-              disabled={loading || !selectedSupplyId || quantity < 1}
+              disabled={registerMutation.isPending || !selectedSupplyId || quantity < 1}
               className="w-full h-12 font-bold rounded-lg"
             >
               <Plus size={20} className="mr-2" />
-              {loading ? 'Registrando...' : 'Registrar Consumo'}
+              {registerMutation.isPending ? 'Registrando...' : 'Registrar Consumo'}
             </Button>
           </form>
         </CardContent>

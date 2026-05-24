@@ -3,23 +3,20 @@
 import { useState } from 'react'
 import { Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { deleteSale } from '@/lib/actions/sales'
 import { ConfirmationModal } from '@/components/ui/confirmation-modal'
 
-export function DeleteSaleButton({ id }: { id: string }) {
-  const [showConfirm, setShowConfirm] = useState(false)
-  const [loading, setLoading] = useState(false)
+interface DeleteSaleButtonProps {
+  id: string
+  onDelete: (id: string) => void
+  loading?: boolean
+}
 
-  const handleDelete = async () => {
-    setLoading(true)
-    try {
-      await deleteSale(id)
-      setShowConfirm(false)
-    } catch (error) {
-      console.error('Error deleting sale:', error)
-    } finally {
-      setLoading(false)
-    }
+export function DeleteSaleButton({ id, onDelete, loading }: DeleteSaleButtonProps) {
+  const [showConfirm, setShowConfirm] = useState(false)
+
+  const handleDelete = () => {
+    onDelete(id)
+    setShowConfirm(false)
   }
 
   return (
@@ -40,6 +37,7 @@ export function DeleteSaleButton({ id }: { id: string }) {
         loading={loading}
         title="¿Eliminar esta venta?"
         description="Esta acción no se puede deshacer. El registro de la venta será eliminado permanentemente y el stock de los productos no será devuelto automáticamente."
+        variant="danger"
       />
     </>
   )

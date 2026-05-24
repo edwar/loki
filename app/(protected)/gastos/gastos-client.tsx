@@ -1,17 +1,17 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Button } from '@/components/ui/button'
 import { formatCurrency, cn } from '@/lib/utils'
 import { Trash2, Edit2, Wallet, Calendar, Plus, TrendingDown, Receipt } from 'lucide-react'
-import { deleteExpense } from '@/lib/actions/expenses'
 import { ConfirmationModal } from '@/components/ui/confirmation-modal'
 import { Modal } from '@/components/ui/modal'
 import { ExpenseFormModal } from '@/components/expense-form-modal'
 import { EmptyState } from '@/components/ui/empty-state'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { deleteExpense } from '@/lib/actions/expenses'
 
 interface Expense {
   id: string
@@ -25,17 +25,47 @@ interface GastosClientProps {
   expenses: Expense[]
 }
 
-export function GastosClient({ expenses }: GastosClientProps) {
-  const router = useRouter()
+export function GastosClient({ expenses: initialExpenses }: GastosClientProps) {
+  const queryClient = useQueryClient()
   const [modalOpen, setModalOpen] = useState(false)
   const [editingExpense, setEditingExpense] = useState<Expense | null>(null)
   const [deletingId, setDeletingId] = useState<string | null>(null)
-  const [isDeleting, setIsDeleting] = useState(false)
 
-  const totalExpenses = expenses.reduce((sum, e) => sum + Number(e.amount), 0)
+  const { data: expenses } = useQuery({
+    queryKey: ['expenses'],
+    queryFn: async () => {
+      const res = await fetch('/api/expenses')
+      if (!res.ok) throw new Error('Error al cargar gastos')
+      return res.json()
+    },
+    initialData: initialExpenses,
+  })
+
+  const totalExpenses = (expenses ?? []).reduce((sum: number, e: Expense) => sum + Number(e.amount), 0)
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => deleteExpense(id),
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey: ['expenses'] })
+      const previous = queryClient.getQueryData<Expense[]>(['expenses'])
+      queryClient.setQueryData<Expense[]>(['expenses'], (old) =>
+        old?.filter((e) => e.id !== id) ?? []
+      )
+      setDeletingId(null)
+      return { previous }
+    },
+    onError: (_err, _id, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(['expenses'], context.previous)
+      }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['expenses'] })
+    },
+  })
 
   const handleSuccess = () => {
-    router.refresh()
+    queryClient.invalidateQueries({ queryKey: ['expenses'] })
   }
 
   const handleOpenNew = () => {
@@ -46,20 +76,6 @@ export function GastosClient({ expenses }: GastosClientProps) {
   const handleOpenEdit = (expense: Expense) => {
     setEditingExpense(expense)
     setModalOpen(true)
-  }
-
-  const handleDelete = async () => {
-    if (!deletingId) return
-    setIsDeleting(true)
-    try {
-      await deleteExpense(deletingId)
-      setDeletingId(null)
-      router.refresh()
-    } catch (error) {
-      console.error('Error deleting expense:', error)
-    } finally {
-      setIsDeleting(false)
-    }
   }
 
   return (
@@ -107,7 +123,7 @@ export function GastosClient({ expenses }: GastosClientProps) {
               </div>
               <div>
                 <p className="text-[10px] font-bold uppercase tracking-widest text-blue-600 dark:text-blue-400">Registros</p>
-                <p className="text-3xl font-extrabold">{expenses.length}</p>
+                <p className="text-3xl font-extrabold">{(expenses ?? []).length}</p>
               </div>
             </div>
           </CardContent>
@@ -115,7 +131,7 @@ export function GastosClient({ expenses }: GastosClientProps) {
       </div>
 
       {/* Table */}
-      {expenses.length === 0 ? (
+      {(expenses?.length ?? 0) === 0 ? (
         <EmptyState
           icon={Wallet}
           title="No hay gastos registrados"
@@ -140,7 +156,7 @@ export function GastosClient({ expenses }: GastosClientProps) {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {expenses.map((expense) => (
+                {(expenses ?? []).map((expense: Expense) => (
                   <TableRow key={expense.id} className="hover:bg-accent/30 group transition-colors">
                     <TableCell className="py-4 font-medium text-muted-foreground">
                       <div className="flex items-center gap-2">
@@ -202,8 +218,8 @@ export function GastosClient({ expenses }: GastosClientProps) {
       <ConfirmationModal
         isOpen={!!deletingId}
         onClose={() => setDeletingId(null)}
-        onConfirm={handleDelete}
-        loading={isDeleting}
+        onConfirm={() => deletingId && deleteMutation.mutate(deletingId)}
+        loading={deleteMutation.isPending}
         title="¿Eliminar este gasto?"
         description="Esta acción no se puede deshacer. El registro del gasto será eliminado permanentemente."
         confirmText="Eliminar Gasto"

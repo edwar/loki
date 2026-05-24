@@ -1,14 +1,13 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Package, Plus } from 'lucide-react'
 import { ProductCard } from '@/components/product-card'
 import { Modal } from '@/components/ui/modal'
 import { ProductFormModal } from '@/components/product-form-modal'
 import { EmptyState } from '@/components/ui/empty-state'
 import { Button } from '@/components/ui/button'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 
 interface Supply {
   id: string
@@ -45,13 +44,25 @@ interface ProductosClientProps {
   allSupplies: Supply[]
 }
 
-export function ProductosClient({ products, categories, allSupplies }: ProductosClientProps) {
-  const router = useRouter()
+export function ProductosClient({ products: initialProducts, categories, allSupplies }: ProductosClientProps) {
+  const queryClient = useQueryClient()
   const [modalOpen, setModalOpen] = useState(false)
   const [editingProduct, setEditingProduct] = useState<Product | null>(null)
 
+  const { data: products } = useQuery<Product[]>({
+    queryKey: ['products'],
+    queryFn: async () => {
+      const res = await fetch('/api/products')
+      if (!res.ok) throw new Error('Error al cargar productos')
+      return res.json()
+    },
+    initialData: initialProducts,
+  })
+
   const handleSuccess = () => {
-    router.refresh()
+    queryClient.invalidateQueries({ queryKey: ['products'] })
+    setModalOpen(false)
+    setEditingProduct(null)
   }
 
   const handleOpenNew = () => {
@@ -84,7 +95,7 @@ export function ProductosClient({ products, categories, allSupplies }: Productos
 
       {/* Product List */}
       <div className="grid gap-8">
-        {products.map((product, index) => (
+        {(products ?? []).map((product, index) => (
           <ProductCard
             key={product.id}
             product={product}
@@ -95,7 +106,7 @@ export function ProductosClient({ products, categories, allSupplies }: Productos
           />
         ))}
 
-        {products.length === 0 && (
+        {(products ?? []).length === 0 && (
           <EmptyState
             icon={Package}
             title="No hay productos registrados"

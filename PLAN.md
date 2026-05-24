@@ -1,38 +1,35 @@
-# [Proyecto] — Plan de Desarrollo
+# Loki — Plan de Desarrollo
 
 ## 1. Resumen Ejecutivo
 
-<!-- Breve descripción del proyecto, estado actual y objetivo principal -->
+Sistema de gestión empresarial colombiano para panadería/pastelería. Control de inventario, producción, ventas, gastos, facturación, rentabilidad y más. Actualmente funcional en su totalidad con 17 módulos operativos. Se completó la migración completa a TanStack Query (4 fases) para cache predictivo, optimistic updates y eliminación de `router.refresh()`.
 
 ---
 
 ## 2. Principios de Diseño y Desarrollo
 
-Estos principios definen cómo se construye el proyecto. Son transferibles a cualquier otro proyecto.
-
 ### 2.1 UX y Navegación
 
 - **Vistas unificadas** antes que múltiples rutas. Si dos módulos comparten contexto (ej. insumos + compras), se fusionan en una sola vista con secciones claras.
-- **Forms en modal (CTA Pattern)**: El botón de acción principal va en la esquina superior derecha y abre un modal centrado. Nada de acordeones ni formularios en columnas laterales.
+- **Forms en modal (CTA Pattern)**: El botón de acción principal va en la esquina superior derecha y abre un modal centrado. Sin acordeones ni formularios en columnas laterales.
 - **Botón Cancelar en modales**: Siempre `variant="ghost"`. El botón de acción principal usa el estilo por defecto (primary).
-- **Acciones siempre visibles**: Botones de editar/eliminar/ver en tablas nunca se ocultan con hover (`opacity-0 group-hover:opacity-100`).
+- **Acciones siempre visibles**: Botones de editar/eliminar/ver en tablas nunca se ocultan con hover.
 
 ### 2.2 UI y Visual
 
-- **Skeleton Loading**: Cada ruta tiene su `loading.tsx` con un skeleton que **calca exactamente** la estructura visual de la página (grid cols, cards, columnas de tabla). Al modificar una página, se actualiza su loading.tsx para evitar CLS.
-- **Staggered row animations**: Las filas de tablas aparecen con fade-in escalonado (`stagger-rows`).
+- **Skeleton Loading**: Cada ruta tiene su `loading.tsx` con un skeleton que calca exactamente la estructura visual de la página para evitar CLS.
+- **Staggered row animations**: Filas de tablas aparecen con fade-in escalonado.
 - **View Transitions**: Transiciones suaves entre rutas usando `<ViewTransition>` de React + `experimental.viewTransition` en Next.js.
-- **No "cajas dentro de cajas"**: Componentes con bordes propios (como `<Table>`) no se anidan dentro de `<Card>` con padding. Se usa `p-0` en el Card y se remueven bordes del hijo.
-- **Bordes redondeados**: `rounded-lg` como estándar en contenedores, botones, inputs, modals. `rounded-xl`/`rounded-2xl` no se usan. `rounded-md`/`rounded-sm` solo en badges/chips.
-- **Soft Delete**: Todas las eliminaciones son suaves (`deletedAt`). Nunca se eliminan registros físicamente.
+- **No "cajas dentro de cajas"**: Componentes con bordes propios no se anidan dentro de `<Card>` con padding.
+- **Bordes redondeados**: `rounded-lg` como estándar en todo.
+- **Soft Delete**: Todas las eliminaciones son suaves (`deletedAt`).
 
 ### 2.3 Desarrollo
 
-- **Menos complejidad es más útil**: Preferir lo simple sobre lo sofisticado. No crear abstracciones innecesarias.
-- **Server Components por defecto**: Las páginas son server components que pasan datos serializados a client components cuando se necesita interactividad.
-- **Server Actions para mutaciones**: Nunca API Routes para CRUD. Server Actions + `revalidatePath`.
+- **Server Components por defecto**: Páginas como server components que pasan datos serializados como `initialData` a `useQuery`.
+- **Server Actions para mutaciones**: Nunca API Routes para CRUD. Las API routes existen solo como puente para `useQuery` del lado del cliente.
+- **TanStack Query para cache cliente**: `useQuery` con `initialData` del SSR, `useMutation` con optimistic updates, `invalidateQueries` en vez de `router.refresh()`.
 - **Zod para validación**: Schemas en server actions y formularios.
-- **Composición sobre configuración**: Componentes reutilizables y predecibles.
 
 ---
 
@@ -44,12 +41,11 @@ Estos principios definen cómo se construye el proyecto. Son transferibles a cua
 | UI | Tailwind CSS 4 + Shadcn/ui | Utility-first + componentes accesibles |
 | Gráficos | Recharts | Dashboards y reportes visuales |
 | Formularios | React Hook Form + Zod | Formularios performantes con validación |
-| Estado global | Zustand | Estado del lado del cliente |
+| Estado cliente | TanStack Query | Cache, optimistic updates, refetch automático |
 | Autenticación | NextAuth.js | Sesiones y roles |
 | Base de datos | PostgreSQL + Prisma | ORM tipado y migraciones |
 | Moneda/Fechas | Intl.\* + date-fns | Formateo local |
-| Notificaciones | sileo | Toasts de feedback |
-| Testing | Playwright + GitHub Actions | E2E + CI |
+| Notificaciones | sonner | Toasts de feedback |
 | PWA | Serwist | Offline support |
 
 ---
@@ -61,7 +57,7 @@ Estos principios definen cómo se construye el proyecto. Son transferibles a cua
 | Concepto | Estándar |
 |----------|----------|
 | IDs | UUID v4 |
-| Timestamps | `createdAt`, `updatedAt`, `deletedAt` (soft delete) |
+| Timestamps | `createdAt`, `updatedAt`, `deletedAt` |
 | Moneda base | COP (Peso Colombiano) |
 | IVA por defecto | 19% |
 | Soft delete | `deletedAt IS NULL` en todas las queries |
@@ -70,32 +66,43 @@ Estos principios definen cómo se construye el proyecto. Son transferibles a cua
 
 ```
 app/
-├── (public)/           → landing, login, register, guia
-├── (protected)/        → dashboard y módulos (ver sección 5)
-├── api/                → solo auth y webhooks
+├── (public)/              → landing, login, register, guia
+├── (protected)/           → dashboard y módulos
+│   ├── [modulo]/
+│   │   ├── page.tsx       → server component, fetch + mapea datos
+│   │   ├── *-client.tsx   → client component con useQuery + useMutation
+│   │   └── loading.tsx    → skeleton que calca la página
+│   └── layout.tsx         → sidebar, session, QueryProvider wrapper
+├── api/                   → solo para puente useQuery (no CRUD directo)
+│   ├── alerts/
+│   ├── customers/
+│   ├── dashboard/
+│   ├── expenses/
+│   ├── sales/
+│   ├── suppliers/
+│   └── supplies/
 lib/
-├── actions/            → server actions (una por módulo)
+├── actions/               → server actions (una por módulo)
+├── providers/
+│   └── query-provider.tsx → QueryClientProvider + ReactQueryDevtools
 ├── auth.ts
 ├── prisma.ts
 └── utils.ts
 components/
-├── ui/                 → shadcn/ui components
-└── [dominio]/          → componentes específicos (dashboard, reports, etc.)
+├── ui/                    → shadcn/ui components
+└── [dominio]/             → específicos (dashboard, reports, etc.)
 prisma/
-└── schema.prisma       → modelo de datos completo
+└── schema.prisma          → modelo de datos completo
 ```
 
-### Patrón de página
+### Patrón de página con TanStack Query
 
 ```
-page.tsx                → server component, fetch data + pasa props
-*-client.tsx            → client component, interactividad
-loading.tsx             → skeleton que calca la página
+page.tsx       → server component, fetch data, pasa props serializados
+*-client.tsx   → useQuery(queryKey, fetch('/api/...'), { initialData })
+                 useMutation(onMutate optimistic, onError rollback, onSettled invalidate)
+loading.tsx    → skeleton que calca la página
 ```
-
-### Esquema de BD
-
-Ver `prisma/schema.prisma` para el modelo completo.
 
 ---
 
@@ -123,13 +130,13 @@ Ver `prisma/schema.prisma` para el modelo completo.
 
 ### Funcionalidades transversales
 
-- Soft delete, categorías configurables, exportación Excel/CSV
+- Soft delete + categorías configurables + exportación Excel/CSV
 - PWA offline, SEO (metadata, sitemap, schema JSON-LD)
 - Roles (admin, manager, employee), log de auditoría
-- Alertas de stock bajo, centro de notificaciones
+- Alertas de stock bajo + centro de notificaciones
 - Facturación con folio secuencial (FAC-XXXX) + PDF
-- Skeleton loading en todas las rutas, staggered row animations
-- View Transitions entre rutas
+- Skeleton loading + staggered rows + view transitions
+- TanStack Query: cache predictivo + optimistic updates
 
 ---
 
@@ -138,34 +145,62 @@ Ver `prisma/schema.prisma` para el modelo completo.
 | Patrón | Implementación |
 |--------|---------------|
 | Modal CRUD | CTA button top-right → `<Modal>` centrado → form → ghost cancel + primary submit |
-| Tabla con datos | `<Table>` con `<TableHeader>` + `<TableBody stagger-rows>` + sticky actions |
+| Tabla con datos | `<Table>` con sticky actions |
 | Empty state | `<EmptyState>` con icono, mensaje y acción opcional |
 | Stat cards | Grid responsiva con icono, valor y label |
-| Skeleton | `loading.tsx` con `<Skeleton>` de `@/components/ui/skeleton`, anchos que calcan contenido real |
+| Skeleton | `loading.tsx` con `<Skeleton>`, anchos que calcan contenido real |
 | Confirmación delete | `<ConfirmationModal variant="danger">` |
 | Exportación | `<ExportButton>` con columnas configurables |
+| Fetch cliente | `useQuery(key, fn, { initialData })` con SSR como punto de partida |
+| Mutación optimista | `useMutation` con `onMutate` → cache patch, `onError` → rollback, `onSettled` → invalidate |
 
 ---
 
-## 7. Próximos Pasos
+## 7. Migración a TanStack Query — Completada
 
-<!-- Pendientes organizados por prioridad -->
+Todas las fases de migración están implementadas y verificadas con build exitoso.
 
-### Alta prioridad
+| Fase | Alcance | Estado |
+|------|---------|--------|
+| Setup | `@tanstack/react-query` + devtools, `QueryProvider`, layout wrapper | ✅ |
+| Fase 1 — Dashboard | `DashboardClient` con `useQuery(['dashboard', range])`, filtros locales | ✅ |
+| Fase 2 — Reportes | `SalesReport`, `ExpensesReport`, `InventoryReport` migrados a `useQuery` | ✅ |
+| Fase 3 — Mutaciones | Delete optimista en Ventas, Gastos, Proveedores, Clientes, Inventario | ✅ |
+| Fase 4 — Polish | Notificaciones (`refetchInterval`), `lowStockCount` (`staleTime: 5min`), categorías (`staleTime: Infinity`) | ✅ |
 
-- [ ]
+### Patrón implementado
 
-### Media prioridad
+```tsx
+// page.tsx (server component)
+const data = await getData()
+return <ClientComponent data={data} />
 
-- [ ]
+// *-client.tsx
+const { data } = useQuery({
+  queryKey: ['entity'],
+  queryFn: () => fetch('/api/entity').then(r => r.json()),
+  initialData: props.data,
+})
 
-### Baja prioridad
-
-- Alertas de insumos próximos a vencer
-- Gráfico de tendencias de inventario
-- Exportación a Excel con formato profesional
-- Exportación programada mensual
+const deleteMutation = useMutation({
+  mutationFn: (id) => deleteEntity(id),
+  onMutate: async (id) => {
+    await queryClient.cancelQueries({ queryKey: ['entity'] })
+    const previous = queryClient.getQueryData(['entity'])
+    queryClient.setQueryData(['entity'], (old) => old?.filter(e => e.id !== id))
+    return { previous }
+  },
+  onError: (err, id, context) => queryClient.setQueryData(['entity'], context?.previous),
+  onSettled: () => queryClient.invalidateQueries({ queryKey: ['entity'] }),
+})
+```
 
 ---
 
-*Documento generado con el template de plan de desarrollo — [Project Name]*
+## 8. Próximos pasos
+
+- [ ] Dashboard ejecutivo con KPIs avanzados
+
+---
+
+*Documento actualizado al estado actual del proyecto Loki.*

@@ -3,7 +3,6 @@ import { Modal } from "@/components/ui/modal"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { useRouter } from "next/navigation"
 import { useState } from "react"
 
 export interface BusinessSettings {
@@ -23,7 +22,6 @@ export function BusinessSettingsModal({ open, onClose, onSuccess, settings }: {
     onSuccess?: (settings?: any) => void
     settings: BusinessSettings
 }) {
-    const router = useRouter()
     const [loading, setLoading] = useState(false)
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -40,7 +38,6 @@ export function BusinessSettingsModal({ open, onClose, onSuccess, settings }: {
 
             if (res.ok) {
                 const data = await res.json()
-                router.refresh()
                 if (onSuccess) {
                     onSuccess(data.settings)
                 } else {

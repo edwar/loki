@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { formatCurrency } from '@/lib/utils'
@@ -10,6 +9,7 @@ import { ConfirmationModal } from '@/components/ui/confirmation-modal'
 import { Modal } from '@/components/ui/modal'
 import { PropertyFormModal } from '@/components/property-form-modal'
 import { EmptyState } from '@/components/ui/empty-state'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 
 const PROPERTY_TYPES = [
   { value: 'terreno', label: 'Terreno' },
@@ -36,17 +36,52 @@ interface BienesClientProps {
   properties: Property[]
 }
 
-export function BienesClient({ properties }: BienesClientProps) {
-  const router = useRouter()
+export function BienesClient({ properties: initialProperties }: BienesClientProps) {
+  const queryClient = useQueryClient()
   const [modalOpen, setModalOpen] = useState(false)
   const [editingProperty, setEditingProperty] = useState<Property | null>(null)
   const [deletingId, setDeletingId] = useState<string | null>(null)
-  const [isDeleting, setIsDeleting] = useState(false)
 
-  const totalValue = properties.reduce((sum, p) => sum + p.currentValue, 0)
+  const { data: properties } = useQuery<Property[]>({
+    queryKey: ['properties'],
+    queryFn: async () => {
+      const res = await fetch('/api/properties')
+      if (!res.ok) throw new Error('Error al cargar bienes')
+      return res.json()
+    },
+    initialData: initialProperties,
+  })
+
+  const totalValue = (properties ?? []).reduce((sum: number, p: Property) => sum + p.currentValue, 0)
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const res = await fetch(`/api/properties?id=${id}`, { method: 'DELETE' })
+      if (!res.ok) throw new Error('Error al eliminar')
+    },
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey: ['properties'] })
+      const previous = queryClient.getQueryData<Property[]>(['properties'])
+      queryClient.setQueryData<Property[]>(['properties'], (old) =>
+        old?.filter((p) => p.id !== id) ?? []
+      )
+      setDeletingId(null)
+      return { previous }
+    },
+    onError: (_err, _id, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(['properties'], context.previous)
+      }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['properties'] })
+    },
+  })
 
   const handleSuccess = () => {
-    router.refresh()
+    queryClient.invalidateQueries({ queryKey: ['properties'] })
+    setModalOpen(false)
+    setEditingProperty(null)
   }
 
   const handleOpenNew = () => {
@@ -59,19 +94,7 @@ export function BienesClient({ properties }: BienesClientProps) {
     setModalOpen(true)
   }
 
-  const handleDelete = async () => {
-    if (!deletingId) return
-    setIsDeleting(true)
-    try {
-      await fetch(`/api/properties?id=${deletingId}`, { method: 'DELETE' })
-      setDeletingId(null)
-      router.refresh()
-    } catch (error) {
-      console.error('Error deleting property:', error)
-    } finally {
-      setIsDeleting(false)
-    }
-  }
+  const safeProperties = properties ?? []
 
   const typeLabel = (type: string) => PROPERTY_TYPES.find(t => t.value === type)?.label || type
 
@@ -104,7 +127,7 @@ export function BienesClient({ properties }: BienesClientProps) {
               </div>
               <div>
                 <p className="text-[10px] font-bold uppercase tracking-widest text-primary">Total Bienes</p>
-                <p className="text-3xl font-extrabold">{properties.length}</p>
+                <p className="text-3xl font-extrabold">{safeProperties.length}</p>
               </div>
             </div>
           </CardContent>
@@ -127,7 +150,7 @@ export function BienesClient({ properties }: BienesClientProps) {
       </div>
 
       {/* Table */}
-      {properties.length === 0 ? (
+      {safeProperties.length === 0 ? (
         <EmptyState
           icon={Building2}
           title="No hay bienes registrados"
@@ -153,7 +176,7 @@ export function BienesClient({ properties }: BienesClientProps) {
                 </tr>
               </thead>
               <tbody>
-                {properties.map((property) => (
+                {safeProperties.map((property) => (
                   <tr key={property.id} className="border-b border-border/10 hover:bg-accent/30 transition-colors group">
                     <td className="px-8 py-4">
                       <p className="font-bold text-lg">{property.name}</p>
@@ -214,8 +237,8 @@ export function BienesClient({ properties }: BienesClientProps) {
       <ConfirmationModal
         isOpen={!!deletingId}
         onClose={() => setDeletingId(null)}
-        onConfirm={handleDelete}
-        loading={isDeleting}
+        onConfirm={() => deletingId && deleteMutation.mutate(deletingId)}
+        loading={deleteMutation.isPending}
         title="¿Eliminar bien?"
         description="Esta acción no se puede deshacer. El bien será eliminado permanentemente de tu registro."
         confirmText="Eliminar Bien"

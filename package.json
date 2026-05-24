@@ -20,6 +20,8 @@
     "@react-pdf/renderer": "^4.5.1",
     "@serwist/next": "^9.5.11",
     "@serwist/precaching": "^9.5.11",
+    "@tanstack/react-query": "^5.100.13",
+    "@tanstack/react-query-devtools": "^5.100.13",
     "@types/recharts": "^2.0.1",
     "bcryptjs": "^3.0.3",
     "clsx": "^2.1.1",

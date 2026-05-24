@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useQueryClient } from '@tanstack/react-query'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
@@ -37,7 +37,12 @@ export function ProductCard({
   const [editQuantity, setEditQuantity] = useState<number>(0)
   const [editUnit, setEditUnit] = useState<string>('')
   const [actualYield, setActualYield] = useState<number>(0)
+  const queryClient = useQueryClient()
   const [isPending, startTransition] = useTransition()
+
+  const invalidateProducts = () => {
+    queryClient.invalidateQueries({ queryKey: ['products'] })
+  }
 
   const recipeCost = product.recipeItems.reduce((acc: number, item: any) => {
     const qty = Number(item.quantityRequired) || 0
@@ -60,6 +65,7 @@ export function ProductCard({
     startTransition(async () => {
       await prepareProduct(product.id, 1, actualYield)
       setIsProducing(false)
+      invalidateProducts()
     })
   }
 
@@ -345,6 +351,7 @@ export function ProductCard({
           startTransition(async () => {
             await deleteProduct(productToDelete)
             setProductToDelete(null)
+            invalidateProducts()
           })
         }}
         title="¿Eliminar producto?"
@@ -361,6 +368,7 @@ export function ProductCard({
           startTransition(async () => {
             await deleteRecipeItem(recipeItemToDelete)
             setRecipeItemToDelete(null)
+            invalidateProducts()
           })
         }}
         title="¿Quitar insumo de la receta?"
@@ -377,6 +385,7 @@ export function ProductCard({
           startTransition(async () => {
             await updateRecipeItem(editingRecipeItem.id, editQuantity, editUnit)
             setEditingRecipeItem(null)
+            invalidateProducts()
           })
         }}
         title="Editar Insumo"

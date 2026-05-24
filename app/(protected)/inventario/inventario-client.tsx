@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { formatCurrency, cn } from '@/lib/utils'
 import { Package, TrendingUp, AlertCircle, Plus, ChevronLeft, ChevronRight } from 'lucide-react'
@@ -13,6 +12,8 @@ import { PurchaseForm } from '@/components/purchase-form'
 import { SupplyForm } from '@/components/supply-form'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { deleteSupply } from '@/lib/actions/supplies'
 
 interface Supplier {
   id: string
@@ -36,19 +37,50 @@ interface InventarioClientProps {
   suppliers: Supplier[]
 }
 
-export function InventarioClient({ supplies, suppliers }: InventarioClientProps) {
-  const router = useRouter()
+export function InventarioClient({ supplies: initialSupplies, suppliers }: InventarioClientProps) {
+  const queryClient = useQueryClient()
   const [modalOpen, setModalOpen] = useState(false)
   const [supplyModalOpen, setSupplyModalOpen] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
   const [itemsPerPage, setItemsPerPage] = useState(5)
 
-  const totalValue = supplies.reduce((sum: number, s) => sum + s.currentStock * s.purchasePrice, 0)
-  const lowStockCount = supplies.filter(s => s.currentStock < s.minStock).length
+  const { data: supplies } = useQuery({
+    queryKey: ['supplies'],
+    queryFn: async () => {
+      const res = await fetch('/api/supplies')
+      if (!res.ok) throw new Error('Error al cargar insumos')
+      return res.json()
+    },
+    initialData: initialSupplies,
+  })
 
-  const totalPages = Math.ceil(supplies.length / itemsPerPage)
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => deleteSupply(id),
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey: ['supplies'] })
+      const previous = queryClient.getQueryData<any[]>(['supplies'])
+      queryClient.setQueryData<any[]>(['supplies'], (old) =>
+        old?.filter((s) => s.id !== id) ?? []
+      )
+      return { previous }
+    },
+    onError: (_err, _id, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(['supplies'], context.previous)
+      }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['supplies'] })
+    },
+  })
+
+  const safeSupplies = supplies ?? []
+  const totalValue = safeSupplies.reduce((sum: number, s: any) => sum + s.currentStock * s.purchasePrice, 0)
+  const lowStockCount = safeSupplies.filter((s: any) => s.currentStock < s.minStock).length
+
+  const totalPages = Math.ceil(safeSupplies.length / itemsPerPage)
   const startIndex = (currentPage - 1) * itemsPerPage
-  const paginatedSupplies = supplies.slice(startIndex, startIndex + itemsPerPage)
+  const paginatedSupplies = safeSupplies.slice(startIndex, startIndex + itemsPerPage)
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page)
@@ -59,7 +91,7 @@ export function InventarioClient({ supplies, suppliers }: InventarioClientProps)
     setCurrentPage(1)
   }
 
-  const exportData = supplies.map((supply) => ({
+  const exportData = safeSupplies.map((supply: any) => ({
     'Nombre': supply.name,
     'Categoría': supply.category || 'N/A',
     'Unidad': supply.unit,
@@ -72,7 +104,7 @@ export function InventarioClient({ supplies, suppliers }: InventarioClientProps)
   }))
 
   const handleSuccess = () => {
-    router.refresh()
+    queryClient.invalidateQueries({ queryKey: ['supplies'] })
   }
 
   return (
@@ -86,7 +118,7 @@ export function InventarioClient({ supplies, suppliers }: InventarioClientProps)
           </p>
         </div>
         <div className="w-full md:w-auto flex flex-col sm:flex-row gap-3">
-          {supplies.length > 0 && (
+          {safeSupplies.length > 0 && (
             <ExportButton
               data={exportData}
               filename={`Inventario_${new Date().toISOString().split('T')[0]}`}
@@ -120,7 +152,7 @@ export function InventarioClient({ supplies, suppliers }: InventarioClientProps)
               </div>
               <div>
                 <p className="text-[10px] font-bold uppercase tracking-widest text-primary">Insumos Totales</p>
-                <p className="text-3xl font-extrabold">{supplies.length}</p>
+                <p className="text-3xl font-extrabold">{safeSupplies.length}</p>
               </div>
             </div>
           </CardContent>
@@ -174,7 +206,12 @@ export function InventarioClient({ supplies, suppliers }: InventarioClientProps)
           <CardTitle className="text-xl">Detalle de Existencias</CardTitle>
         </CardHeader>
         <CardContent className="p-0 [&>div]:border-0 [&>div]:shadow-none [&>div]:rounded-none [&>div]:bg-transparent">
-          <SupplyTable supplies={paginatedSupplies} suppliers={suppliers} />
+          <SupplyTable
+            supplies={paginatedSupplies}
+            suppliers={suppliers}
+            onDelete={deleteMutation.mutate}
+            isDeleting={deleteMutation.isPending}
+          />
         </CardContent>
 
         {/* Pagination */}
@@ -192,7 +229,7 @@ export function InventarioClient({ supplies, suppliers }: InventarioClientProps)
               </SelectContent>
             </Select>
             <span className="text-muted-foreground font-medium ml-2">
-              de {supplies.length} insumos
+              de {safeSupplies.length} insumos
             </span>
           </div>
 
@@ -237,7 +274,7 @@ export function InventarioClient({ supplies, suppliers }: InventarioClientProps)
         <div className="p-8">
           <PurchaseForm
             suppliers={suppliers}
-            supplies={supplies.map(s => ({ id: s.id, name: s.name, unit: s.unit }))}
+            supplies={safeSupplies.map((s: any) => ({ id: s.id, name: s.name, unit: s.unit }))}
             onSuccess={handleSuccess}
             onClose={() => setModalOpen(false)}
           />

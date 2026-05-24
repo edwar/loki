@@ -5,34 +5,23 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Button } from '@/components/ui/button'
 import { formatCurrency, cn } from '@/lib/utils'
 import { Trash2, Edit2, Package } from 'lucide-react'
-import { deleteSupply } from '@/lib/actions/supplies'
 import { Modal } from '@/components/ui/modal'
 import { SupplyForm } from './supply-forms'
 import { ConfirmationModal } from './ui/confirmation-modal'
 
 export function SupplyTable({
   supplies,
-  suppliers
+  suppliers,
+  onDelete,
+  isDeleting,
 }: {
   supplies: any[]
   suppliers: any[]
+  onDelete?: (id: string) => void
+  isDeleting?: boolean
 }) {
   const [editingSupply, setEditingSupply] = useState<any>(null)
   const [deletingSupply, setDeletingSupply] = useState<any>(null)
-  const [isDeleting, setIsDeleting] = useState(false)
-
-  const handleDelete = async () => {
-    if (!deletingSupply) return
-    setIsDeleting(true)
-    try {
-      await deleteSupply(deletingSupply.id)
-      setDeletingSupply(null)
-    } catch (error) {
-      console.error("Error deleting supply:", error)
-    } finally {
-      setIsDeleting(false)
-    }
-  }
 
   return (
     <>
@@ -141,7 +130,7 @@ export function SupplyTable({
       <ConfirmationModal
         isOpen={!!deletingSupply}
         onClose={() => setDeletingSupply(null)}
-        onConfirm={handleDelete}
+        onConfirm={() => { if (deletingSupply && onDelete) { onDelete(deletingSupply.id); setDeletingSupply(null) } }}
         title="Eliminar Insumo"
         description={`¿Estás seguro de que deseas eliminar "${deletingSupply?.name}"? Esta acción no se puede deshacer.`}
         confirmText="Eliminar Insumo"

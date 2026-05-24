@@ -27,9 +27,10 @@ import {
   Tag,
   Percent
 } from 'lucide-react'
-import { useState, useEffect, ViewTransition } from 'react'
+import { useState, ViewTransition } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import { QueryProvider } from '@/lib/providers/query-provider'
 import { ThemeToggle } from '@/components/theme-toggle'
-import { getLowStockCount } from '@/lib/actions/alerts'
 import { SyncManager } from '@/components/sync-manager'
 import { Button } from '@/components/ui/button'
 import { NotificationsDropdown } from '@/components/notifications-dropdown'
@@ -97,7 +98,7 @@ const navigation: NavSection[] = [
   },
 ]
 
-export default function ProtectedLayout({
+function LayoutContent({
   children,
 }: {
   children: React.ReactNode
@@ -105,7 +106,18 @@ export default function ProtectedLayout({
   const pathname = usePathname()
   const { data: session } = useSession()
   const [mobileOpen, setMobileOpen] = useState(false)
-  const [lowStockCount, setLowStockCount] = useState(0)
+
+  const { data: lowStockCount = 0 } = useQuery({
+    queryKey: ['lowStockCount'],
+    queryFn: async () => {
+      const res = await fetch('/api/alerts')
+      if (!res.ok) return 0
+      const data = await res.json()
+      return data.lowStockCount ?? 0
+    },
+    staleTime: 5 * 60 * 1000,
+  })
+
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>(() => {
     const initial: Record<string, boolean> = {}
     navigation.forEach(section => {
@@ -113,10 +125,6 @@ export default function ProtectedLayout({
     })
     return initial
   })
-
-  useEffect(() => {
-    getLowStockCount().then(setLowStockCount)
-  }, [pathname])
 
   const handleSignOut = async () => {
     await signOut({ redirect: true, callbackUrl: '/' })
@@ -297,5 +305,19 @@ export default function ProtectedLayout({
 
       <SyncManager />
     </div>
+  )
+}
+
+export default function ProtectedLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  return (
+    <QueryProvider>
+      <LayoutContent>
+        {children}
+      </LayoutContent>
+    </QueryProvider>
   )
 }
