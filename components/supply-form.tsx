@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
+import { sileo as toast } from 'sileo'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { NumericInput } from '@/components/ui/numeric-input'
@@ -29,7 +30,6 @@ interface SupplyFormProps {
 
 export function SupplyForm({ onSuccess, onClose }: SupplyFormProps) {
   const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
   const [name, setName] = useState('')
   const [categoryId, setCategoryId] = useState('')
   const [displayUnit, setDisplayUnit] = useState('unidad')
@@ -58,7 +58,6 @@ export function SupplyForm({ onSuccess, onClose }: SupplyFormProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
-    setError(null)
 
     const normalizedUnit = getNormalizedUnit(displayUnit)
     const finalUnitsPerPack = showUnitsPerPack ? unitsPerPack : 1
@@ -81,7 +80,7 @@ export function SupplyForm({ onSuccess, onClose }: SupplyFormProps) {
       onSuccess?.()
       onClose?.()
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error al guardar el insumo')
+      toast.error({ title: err instanceof Error ? err.message : 'Error al guardar el insumo' })
     } finally {
       setLoading(false)
     }
@@ -163,11 +162,6 @@ export function SupplyForm({ onSuccess, onClose }: SupplyFormProps) {
           <NumericInput value={minStock} onChange={setMinStock} />
         </div>
 
-        {error && (
-          <div className="p-3 bg-rose-500/10 text-rose-500 rounded-lg text-sm font-medium">
-            {error}
-          </div>
-        )}
       </div>
 
       <div className="flex gap-3 pt-4 border-t border-border">
