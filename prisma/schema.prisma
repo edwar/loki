@@ -304,7 +304,7 @@ model BusinessSettings {
   phone        String?
   email        String?
   taxRate      Decimal  @default(16) @db.Decimal(5, 2) // IVA por defecto
-  currency     String   @default("MXN")
+  currency     String   @default("COP")
   logoUrl      String?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt

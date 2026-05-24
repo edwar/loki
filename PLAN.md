@@ -25,10 +25,6 @@ El proyecto se encuentra en fase de producción activa. Los módulos core CRUD, 
 - **Auth**: NextAuth.js
 - **Base de datos**: Neon (PostgreSQL) - como solicitaste
 
-### IA y Procesamiento
-- **OCR**: Tesseract.js (gratuito, local)
-- ~~**IA para receipts**~~: Removido — modelos gratuitos poco confiables. Registro manual en su lugar.
-
 ### Utilities
 - **Fechas**: date-fns
 - **Moneda**: Intl.NumberFormat
@@ -419,11 +415,9 @@ A continuación propongo features adicionales que podrían agregar valor al proy
 
 - [x] **Reportes PDF**: Generación de reportes mensuales/trimestrales en PDF para exportar: estado de resultados, inventario, historial de compras.
 
-### 8.2 Otras Features (Pendientes de Evaluar)
-
-- [ ] **Multi-moneda**: Soporte para registrar precios en diferentes monedas. (Baja prioridad - útil solo si hay operaciones internacionales)
-
 ---
+
+
 
 ## 9. Estado Final
 

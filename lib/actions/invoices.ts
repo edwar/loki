@@ -69,8 +69,8 @@ export async function getBusinessSettings() {
     settings = await prisma.businessSettings.create({
       data: {
         businessName: 'Mi Negocio',
-        taxRate: 16,
-        currency: 'MXN'
+        taxRate: 19,
+        currency: 'COP'
       }
     })
   }
@@ -90,7 +90,7 @@ export async function updateBusinessSettings(formData: FormData) {
   const phone = formData.get('phone') as string | null
   const email = formData.get('email') as string | null
   const taxRate = parseFloat(formData.get('taxRate') as string) || 16
-  const currency = formData.get('currency') as string || 'MXN'
+  const currency = formData.get('currency') as string || 'COP'
 
   const settings = await prisma.businessSettings.findFirst()
 

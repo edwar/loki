@@ -47,18 +47,18 @@ export function InvoicePDFButton({ invoice, businessSettings }: Props) {
   const [loading, setLoading] = useState(false)
 
   const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(value)
+    return new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(value)
   }
 
   const formatDate = (date: string) => {
-    return new Date(date).toLocaleDateString('es-MX')
+    return new Date(date).toLocaleDateString('es-CO')
   }
 
   const handleDownload = () => {
     setLoading(true)
     
     setTimeout(() => {
-      const bs = businessSettings || { businessName: 'Mi Negocio', tin: '', address: '', phone: '', email: '', taxRate: 16 }
+      const bs = businessSettings || { businessName: 'Mi Negocio', tin: '', address: '', phone: '', email: '', taxRate: 19 }
       
       const paymentMethodLabels: Record<string, string> = {
         efectivo: 'Efectivo',
