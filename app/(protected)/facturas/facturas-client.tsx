@@ -260,7 +260,7 @@ export function FacturasClient({ invoices, customers, products, businessSettings
             open={settingsOpen}
             onClose={() => setSettingsOpen(false)}
             onSuccess={handleSettingsSuccess}
-            settings={businessSettings || { id: '', businessName: '', tin: null, address: null, phone: null, email: null, taxRate: 16, currency: 'MXN' }}
+            settings={businessSettings || { id: '', businessName: '', tin: null, address: null, phone: null, email: null, taxRate: 19, currency: 'COP' }}
           />
         </div>
       )}

@@ -25,7 +25,7 @@ export async function POST(request: Request) {
   const taxRateInput = formData.get('taxRate')
   const taxRate = taxRateInput ? parseFloat(taxRateInput as string) : 16
   const finalTaxRate = isNaN(taxRate) ? 16 : taxRate
-  const currency = formData.get('currency') as string || 'MXN'
+  const currency = formData.get('currency') as string || 'COP'
 
   const settings = await prisma.businessSettings.findFirst()
 

@@ -109,7 +109,7 @@ const jsonLd = {
   "offers": {
     "@type": "Offer",
     "price": "0",
-    "priceCurrency": "MXN",
+    "priceCurrency": "COP",
     "availability": "https://schema.org/OnlineOnly"
   },
   "creator": {
