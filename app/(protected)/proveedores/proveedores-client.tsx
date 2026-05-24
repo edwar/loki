@@ -1,18 +1,17 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Button } from '@/components/ui/button'
-import { formatCurrency, cn } from '@/lib/utils'
 import { Building2, Plus, Phone, Mail, MapPin, Edit2, Trash2 } from 'lucide-react'
-import { deleteSupplier } from '@/lib/actions/suppliers'
 import { ConfirmationModal } from '@/components/ui/confirmation-modal'
 import { Modal } from '@/components/ui/modal'
 import { SupplierFormModal } from '@/components/supplier-form-modal'
 import { EmptyState } from '@/components/ui/empty-state'
 import { ExportButton } from '@/components/ui/export-button'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { deleteSupplier } from '@/lib/actions/suppliers'
 
 interface Supplier {
   id: string
@@ -27,15 +26,45 @@ interface ProveedoresClientProps {
   suppliers: Supplier[]
 }
 
-export function ProveedoresClient({ suppliers }: ProveedoresClientProps) {
-  const router = useRouter()
+export function ProveedoresClient({ suppliers: initialSuppliers }: ProveedoresClientProps) {
+  const queryClient = useQueryClient()
   const [modalOpen, setModalOpen] = useState(false)
   const [editingSupplier, setEditingSupplier] = useState<Supplier | null>(null)
   const [deletingSupplier, setDeletingSupplier] = useState<Supplier | null>(null)
-  const [isDeleting, setIsDeleting] = useState(false)
+
+  const { data: suppliers } = useQuery({
+    queryKey: ['suppliers'],
+    queryFn: async () => {
+      const res = await fetch('/api/suppliers')
+      if (!res.ok) throw new Error('Error al cargar proveedores')
+      return res.json()
+    },
+    initialData: initialSuppliers,
+  })
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => deleteSupplier(id),
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey: ['suppliers'] })
+      const previous = queryClient.getQueryData<Supplier[]>(['suppliers'])
+      queryClient.setQueryData<Supplier[]>(['suppliers'], (old) =>
+        old?.filter((s) => s.id !== id) ?? []
+      )
+      setDeletingSupplier(null)
+      return { previous }
+    },
+    onError: (_err, _id, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(['suppliers'], context.previous)
+      }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['suppliers'] })
+    },
+  })
 
   const handleSuccess = () => {
-    router.refresh()
+    queryClient.invalidateQueries({ queryKey: ['suppliers'] })
   }
 
   const handleOpenNew = () => {
@@ -46,20 +75,6 @@ export function ProveedoresClient({ suppliers }: ProveedoresClientProps) {
   const handleOpenEdit = (supplier: Supplier) => {
     setEditingSupplier(supplier)
     setModalOpen(true)
-  }
-
-  const handleDelete = async () => {
-    if (!deletingSupplier) return
-    setIsDeleting(true)
-    try {
-      await deleteSupplier(deletingSupplier.id)
-      setDeletingSupplier(null)
-      router.refresh()
-    } catch (error) {
-      console.error('Error deleting supplier:', error)
-    } finally {
-      setIsDeleting(false)
-    }
   }
 
   return (
@@ -73,9 +88,9 @@ export function ProveedoresClient({ suppliers }: ProveedoresClientProps) {
           </p>
         </div>
         <div className="w-full md:w-auto flex flex-col sm:flex-row gap-3 items-center">
-          {suppliers.length > 0 && (
+          {(suppliers?.length ?? 0) > 0 && (
             <ExportButton
-              data={suppliers.map(s => ({
+              data={(suppliers ?? []).map((s: Supplier) => ({
                 'Nombre': s.name,
                 'Teléfono': s.phone || '',
                 'Email': s.email || '',
@@ -104,7 +119,7 @@ export function ProveedoresClient({ suppliers }: ProveedoresClientProps) {
               </div>
               <div>
                 <p className="text-[10px] font-bold uppercase tracking-widest text-primary">Proveedores Registrados</p>
-                <p className="text-3xl font-extrabold">{suppliers.length}</p>
+                <p className="text-3xl font-extrabold">{(suppliers ?? []).length}</p>
               </div>
             </div>
           </CardContent>
@@ -119,7 +134,7 @@ export function ProveedoresClient({ suppliers }: ProveedoresClientProps) {
               </div>
               <div>
                 <p className="text-[10px] font-bold uppercase tracking-widest text-amber-600 dark:text-amber-400">Aliados Comerciales</p>
-                <p className="text-3xl font-extrabold">{suppliers.filter(s => s.purchaseCount > 0).length}</p>
+                <p className="text-3xl font-extrabold">{(suppliers ?? []).filter((s: Supplier) => s.purchaseCount > 0).length}</p>
               </div>
             </div>
           </CardContent>
@@ -127,7 +142,7 @@ export function ProveedoresClient({ suppliers }: ProveedoresClientProps) {
       </div>
 
       {/* Table */}
-      {suppliers.length === 0 ? (
+      {(suppliers?.length ?? 0) === 0 ? (
         <EmptyState
           icon={Building2}
           title="No hay proveedores registrados"
@@ -151,7 +166,7 @@ export function ProveedoresClient({ suppliers }: ProveedoresClientProps) {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {suppliers.map((supplier) => (
+                {(suppliers ?? []).map((supplier: Supplier) => (
                   <TableRow key={supplier.id} className="hover:bg-accent/30 group transition-colors">
                     <TableCell className="py-4">
                       <div className="flex flex-col">
@@ -225,8 +240,8 @@ export function ProveedoresClient({ suppliers }: ProveedoresClientProps) {
       <ConfirmationModal
         isOpen={!!deletingSupplier}
         onClose={() => setDeletingSupplier(null)}
-        onConfirm={handleDelete}
-        loading={isDeleting}
+        onConfirm={() => deletingSupplier && deleteMutation.mutate(deletingSupplier.id)}
+        loading={deleteMutation.isPending}
         title="¿Eliminar proveedor?"
         description={`¿Estás seguro de que deseas eliminar a "${deletingSupplier?.name}"? Esta acción no se puede deshacer.`}
         confirmText="Eliminar Proveedor"

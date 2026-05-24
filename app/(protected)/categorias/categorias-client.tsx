@@ -1,15 +1,15 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Plus, Tag, Trash2, Edit2 } from 'lucide-react'
+import { Plus, Tag, Trash2, Edit2, X } from 'lucide-react'
 import { Modal } from '@/components/ui/modal'
 import { createCategory, deleteCategory, updateCategory } from '@/lib/actions/categories'
 import { ConfirmationModal } from '@/components/ui/confirmation-modal'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 
 interface Category {
   id: string
@@ -21,12 +21,42 @@ interface CategoriasClientProps {
   categories: Category[]
 }
 
-export function CategoriasClient({ categories }: CategoriasClientProps) {
-  const router = useRouter()
+export function CategoriasClient({ categories: initialCategories }: CategoriasClientProps) {
+  const queryClient = useQueryClient()
   const [modalOpen, setModalOpen] = useState(false)
   const [editingCategory, setEditingCategory] = useState<Category | null>(null)
   const [categoryToDelete, setCategoryToDelete] = useState<Category | null>(null)
-  const [isDeleting, setIsDeleting] = useState(false)
+
+  const { data: categories } = useQuery<Category[]>({
+    queryKey: ['categories'],
+    queryFn: async () => {
+      const res = await fetch('/api/categories')
+      if (!res.ok) throw new Error('Error al cargar categorías')
+      return res.json()
+    },
+    initialData: initialCategories,
+  })
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => deleteCategory(id),
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey: ['categories'] })
+      const previous = queryClient.getQueryData<Category[]>(['categories'])
+      queryClient.setQueryData<Category[]>(['categories'], (old) =>
+        old?.filter((c) => c.id !== id) ?? []
+      )
+      setCategoryToDelete(null)
+      return { previous }
+    },
+    onError: (_err, _id, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(['categories'], context.previous)
+      }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['categories'] })
+    },
+  })
 
   const handleOpenNew = () => {
     setEditingCategory(null)
@@ -39,26 +69,14 @@ export function CategoriasClient({ categories }: CategoriasClientProps) {
   }
 
   const handleSuccess = () => {
-    router.refresh()
+    queryClient.invalidateQueries({ queryKey: ['categories'] })
     setModalOpen(false)
     setEditingCategory(null)
   }
 
-  const supplyCategories = categories.filter(c => c.type === 'supply')
-  const productCategories = categories.filter(c => c.type === 'product')
-
-  const handleDelete = async () => {
-    if (!categoryToDelete) return
-    setIsDeleting(true)
-    try {
-      await deleteCategory(categoryToDelete.id)
-      setCategoryToDelete(null)
-    } catch (error) {
-      console.error('Error deleting category:', error)
-    } finally {
-      setIsDeleting(false)
-    }
-  }
+  const safeCategories = categories ?? []
+  const supplyCategories = safeCategories.filter((c: Category) => c.type === 'supply')
+  const productCategories = safeCategories.filter((c: Category) => c.type === 'product')
 
   return (
     <div className="space-y-8 animate-fade-in">
@@ -138,7 +156,7 @@ export function CategoriasClient({ categories }: CategoriasClientProps) {
         </Card>
       </div>
 
-      <Modal isOpen={modalOpen} onClose={() => { setModalOpen(false); setEditingCategory(null) }}>
+      <Modal isOpen={modalOpen} onClose={() => { setModalOpen(false); setEditingCategory(null) }} title={editingCategory ? 'Editar Categoría' : 'Nueva Categoría'}>
         <div className="p-8">
           <CategoryForm category={editingCategory} onSuccess={handleSuccess} onClose={() => { setModalOpen(false); setEditingCategory(null) }} />
         </div>
@@ -147,10 +165,12 @@ export function CategoriasClient({ categories }: CategoriasClientProps) {
       <ConfirmationModal
         isOpen={!!categoryToDelete}
         onClose={() => setCategoryToDelete(null)}
-        onConfirm={handleDelete}
+        onConfirm={() => categoryToDelete && deleteMutation.mutate(categoryToDelete.id)}
         title="¿Eliminar categoría?"
         description={`La categoría "${categoryToDelete?.name}" será eliminada.`}
-        confirmText={isDeleting ? 'Eliminando...' : 'Eliminar'}
+        confirmText="Eliminar"
+        variant="danger"
+        loading={deleteMutation.isPending}
       />
     </div>
   )
@@ -175,14 +195,6 @@ function CategoryForm({ category, onSuccess, onClose }: { category?: Category | 
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col h-full">
-      <div className="flex items-center justify-between pb-6 border-b border-border">
-        <div>
-          <h2 className="text-xl font-bold">{isEditing ? 'Editar Categoría' : 'Nueva Categoría'}</h2>
-          <p className="text-sm text-muted-foreground mt-1">
-            {isEditing ? 'Modifica los datos de la categoría' : 'Crea una categoría para organizar insumos o productos'}
-          </p>
-        </div>
-      </div>
 
       <div className="flex-1 overflow-y-auto py-6 space-y-4">
         <div className="space-y-2">

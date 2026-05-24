@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { Bell, AlertTriangle, Package, Receipt, TrendingDown, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { formatDistanceToNow } from 'date-fns'
@@ -24,26 +25,18 @@ interface AlertsSummary {
 
 export function NotificationsDropdown() {
   const [isOpen, setIsOpen] = useState(false)
-  const [alerts, setAlerts] = useState<AlertsSummary>({ alerts: [], unreadCount: 0 })
   const dropdownRef = useRef<HTMLDivElement>(null)
 
-  useEffect(() => {
-    async function fetchAlerts() {
-      try {
-        const res = await fetch('/api/alerts')
-        if (res.ok) {
-          const data = await res.json()
-          setAlerts(data)
-        }
-      } catch (error) {
-        console.error('Error fetching alerts:', error)
-      }
-    }
-
-    fetchAlerts()
-    const interval = setInterval(fetchAlerts, 60000)
-    return () => clearInterval(interval)
-  }, [])
+  const { data: alerts = { alerts: [], unreadCount: 0 } } = useQuery<AlertsSummary>({
+    queryKey: ['alerts'],
+    queryFn: async () => {
+      const res = await fetch('/api/alerts')
+      if (!res.ok) throw new Error('Error al cargar alertas')
+      return res.json()
+    },
+    refetchInterval: isOpen ? 60000 : false,
+    enabled: isOpen,
+  })
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {

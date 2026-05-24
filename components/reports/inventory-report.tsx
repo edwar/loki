@@ -4,7 +4,8 @@ import { Document, Page, Text, View, StyleSheet, PDFDownloadLink, PDFViewer } fr
 import { formatCurrency } from '@/lib/utils'
 import { Download, Eye } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
 
 const styles = StyleSheet.create({
   page: { padding: 40, fontFamily: 'Helvetica' },
@@ -85,19 +86,35 @@ function InventoryPDF({ data }: { data: InventoryData }) {
 }
 
 export function InventoryReport() {
-  const [data, setData] = useState<InventoryData>({ supplies: [], totalValue: 0, lowStock: [], criticalCount: 0 })
   const [showPreview, setShowPreview] = useState(false)
 
-  useEffect(() => {
-    const fetchData = async () => {
+  const { data, isLoading, error } = useQuery<InventoryData>({
+    queryKey: ['inventory-report'],
+    queryFn: async () => {
       const res = await fetch('/api/reports/inventory')
-      if (res.ok) {
-        const json = await res.json()
-        setData(json)
-      }
-    }
-    fetchData()
-  }, [])
+      if (!res.ok) throw new Error('Error al cargar reporte de inventario')
+      return res.json()
+    },
+  })
+
+  if (isLoading) {
+    return (
+      <div className="space-y-4">
+        <div className="flex gap-3">
+          <div className="h-10 w-36 bg-muted animate-pulse rounded-lg" />
+          <div className="h-10 w-44 bg-muted animate-pulse rounded-lg" />
+        </div>
+      </div>
+    )
+  }
+
+  if (error || !data) {
+    return (
+      <div className="text-center py-8 text-muted-foreground">
+        Error al cargar el reporte. Intenta de nuevo.
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-4">

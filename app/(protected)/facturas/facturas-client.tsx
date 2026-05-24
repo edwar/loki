@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { formatCurrency, formatDate } from '@/lib/utils'
@@ -11,6 +10,7 @@ import { InvoiceFormModal } from './invoice-form-modal'
 import { EmptyState } from '@/components/ui/empty-state'
 import { InvoicePDFButton } from './invoice-pdf-button'
 import { BusinessSettings, BusinessSettingsModal } from './business-settings-modal'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 
 interface Product {
   id: string
@@ -76,20 +76,31 @@ const paymentStatusColors: Record<string, string> = {
   partial: 'bg-orange-100 text-orange-800'
 }
 
-export function FacturasClient({ invoices, customers, products, businessSettings }: FacturasClientProps) {
-  const router = useRouter()
+export function FacturasClient({ invoices: initialInvoices, customers, products, businessSettings }: FacturasClientProps) {
+  const queryClient = useQueryClient()
   const [modalOpen, setModalOpen] = useState(false)
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [localSettings, setLocalSettings] = useState(businessSettings)
 
-  const totalAmount = invoices.reduce((sum, inv) => sum + Number(inv.total), 0)
-  const paidAmount = invoices
-    .filter(inv => inv.paymentStatus === 'paid')
-    .reduce((sum, inv) => sum + Number(inv.total), 0)
+  const { data: invoices } = useQuery<Invoice[]>({
+    queryKey: ['invoices'],
+    queryFn: async () => {
+      const res = await fetch('/api/invoices')
+      if (!res.ok) throw new Error('Error al cargar facturas')
+      return res.json()
+    },
+    initialData: initialInvoices,
+  })
+
+  const safeInvoices = invoices ?? []
+  const totalAmount = safeInvoices.reduce((sum: number, inv: Invoice) => sum + Number(inv.total), 0)
+  const paidAmount = safeInvoices
+    .filter((inv: Invoice) => inv.paymentStatus === 'paid')
+    .reduce((sum: number, inv: Invoice) => sum + Number(inv.total), 0)
   const pendingAmount = totalAmount - paidAmount
 
   const handleSuccess = () => {
-    router.refresh()
+    queryClient.invalidateQueries({ queryKey: ['invoices'] })
     setModalOpen(false)
   }
 
@@ -158,7 +169,7 @@ export function FacturasClient({ invoices, customers, products, businessSettings
             <CardTitle className="text-sm font-medium text-muted-foreground">Total Facturas</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{invoices.length}</div>
+            <div className="text-2xl font-bold">{safeInvoices.length}</div>
           </CardContent>
         </Card>
       </div>
@@ -182,7 +193,7 @@ export function FacturasClient({ invoices, customers, products, businessSettings
           <CardTitle>Facturas</CardTitle>
         </CardHeader>
         <CardContent>
-          {invoices.length === 0 ? (
+          {safeInvoices.length === 0 ? (
             <EmptyState
               icon={FileText}
               title="No hay facturas"
@@ -205,7 +216,7 @@ export function FacturasClient({ invoices, customers, products, businessSettings
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {invoices.map((invoice) => (
+                  {safeInvoices.map((invoice) => (
                     <TableRow key={invoice.id}>
                       <TableCell className="font-mono font-medium">{invoice.folio}</TableCell>
                       <TableCell>{formatDate(invoice.issueDate)}</TableCell>

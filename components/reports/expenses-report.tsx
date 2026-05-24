@@ -4,7 +4,8 @@ import { Document, Page, Text, View, StyleSheet, PDFDownloadLink, PDFViewer } fr
 import { formatCurrency } from '@/lib/utils'
 import { Download, Eye } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
 
 const styles = StyleSheet.create({
   page: { padding: 40, fontFamily: 'Helvetica' },
@@ -100,23 +101,39 @@ function ExpensesPDF({ data }: { data: ExpensesData }) {
 }
 
 export function ExpensesReport({ startDate, endDate }: { startDate: string; endDate: string }) {
-  const [data, setData] = useState<ExpensesData>({ expenses: [], byCategory: {}, total: 0, startDate, endDate })
   const [showPreview, setShowPreview] = useState(false)
 
-  useEffect(() => {
-    const fetchData = async () => {
+  const { data, isLoading, error } = useQuery<ExpensesData>({
+    queryKey: ['expenses-report', startDate, endDate],
+    queryFn: async () => {
       const params = new URLSearchParams()
       if (startDate) params.set('startDate', startDate)
       if (endDate) params.set('endDate', endDate)
 
       const res = await fetch(`/api/reports/expenses?${params}`)
-      if (res.ok) {
-        const json = await res.json()
-        setData(json)
-      }
-    }
-    fetchData()
-  }, [startDate, endDate])
+      if (!res.ok) throw new Error('Error al cargar reporte de gastos')
+      return res.json()
+    },
+  })
+
+  if (isLoading) {
+    return (
+      <div className="space-y-4">
+        <div className="flex gap-3">
+          <div className="h-10 w-36 bg-muted animate-pulse rounded-lg" />
+          <div className="h-10 w-44 bg-muted animate-pulse rounded-lg" />
+        </div>
+      </div>
+    )
+  }
+
+  if (error || !data) {
+    return (
+      <div className="text-center py-8 text-muted-foreground">
+        Error al cargar el reporte. Intenta de nuevo.
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-4">

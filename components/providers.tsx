@@ -4,6 +4,7 @@ import { SessionProvider } from 'next-auth/react'
 import { useEffect, useState } from 'react'
 import { Toaster } from 'sileo'
 import 'sileo/styles.css'
+import { QueryProvider } from '@/lib/providers/query-provider'
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const [mounted, setMounted] = useState(false)
@@ -20,7 +21,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
 
   return (
     <SessionProvider>
-      {children}
+      <QueryProvider>
+        {children}
+      </QueryProvider>
       <Toaster />
     </SessionProvider>
   )

@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { NumericInput } from '@/components/ui/numeric-input'
@@ -34,13 +35,15 @@ export function SupplyForm({ onSuccess, onClose }: SupplyFormProps) {
   const [displayUnit, setDisplayUnit] = useState('unidad')
   const [minStock, setMinStock] = useState(1)
   const [unitsPerPack, setUnitsPerPack] = useState(1)
-  const [categories, setCategories] = useState<Category[]>([])
-
-  useEffect(() => {
-    fetch('/api/categories?type=supply')
-      .then(res => res.json())
-      .then(data => setCategories(data))
-  }, [])
+  const { data: categories = [] } = useQuery<Category[]>({
+    queryKey: ['categories', 'supply'],
+    queryFn: async () => {
+      const res = await fetch('/api/categories?type=supply')
+      if (!res.ok) throw new Error('Error al cargar categorías')
+      return res.json()
+    },
+    staleTime: Infinity,
+  })
 
   const unitType = getUnitType(displayUnit)
   const showUnitsPerPack = !unitType && ['pack', 'caja', 'bolsa', 'cubeta', 'par', 'docena'].includes(displayUnit)

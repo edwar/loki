@@ -1,19 +1,19 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { formatCurrency, formatDate } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
-import { Trash2, History, Plus, ShoppingBag } from 'lucide-react'
-import { deleteSale } from '@/lib/actions/sales'
+import { History, Plus, ShoppingBag } from 'lucide-react'
 import { DeleteSaleButton } from './delete-sale-button'
 import { Modal } from '@/components/ui/modal'
 import { SaleFormModal } from '@/components/sale-form-modal'
 import { ExportButton } from '@/components/ui/export-button'
 import { Edit2 } from 'lucide-react'
 import { EmptyState } from '@/components/ui/empty-state'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { deleteSale } from '@/lib/actions/sales'
 
 interface Product {
   id: string
@@ -62,12 +62,42 @@ interface VentasClientProps {
   sales: Sale[]
 }
 
-export function VentasClient({ products, customers, sales }: VentasClientProps) {
-  const router = useRouter()
+export function VentasClient({ products, customers, sales: initialSales }: VentasClientProps) {
+  const queryClient = useQueryClient()
   const [modalOpen, setModalOpen] = useState(false)
   const [editingSale, setEditingSale] = useState<Sale | null>(null)
 
-  const exportData = sales.map((sale: any) => ({
+  const { data: sales } = useQuery({
+    queryKey: ['sales'],
+    queryFn: async () => {
+      const res = await fetch('/api/sales')
+      if (!res.ok) throw new Error('Error al cargar ventas')
+      return res.json()
+    },
+    initialData: initialSales,
+  })
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => deleteSale(id),
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey: ['sales'] })
+      const previous = queryClient.getQueryData<Sale[]>(['sales'])
+      queryClient.setQueryData<Sale[]>(['sales'], (old) =>
+        old?.filter((sale) => sale.id !== id) ?? []
+      )
+      return { previous }
+    },
+    onError: (_err, _id, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(['sales'], context.previous)
+      }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['sales'] })
+    },
+  })
+
+  const exportData = (sales ?? []).map((sale: any) => ({
     'ID Venta': sale.id,
     'Fecha': formatDate(sale.createdAt),
     'Cliente': sale.customer?.name || "Venta General",
@@ -77,7 +107,7 @@ export function VentasClient({ products, customers, sales }: VentasClientProps) 
   }))
 
   const handleSuccess = () => {
-    router.refresh()
+    queryClient.invalidateQueries({ queryKey: ['sales'] })
   }
 
   const handleOpenNew = () => {
@@ -101,7 +131,7 @@ export function VentasClient({ products, customers, sales }: VentasClientProps) 
           </p>
         </div>
         <div className="w-full md:w-auto flex flex-col sm:flex-row gap-3">
-          {sales.length > 0 && (
+          {(sales?.length ?? 0) > 0 && (
             <ExportButton
               data={exportData}
               filename={`Ventas_${new Date().toISOString().split('T')[0]}`}
@@ -144,7 +174,7 @@ export function VentasClient({ products, customers, sales }: VentasClientProps) 
       )}
 
       {/* Sales Table */}
-      {sales.length === 0 && products.length > 0 ? (
+      {(sales?.length ?? 0) === 0 && products.length > 0 ? (
         <EmptyState
           icon={History}
           title="No hay ventas registradas"
@@ -152,7 +182,7 @@ export function VentasClient({ products, customers, sales }: VentasClientProps) 
           actionLabel={<><Plus size={18} /> Registrar Primera Venta</>}
           onAction={handleOpenNew}
         />
-      ) : sales.length > 0 && (
+      ) : (sales?.length ?? 0) > 0 && (
         <Card className="rounded-lg border-border/40 bg-card/30 backdrop-blur-md overflow-hidden p-0">
           <CardHeader className="px-8 py-6 border-b border-border/30 bg-primary/5">
             <div className="flex items-center gap-3">
@@ -173,7 +203,7 @@ export function VentasClient({ products, customers, sales }: VentasClientProps) 
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {sales.map((sale: any) => (
+                {(sales ?? []).map((sale: any) => (
                   <TableRow key={sale.id} className="group hover:bg-accent/5 transition-colors border-border/10">
                     <TableCell className="py-4 pl-4 sm:pl-6">
                       <p className="text-xs font-bold text-foreground">{formatDate(sale.createdAt).split(',')[0]}</p>
@@ -202,7 +232,11 @@ export function VentasClient({ products, customers, sales }: VentasClientProps) 
                         >
                           <Edit2 className='w-4 h-4' />
                         </Button>
-                        <DeleteSaleButton id={sale.id} />
+                        <DeleteSaleButton
+                          id={sale.id}
+                          onDelete={deleteMutation.mutate}
+                          loading={deleteMutation.isPending}
+                        />
                       </div>
                     </TableCell>
                   </TableRow>
