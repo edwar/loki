@@ -8,7 +8,10 @@ const withSerwist = withSerwistInit({
 });
 
 const nextConfig: NextConfig = {
-  turbopack: {}
+  turbopack: {},
+  experimental: {
+    viewTransition: true,
+  },
 };
 
 export default withSerwist(nextConfig);

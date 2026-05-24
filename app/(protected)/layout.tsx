@@ -27,7 +27,7 @@ import {
   Tag,
   Percent
 } from 'lucide-react'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, ViewTransition } from 'react'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { getLowStockCount } from '@/lib/actions/alerts'
 import { SyncManager } from '@/components/sync-manager'
@@ -289,9 +289,9 @@ export default function ProtectedLayout({
       {/* Main Content */}
       <main className="lg:ml-72 min-h-screen relative">
         <div className="max-w-7xl mx-auto p-4 md:p-10 pb-20">
-          <div className="transition-all duration-500">
+          <ViewTransition name="page-content">
             {children}
-          </div>
+          </ViewTransition>
         </div>
       </main>
 

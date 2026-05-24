@@ -19,7 +19,7 @@ TableHeader.displayName = 'TableHeader'
 
 const TableBody = React.forwardRef<HTMLTableSectionElement, React.HTMLAttributes<HTMLTableSectionElement>>(
   ({ className, ...props }, ref) => (
-    <tbody ref={ref} className={className} {...props} />
+    <tbody ref={ref} className={cn('stagger-rows', className)} {...props} />
   )
 )
 TableBody.displayName = 'TableBody'

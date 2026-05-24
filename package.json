@@ -2,7 +2,7 @@
   "name": "loki",
   "version": "0.1.0",
   "private": true,
-  "packageManager": "pnpm@10.9.0",
+  "packageManager": "pnpm@11.2.2",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -36,6 +36,7 @@
     "recharts": "^3.8.1",
     "serwist": "^9.5.11",
     "sileo": "^0.1.5",
+    "sonner": "^2.0.7",
     "tailwind-merge": "^3.5.0",
     "tesseract.js": "^7.0.0",
     "xlsx": "^0.18.5",
