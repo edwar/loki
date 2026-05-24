@@ -6,11 +6,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { formatCurrency, cn } from '@/lib/utils'
-import { Trash2, ShoppingBag, Edit2, ChevronDown, Plus } from 'lucide-react'
+import { Trash2, ShoppingBag, Edit2, ChevronDown, Plus, Package } from 'lucide-react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { UNIDADES_POR_TIPO } from '@/lib/constants'
 import { getUnitType } from '@/lib/conversions'
-import { deleteProduct, deleteRecipeItem, prepareProduct, updateRecipeItem } from '@/lib/actions/products'
+import { deleteProduct, deleteRecipeItem, prepareProduct, updateRecipeItem, consumeProduct } from '@/lib/actions/products'
 import { RecipeForm } from './product-forms'
 import { NumericInput } from './ui/numeric-input'
 import { ConfirmationModal } from './ui/confirmation-modal'
@@ -31,6 +31,8 @@ export function ProductCard({
 }) {
   const [isExpanded, setIsExpanded] = useState(false)
   const [isProducing, setIsProducing] = useState(false)
+  const [isConsuming, setIsConsuming] = useState(false)
+  const [consumeQuantity, setConsumeQuantity] = useState(1)
   const [recipeItemToDelete, setRecipeItemToDelete] = useState<string | null>(null)
   const [productToDelete, setProductToDelete] = useState<string | null>(null)
   const [editingRecipeItem, setEditingRecipeItem] = useState<any | null>(null)
@@ -65,6 +67,17 @@ export function ProductCard({
     startTransition(async () => {
       await prepareProduct(product.id, 1, actualYield)
       setIsProducing(false)
+      invalidateProducts()
+    })
+  }
+
+  const handleConfirmConsume = () => {
+    if (consumeQuantity <= 0 || Number(product.currentStock) < consumeQuantity) return
+    startTransition(async () => {
+      await consumeProduct(product.id, consumeQuantity)
+      setIsConsuming(false)
+      setConsumeQuantity(1)
+      toast.warning({ title: `Consumo registrado: ${consumeQuantity} ${product.name}` })
       invalidateProducts()
     })
   }
@@ -204,6 +217,31 @@ export function ProductCard({
                 </div>
               )}
 
+              {Number(product.currentStock) > 0 && (
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-lg border border-rose-500/20 bg-rose-500/5 gap-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg shrink-0 flex items-center justify-center bg-rose-500/20 text-rose-600">
+                      <Package size={20} />
+                    </div>
+                    <div>
+                      <p className="text-sm font-bold text-rose-900 dark:text-rose-100">
+                        Registrar Consumo
+                      </p>
+                      <p className="text-xs text-rose-700/70 dark:text-rose-400/70">
+                        Descuenta unidades del stock (ají, salsas, etc.)
+                      </p>
+                    </div>
+                  </div>
+                  <Button
+                    onClick={() => { setConsumeQuantity(1); setIsConsuming(true) }}
+                    variant="outline"
+                    className="w-full sm:w-auto font-bold border-rose-500/30 hover:bg-rose-500/10 hover:text-rose-600"
+                  >
+                    Registrar Consumo
+                  </Button>
+                </div>
+              )}
+
               {product.recipeItems.length > 0 && (
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 rounded-lg border border-border/30 bg-background/50">
                   <div className="space-y-1">
@@ -308,6 +346,39 @@ export function ProductCard({
               onChange={setActualYield}
               className="h-14 text-lg font-black text-center border-amber-500/30 focus-visible:ring-amber-500/20"
             />
+          </div>
+        </div>
+      </ConfirmationModal>
+
+      {/* Consumption Modal */}
+      <ConfirmationModal
+        isOpen={isConsuming}
+        onClose={() => setIsConsuming(false)}
+        onConfirm={handleConfirmConsume}
+        title={`Registrar Consumo — ${product.name}`}
+        description="Descuenta unidades del stock actual. El stock no se reabastece automáticamente."
+        confirmText="Registrar Consumo"
+        variant="danger"
+      >
+        <div className="space-y-4 pt-2">
+          <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg">
+            <span className="text-sm font-bold text-foreground">Stock Disponible:</span>
+            <span className="text-sm font-black text-emerald-500">{Number(product.currentStock)} uds</span>
+          </div>
+          <div className="space-y-2">
+            <label className="text-xs font-bold uppercase tracking-widest text-foreground">
+              Unidades a Consumir
+            </label>
+            <NumericInput
+              value={consumeQuantity}
+              onChange={setConsumeQuantity}
+              min={1}
+              max={Number(product.currentStock)}
+              className="h-14 text-lg font-black text-center border-rose-500/30 focus-visible:ring-rose-500/20"
+            />
+            {consumeQuantity > Number(product.currentStock) && (
+              <p className="text-xs text-rose-500">Supera el stock disponible</p>
+            )}
           </div>
         </div>
       </ConfirmationModal>
