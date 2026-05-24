@@ -13,6 +13,7 @@ interface Supply {
   id: string
   name: string
   unit: string
+  unitsPerPack: number
 }
 
 interface RecipeItem {

@@ -12,6 +12,7 @@ export async function getProducts() {
       recipeItems: {
         where: { deletedAt: null },
         include: { supply: true },
+        orderBy: { createdAt: 'desc' },
       },
     },
     orderBy: { createdAt: 'desc' },
