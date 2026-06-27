@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { NumericInput } from '@/components/ui/numeric-input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Combobox } from '@/components/ui/combobox'
 import { createProduct, updateProduct, addRecipeItem } from '@/lib/actions/products'
 import { UNIDADES, UNIDADES_POR_TIPO } from '@/lib/constants'
 import { convertUnits, canConvert, getUnitType, formatUnitForDisplay } from '@/lib/conversions'
@@ -138,9 +139,12 @@ export function RecipeForm({
         {/* Inputs Row */}
         <div className="md:col-span-5 lg:col-span-6">
           <label className="md:hidden text-[10px] font-bold uppercase tracking-[0.2em] text-primary/50 mb-1 block">Insumo</label>
-          <Select name="supplyId" required value={selectedSupplyId} onValueChange={(val) => {
+          <Combobox
+            options={supplies.map(s => ({ value: s.id, label: `${s.name} (${formatUnitForDisplay(s.unit)})` }))}
+            value={selectedSupplyId}
+            onValueChange={(val) => {
               setSelectedSupplyId(val)
-              const s = supplies.find(s => s.id === val)
+              const s = supplies.find(sp => sp.id === val)
               if (s) {
                 const unitType = getUnitType(s.unit)
                 const isContainer = unitType === null && s.unit !== 'unidad' && (s.unitsPerPack || 1) > 1
@@ -148,18 +152,11 @@ export function RecipeForm({
               } else {
                 setSelectedUnit('')
               }
-            }}>
-            <SelectTrigger className="h-11 rounded-lg bg-background/60 border-primary/5 hover:border-primary/20 transition-all shadow-sm">
-              <SelectValue placeholder="Seleccionar..." />
-            </SelectTrigger>
-            <SelectContent className="rounded-lg border-primary/10">
-              {supplies.map(s => (
-                <SelectItem key={s.id} value={s.id} className="rounded-lg">
-                  {s.name} <span className="text-muted-foreground text-xs">({formatUnitForDisplay(s.unit)})</span>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+            }}
+            placeholder="Buscar insumo..."
+            className="h-11"
+          />
+          <input type="hidden" name="supplyId" value={selectedSupplyId} />
         </div>
 
         <div className="md:col-span-3 lg:col-span-2">
