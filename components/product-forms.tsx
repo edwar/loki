@@ -16,19 +16,12 @@ export function ProductForm({
   categories,
   onSuccess
 }: {
-  product?: { id: string; name: string; category: string | null; salePrice: number; yield: number } | null
+  product?: { id: string; name: string; category: string | null; profitMargin: number } | null
   categories: string[]
   onSuccess?: () => void
 }) {
-  const [salePrice, setSalePrice] = useState(product?.salePrice ?? 0)
-  const [yieldAmount, setYieldAmount] = useState(product?.yield ?? 1)
+  const [profitMargin, setProfitMargin] = useState(product?.profitMargin ?? 30)
   const action = product ? updateProduct.bind(null, product.id) : createProduct
-
-  const handleSubmit = async (formData: FormData) => {
-    // If we have an onSuccess callback, we can assume the action is successful 
-    // or we can just call it to close the modal.
-    onSuccess?.()
-  }
 
   return (
     <form
@@ -58,24 +51,16 @@ export function ProductForm({
             </datalist>
           </div>
           <div className="space-y-2">
-            <label className="text-xs font-bold uppercase tracking-widest text-foreground/60">Precio de Venta</label>
+            <label className="text-xs font-bold uppercase tracking-widest text-foreground/60">Margen de Utilidad (%)</label>
             <NumericInput
-              value={salePrice}
-              onChange={setSalePrice}
-              placeholder="0"
+              value={profitMargin}
+              onChange={setProfitMargin}
+              placeholder="30"
+              min={0}
+              max={100}
               className="h-12"
             />
-            <input type="hidden" name="salePrice" value={salePrice?.toString() || "0"} />
-          </div>
-          <div className="space-y-2">
-            <label className="text-xs font-bold uppercase tracking-widest text-foreground/60">Rendimiento (Porción/Lote)</label>
-            <NumericInput
-              value={yieldAmount}
-              onChange={setYieldAmount}
-              placeholder="1"
-              className="h-12"
-            />
-            <input type="hidden" name="yield" value={yieldAmount?.toString() || "1"} />
+            <input type="hidden" name="profitMargin" value={profitMargin?.toString() || "30"} />
           </div>
         </div>
       </div>

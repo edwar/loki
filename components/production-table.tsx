@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Dialog } from './ui/dialog'
 import { NumericInput } from './ui/numeric-input'
-import { Edit2, Trash2, ArrowUpRight, ArrowDownRight, Factory, History } from 'lucide-react'
+import { Edit2, Trash2, Factory, History } from 'lucide-react'
 import { updateProductionYield, deleteProductionLog } from '@/lib/actions/production'
 import { ConfirmationModal } from './ui/confirmation-modal'
 
@@ -75,10 +75,6 @@ export function ProductionTable({ logs }: { logs: any[] }) {
             </TableHeader>
             <TableBody>
               {logs.map((log) => {
-                const diff = Number(log.actualYield) - Number(log.expectedYield)
-                const isSurplus = diff > 0
-                const isShortage = diff < 0
-
                 return (
                   <TableRow key={log.id} className="hover:bg-accent/5 group">
                     <TableCell className="py-4 text-sm font-medium">
@@ -93,16 +89,9 @@ export function ProductionTable({ logs }: { logs: any[] }) {
                       </span>
                     </TableCell>
                     <TableCell className="py-4">
-                      <div className="flex flex-col">
-                        <span className="text-sm font-black flex items-center gap-1">
-                          {Number(log.actualYield)} uds
-                          {isSurplus && <ArrowUpRight className="w-3 h-3 text-emerald-500" />}
-                          {isShortage && <ArrowDownRight className="w-3 h-3 text-rose-500" />}
-                        </span>
-                        <span className="text-[10px] text-muted-foreground font-bold">
-                          Esperado: {Number(log.expectedYield)}
-                        </span>
-                      </div>
+                      <span className="text-sm font-black">
+                        {Number(log.actualYield)} uds
+                      </span>
                     </TableCell>
                     <TableCell className="py-4 text-right sticky right-0 bg-card z-10 shadow-[-8px_0_8px_-8px_rgba(0,0,0,0.1)] border-l border-border/10 px-4 w-24">
                       <div className="flex justify-end gap-2">
@@ -144,7 +133,7 @@ export function ProductionTable({ logs }: { logs: any[] }) {
               Producto: <strong className="text-foreground">{editingLog?.product.name}</strong>
             </p>
             <p className="text-sm font-medium mt-1">
-              Rendimiento Esperado: <strong className="text-foreground">{Number(editingLog?.expectedYield)} uds</strong>
+              Rendimiento Actual: <strong className="text-foreground">{Number(editingLog?.actualYield)} uds</strong>
             </p>
           </div>
 

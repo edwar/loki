@@ -98,24 +98,25 @@ export async function getAlerts(): Promise<AlertsSummary> {
     })
 
     for (const product of products) {
-      if (product.recipeItems.length === 0) continue
+      if (product.recipeItems.length === 0) {
+        alerts.push({
+          id: `recipe-${product.id}`,
+          type: 'low_margin',
+          title: 'Sin Receta',
+          description: `${product.name}: no tiene una receta definida`,
+          severity: 'warning',
+          createdAt: new Date(),
+        })
+        continue
+      }
 
-      const yieldAmount = Number(product.yield) || 1
-      const salePrice = Number(product.salePrice)
-      const totalCost = product.recipeItems.reduce((sum, item) => {
-        const price = Number(item.supply?.purchasePrice) || 0
-        return sum + (price * Number(item.quantityRequired))
-      }, 0)
-      const costPerUnit = yieldAmount > 0 ? totalCost / yieldAmount : totalCost
-      const margin = salePrice - costPerUnit
-      const marginPercentage = salePrice > 0 ? (margin / salePrice) * 100 : 0
-
-      if (marginPercentage < 20 && marginPercentage > 0) {
+      const profitMargin = Number(product.profitMargin) || 30
+      if (profitMargin < 20) {
         alerts.push({
           id: `margin-${product.id}`,
           type: 'low_margin',
           title: 'Margen Bajo',
-          description: `${product.name}: ${marginPercentage.toFixed(1)}% de margen`,
+          description: `${product.name}: ${profitMargin}% configurado`,
           severity: 'warning',
           link: '/rentabilidad',
           createdAt: today

@@ -16,9 +16,8 @@ export default async function ProductosPage() {
   ])
 
   const products = productsRaw.map((p: any) => {
-    const salePrice = Number(p.salePrice)
     const currentStock = Number(p.currentStock)
-    const yieldAmount = Number(p.yield) || 1
+    const profitMargin = Number(p.profitMargin) || 30
     const recipeItems = p.recipeItems?.map((ri: any) => ({
       ...ri,
       quantityRequired: Number(ri.quantityRequired),
@@ -48,9 +47,8 @@ export default async function ProductosPage() {
       id: p.id,
       name: p.name,
       category: p.category?.name || null,
-      salePrice,
       currentStock,
-      yield: yieldAmount,
+      profitMargin,
       recipeItems,
       maxPossibleBatches: maxBatches === Infinity ? 0 : maxBatches
     }

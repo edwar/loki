@@ -52,13 +52,9 @@ export function ProductCard({
     return acc + (qty * price)
   }, 0)
 
-  const unitCost = product.yield > 0 ? recipeCost / product.yield : 0
-  const salePrice = Number(product.salePrice) || 0
-  const profitMargin = salePrice > 0 ? ((salePrice - unitCost) / salePrice) * 100 : 0
-
   const handleOpenProduce = () => {
     if (product.maxPossibleBatches <= 0) return
-    setActualYield(product.yield || 1)
+    setActualYield(1)
     setIsProducing(true)
   }
 
@@ -99,14 +95,9 @@ export function ProductCard({
             <div className="flex-1 min-w-0">
               <CardTitle className="text-base md:text-lg truncate">{product.name}</CardTitle>
               <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mt-1">
-                <div className="flex items-center gap-3">
-                  <span className="text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 bg-primary/10 text-primary rounded-md shrink-0">
-                    {product.category || 'Sin categoría'}
-                  </span>
-                  <span className="text-sm font-bold text-foreground shrink-0">
-                    {formatCurrency(Number(product.salePrice) || 0)}
-                  </span>
-                </div>
+                <span className="text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 bg-primary/10 text-primary rounded-md shrink-0">
+                  {product.category || 'Sin categoría'}
+                </span>
                 <div className="flex items-center gap-3 sm:gap-2 sm:ml-2 sm:pl-3 sm:border-l border-border/30 mt-1 sm:mt-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-dashed sm:border-solid">
                   <div className="flex flex-col">
                     <span className="text-[9px] uppercase tracking-tighter text-muted-foreground/60 font-bold">Stock Disponible</span>
@@ -243,26 +234,18 @@ export function ProductCard({
               )}
 
               {product.recipeItems.length > 0 && (
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 rounded-lg border border-border/30 bg-background/50">
+                <div className="grid grid-cols-2 gap-4 p-4 rounded-lg border border-border/30 bg-background/50">
                   <div className="space-y-1">
                     <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">Costo del Lote</p>
                     <p className="text-sm font-black text-foreground">{formatCurrency(recipeCost)}</p>
                   </div>
                   <div className="space-y-1">
-                    <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">Costo Unitario</p>
-                    <p className="text-sm font-black text-rose-500">{formatCurrency(unitCost)}</p>
+                    <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">Margen de Utilidad</p>
+                    <p className="text-sm font-black text-emerald-500">{product.profitMargin ?? 30}%</p>
                   </div>
-                  <div className="space-y-1">
-                    <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">Precio Venta</p>
-                    <p className="text-sm font-black text-emerald-500">{formatCurrency(salePrice)}</p>
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">Margen Bruto</p>
-                    <p className={cn(
-                      "text-sm font-black",
-                      profitMargin > 30 ? "text-emerald-500" : profitMargin > 0 ? "text-amber-500" : "text-rose-500"
-                    )}>
-                      {profitMargin.toFixed(1)}%
+                  <div className="col-span-2 p-3 rounded-lg bg-accent/30 text-center">
+                    <p className="text-[11px] text-muted-foreground">
+                      El precio de venta se calculará al registrar la producción, basado en el costo real del lote y el margen de utilidad.
                     </p>
                   </div>
                 </div>
@@ -282,7 +265,7 @@ export function ProductCard({
                     <TableHeader>
                       <TableRow className="bg-accent/5 hover:bg-accent/5">
                         <TableHead className="h-9 text-[10px] uppercase tracking-widest font-bold">Insumo</TableHead>
-                        <TableHead className="h-9 text-[10px] uppercase tracking-widest font-bold">Consumo por Receta ({product.yield} uds)</TableHead>
+                        <TableHead className="h-9 text-[10px] uppercase tracking-widest font-bold">Consumo por Receta</TableHead>
                         <TableHead className="h-9 text-[10px] uppercase tracking-widest font-bold text-right">Costo Est.</TableHead>
                         <TableHead className="h-9 text-[10px] uppercase tracking-widest font-bold text-right">Acción</TableHead>
                       </TableRow>
@@ -324,22 +307,18 @@ export function ProductCard({
         variant="warning"
       >
         <div className="space-y-4 pt-2">
-          <div className="p-4 bg-muted/30 rounded-lg space-y-2">
+          <div className="p-4 bg-muted/30 rounded-lg">
             <p className="text-sm text-muted-foreground">
-              Se consumirán los materiales necesarios para producir <strong>1 lote</strong> de la receta.
+              Se consumirán los materiales necesarios para producir <strong>1 lote</strong> de la receta y se registrarán las unidades obtenidas.
             </p>
-            <div className="flex justify-between items-center py-2 border-t border-border/30">
-              <span className="text-sm font-bold text-foreground">Rendimiento Teórico (1 Lote):</span>
-              <span className="text-sm font-black text-amber-500">{product.yield} unidades</span>
-            </div>
           </div>
 
           <div className="space-y-3">
             <label className="text-xs font-bold uppercase tracking-widest text-foreground">
-              Unidades Reales Obtenidas
+              Unidades Obtenidas
             </label>
             <p className="text-xs text-foreground/60 mb-2">
-              Ajusta este valor si salieron más (excedente) o menos (merma) unidades de las esperadas por la receta.
+              Ingresa cuántas unidades salieron de este lote de producción.
             </p>
             <NumericInput
               value={actualYield}

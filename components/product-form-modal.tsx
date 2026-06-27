@@ -9,15 +9,14 @@ import { createProduct, updateProduct } from '@/lib/actions/products'
 import { Plus, X } from 'lucide-react'
 
 interface ProductFormModalProps {
-  product?: { id: string; name: string; category: string | null; salePrice: number; yield: number } | null
+  product?: { id: string; name: string; category: string | null; profitMargin: number } | null
   categories: string[]
   onSuccess?: () => void
   onClose?: () => void
 }
 
 export function ProductFormModal({ product, categories, onSuccess, onClose }: ProductFormModalProps) {
-  const [salePrice, setSalePrice] = useState(product?.salePrice ?? 0)
-  const [yieldAmount, setYieldAmount] = useState(product?.yield ?? 1)
+  const [profitMargin, setProfitMargin] = useState(product?.profitMargin ?? 30)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [category, setCategory] = useState(product?.category ?? '')
@@ -31,8 +30,7 @@ export function ProductFormModal({ product, categories, onSuccess, onClose }: Pr
     setError(null)
 
     const formData = new FormData(e.currentTarget)
-    formData.set('salePrice', salePrice.toString())
-    formData.set('yield', yieldAmount.toString())
+    formData.set('profitMargin', profitMargin.toString())
     if (category) {
       formData.set('category', category)
     }
@@ -95,23 +93,18 @@ export function ProductFormModal({ product, categories, onSuccess, onClose }: Pr
           </div>
 
           <div className="space-y-2">
-            <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Precio de Venta</label>
+            <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Margen de Utilidad (%)</label>
             <NumericInput
-              value={salePrice}
-              onChange={setSalePrice}
-              placeholder="0"
+              value={profitMargin}
+              onChange={setProfitMargin}
+              placeholder="30"
+              min={0}
+              max={100}
               className="h-12"
             />
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Rendimiento (Porción/Lote)</label>
-            <NumericInput
-              value={yieldAmount}
-              onChange={setYieldAmount}
-              placeholder="1"
-              className="h-12"
-            />
+            <p className="text-[10px] text-muted-foreground">
+              El precio de venta se calculará automáticamente al registrar producción.
+            </p>
           </div>
         </div>
 

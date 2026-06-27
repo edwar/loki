@@ -20,7 +20,6 @@ import { sileo as toast } from 'sileo'
 interface Product {
   id: string
   name: string
-  yield: number
   recipeItems: {
     id: string
     quantityRequired: number
@@ -41,21 +40,6 @@ export function NewProductionModal({ products }: { products: Product[] }) {
   const [actualYield, setActualYield] = useState<number>(0)
 
   const selectedProduct = products.find((p) => p.id === selectedProductId)
-
-  const handleProductChange = (id: string) => {
-    setSelectedProductId(id)
-    const product = products.find((p) => p.id === id)
-    if (product) {
-      setActualYield(product.yield * batches)
-    }
-  }
-
-  const handleBatchesChange = (val: number) => {
-    setBatches(val)
-    if (selectedProduct) {
-      setActualYield(selectedProduct.yield * val)
-    }
-  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -108,7 +92,7 @@ export function NewProductionModal({ products }: { products: Product[] }) {
           <div className="space-y-4">
             <div className="space-y-2">
               <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Producto a fabricar</label>
-              <Select value={selectedProductId} onValueChange={handleProductChange}>
+              <Select value={selectedProductId} onValueChange={setSelectedProductId}>
                 <SelectTrigger className="h-12 rounded-lg">
                   <SelectValue placeholder="Selecciona un producto..." />
                 </SelectTrigger>
@@ -131,12 +115,12 @@ export function NewProductionModal({ products }: { products: Product[] }) {
                     min="1"
                     step="1"
                     value={batches}
-                    onChange={(e) => handleBatchesChange(parseInt(e.target.value) || 0)}
+                    onChange={(e) => setBatches(parseInt(e.target.value) || 0)}
                     className="h-12 rounded-lg font-bold"
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Rendimiento Real</label>
+                  <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Unidades Obtenidas</label>
                   <Input
                     type="number"
                     min="0"
@@ -145,9 +129,6 @@ export function NewProductionModal({ products }: { products: Product[] }) {
                     onChange={(e) => setActualYield(parseFloat(e.target.value) || 0)}
                     className="h-12 rounded-lg font-bold text-primary"
                   />
-                  <p className="text-[10px] text-muted-foreground italic">
-                    Esperado: {selectedProduct.yield * batches} unidades
-                  </p>
                 </div>
               </div>
             )}

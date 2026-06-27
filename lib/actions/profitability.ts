@@ -59,8 +59,9 @@ export async function getProductProfitability(marginThreshold: number = DEFAULT_
   })
 
   const productProfitability: ProductProfitability[] = products.map(product => {
-    const yieldAmount = Number(product.yield) || 1
+    const profitMargin = Number(product.profitMargin) || 30
     const salePrice = Number(product.salePrice)
+    const yieldAmount = Number(product.yield) || 1
 
     const totalRecipeCost = product.recipeItems.reduce((sum, item) => {
       const supplyPrice = Number(item.supply?.purchasePrice) || 0
@@ -68,22 +69,44 @@ export async function getProductProfitability(marginThreshold: number = DEFAULT_
       return sum + (supplyPrice * quantityRequired)
     }, 0)
 
+    // Si no hay receta, no podemos calcular rentabilidad real
+    if (product.recipeItems.length === 0) {
+      return {
+        id: product.id,
+        name: product.name,
+        category: product.category?.name || null,
+        salePrice,
+        yield: yieldAmount,
+        totalRecipeCost: 0,
+        costPerUnit: 0,
+        margin: 0,
+        marginPercentage: 0,
+        isProfitable: false,
+        hasRecipe: false
+      }
+    }
+
+    // Usar el precio de venta almacenado si existe, de lo contrario calcularlo
+    const effectiveSalePrice = salePrice > 0
+      ? salePrice
+      : (totalRecipeCost / yieldAmount) * (1 + profitMargin / 100)
+
     const costPerUnit = yieldAmount > 0 ? totalRecipeCost / yieldAmount : totalRecipeCost
-    const margin = salePrice - costPerUnit
-    const marginPercentage = salePrice > 0 ? (margin / salePrice) * 100 : 0
+    const margin = effectiveSalePrice - costPerUnit
+    const marginPercentage = effectiveSalePrice > 0 ? (margin / effectiveSalePrice) * 100 : 0
 
     return {
       id: product.id,
       name: product.name,
       category: product.category?.name || null,
-      salePrice,
+      salePrice: effectiveSalePrice,
       yield: yieldAmount,
       totalRecipeCost,
       costPerUnit,
       margin,
       marginPercentage,
       isProfitable: margin > 0,
-      hasRecipe: product.recipeItems.length > 0
+      hasRecipe: true
     }
   })
 

@@ -85,9 +85,10 @@ model Product {
   id           String    @id @default(uuid())
   name         String
   categoryId   String?
-  salePrice    Decimal   @db.Decimal(10, 2)
+  salePrice    Decimal   @default(0) @db.Decimal(10, 2)
   currentStock Decimal   @default(0) @db.Decimal(10, 2)
   yield        Decimal   @default(1) @db.Decimal(10, 2)
+  profitMargin Decimal   @default(30) @db.Decimal(5, 2)
   imageUrl     String?
   isActive     Boolean   @default(true)
   createdAt    DateTime  @default(now())

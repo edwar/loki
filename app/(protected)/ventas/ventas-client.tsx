@@ -20,7 +20,6 @@ interface Product {
   name: string
   salePrice: number
   currentStock: number
-  yield: number
   recipeItems: {
     id: string
     quantityRequired: number

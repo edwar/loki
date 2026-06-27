@@ -180,10 +180,7 @@ export function SaleFormModal({ products, customers, sale, onSuccess, onClose }:
                     <SelectLabel className="text-[10px] uppercase tracking-widest text-muted-foreground/50">Tus Productos</SelectLabel>
                     {products.map((p: any) => (
                       <SelectItem key={p.id} value={p.id} className="rounded-lg">
-                        <div className="flex justify-between items-center w-full gap-2">
-                          <span>{p.name}</span>
-                          <span className="text-xs font-bold text-primary/60">{formatCurrency(Number(p.salePrice))}</span>
-                        </div>
+                        {p.name}
                       </SelectItem>
                     ))}
                   </SelectGroup>

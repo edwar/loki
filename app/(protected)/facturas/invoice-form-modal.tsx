@@ -205,7 +205,7 @@ export function InvoiceFormModal({ isOpen, onClose, onSuccess, customers, produc
                     >
                       <span>{product.name}</span>
                       <span className="text-muted-foreground text-sm group-hover:text-white">
-                        {formatCurrency(product.salePrice)} (Stock: {product.currentStock})
+                        Stock: {product.currentStock}
                       </span>
                     </Button>
                   ))}
