@@ -4,7 +4,7 @@ test.describe('Gestión de Productos', () => {
   const testProduct = {
     name: `Producto Test ${Date.now()}`,
     category: 'Empanadas',
-    salePrice: '5000'
+    profitMargin: '30'
   }
 
   test('debería mostrar empty state cuando no hay productos', async ({ page }) => {
@@ -29,8 +29,8 @@ test.describe('Gestión de Productos', () => {
     await page.click('text=Seleccionar categoría')
     await page.click(`text=${testProduct.category}`)
     
-    // Ingresar precio de venta
-    await page.fill('input[name="salePrice"]', testProduct.salePrice)
+    // Ingresar margen de utilidad
+    await page.fill('input[name="profitMargin"]', testProduct.profitMargin)
     
     // Agregar al menos un insumo a la receta
     const addSupplyButton = page.locator('button:has-text("Agregar Insumo")')

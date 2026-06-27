@@ -27,14 +27,11 @@ export default async function ProductionPage() {
   // Convert Decimals to Numbers for Client Component
   const serializedLogs = logs.map(log => ({
     ...log,
-    expectedYield: Number(log.expectedYield),
     actualYield: Number(log.actualYield),
     batches: Number(log.batches),
     product: {
       ...log.product,
-      salePrice: Number(log.product.salePrice),
       currentStock: Number(log.product.currentStock),
-      yield: Number(log.product.yield)
     },
     items: log.items.map(item => ({
       ...item,
@@ -52,7 +49,6 @@ export default async function ProductionPage() {
   const products = productsRaw.map(p => ({
     id: p.id,
     name: p.name,
-    yield: Number(p.yield),
     recipeItems: p.recipeItems.map(ri => ({
       id: ri.id,
       quantityRequired: Number(ri.quantityRequired),
@@ -70,9 +66,7 @@ export default async function ProductionPage() {
     'Fecha': formatDate(log.date),
     'Producto': log.product.name,
     'Lotes Fabricados': log.batches,
-    'Rendimiento Teórico': log.expectedYield,
-    'Rendimiento Real': log.actualYield,
-    'Merma / Excedente': log.actualYield - log.expectedYield,
+    'Unidades Producidas': log.actualYield,
     'Costo Insumos ($)': log.items.reduce((acc, item) => acc + (item.quantityConsumed * item.unitCost), 0),
     'Detalle Insumos': log.items.map(item => `${item.quantityConsumed} ${item.supply.unit} de ${item.supply.name}`).join(' | ')
   }))

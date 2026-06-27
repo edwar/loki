@@ -16,7 +16,6 @@ export default async function VentasPage() {
     name: p.name,
     salePrice: Number(p.salePrice),
     currentStock: Number(p.currentStock),
-    yield: Number(p.yield) || 1,
     recipeItems: p.recipeItems?.map((ri: any) => ({
       id: ri.id,
       quantityRequired: Number(ri.quantityRequired),

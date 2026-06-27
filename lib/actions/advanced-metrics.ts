@@ -130,12 +130,12 @@ export async function getAdvancedMetrics(range: string = '30d'): Promise<Advance
       const product = allProducts.find(p => p.id === item.productId)
       if (!product || product.recipeItems.length === 0) return itemSum
       
-      const yieldAmount = Number(product.yield) || 1
       const totalCost = product.recipeItems.reduce((costSum, ri) => {
         const price = Number(ri.supply?.purchasePrice) || 0
         return costSum + (price * Number(ri.quantityRequired))
       }, 0)
-      const costPerUnit = yieldAmount > 0 ? totalCost / yieldAmount : totalCost
+      // Costo por lote (sin rendimiento, se calcula a nivel de producción)
+      const costPerUnit = totalCost
       
       return itemSum + (costPerUnit * item.quantity)
     }, 0)

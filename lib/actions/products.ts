@@ -22,8 +22,7 @@ export async function getProducts() {
 export async function createProduct(formData: FormData) {
   const name = formData.get('name') as string
   const categoryName = formData.get('category') as string | null
-  const salePrice = parseFloat(formData.get('salePrice') as string) || 0
-  const yieldAmount = parseFloat(formData.get('yield') as string) || 1
+  const profitMargin = parseFloat(formData.get('profitMargin') as string) || 30
 
   let categoryId = null
   if (categoryName) {
@@ -37,8 +36,7 @@ export async function createProduct(formData: FormData) {
     data: {
       name,
       categoryId,
-      salePrice,
-      yield: yieldAmount,
+      profitMargin,
     },
   })
 
@@ -95,8 +93,7 @@ export async function updateRecipeItem(id: string, quantityRequired: number, uni
 export async function updateProduct(id: string, formData: FormData) {
   const name = formData.get('name') as string
   const categoryName = formData.get('category') as string | null
-  const salePrice = parseFloat(formData.get('salePrice') as string) || 0
-  const yieldAmount = parseFloat(formData.get('yield') as string) || 1
+  const profitMargin = parseFloat(formData.get('profitMargin') as string) || 30
 
   let categoryId = null
   if (categoryName) {
@@ -111,8 +108,7 @@ export async function updateProduct(id: string, formData: FormData) {
     data: {
       name,
       categoryId,
-      salePrice,
-      yield: yieldAmount,
+      profitMargin,
     },
   })
 
@@ -140,9 +136,6 @@ export async function prepareProduct(productId: string, batches: number, actualY
   })
 
   if (!product) throw new Error('Producto no encontrado')
-
-  const yieldAmount = Number(product.yield) || 1
-  const expectedYield = yieldAmount * batches
 
   // 1. Verificar disponibilidad y preparar deducciones
   const supplyUpdates: { id: string; quantity: number; unitCost: number }[] = []
@@ -190,7 +183,7 @@ export async function prepareProduct(productId: string, batches: number, actualY
     await tx.productionLog.create({
       data: {
         productId,
-        expectedYield,
+        expectedYield: actualYield,
         actualYield,
         batches,
         items: {
