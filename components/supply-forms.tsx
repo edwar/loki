@@ -92,19 +92,17 @@ export function SupplyForm({
           </Select>
         </div>
         {!supply && (
-          <>
-            <div className="space-y-2">
-              <label className="text-xs font-bold uppercase tracking-widest text-foreground/60">Stock Inicial</label>
-              <NumericInput value={currentStock} onChange={setCurrentStock} />
-              <input type="hidden" name="currentStock" value={currentStock} />
-            </div>
-            <div className="space-y-2">
-              <label className="text-xs font-bold uppercase tracking-widest text-foreground/60">Precio de Compra Inicial</label>
-              <NumericInput value={purchasePrice} onChange={setPurchasePrice} />
-              <input type="hidden" name="purchasePrice" value={purchasePrice} />
-            </div>
-          </>
+          <div className="space-y-2">
+            <label className="text-xs font-bold uppercase tracking-widest text-foreground/60">Stock Inicial</label>
+            <NumericInput value={currentStock} onChange={setCurrentStock} />
+            <input type="hidden" name="currentStock" value={currentStock} />
+          </div>
         )}
+        <div className="space-y-2">
+          <label className="text-xs font-bold uppercase tracking-widest text-foreground/60">Precio de Compra</label>
+          <NumericInput value={purchasePrice} onChange={setPurchasePrice} />
+          <input type="hidden" name="purchasePrice" value={purchasePrice} />
+        </div>
         <div className="space-y-2">
           <label className="text-xs font-bold uppercase tracking-widest text-foreground/60">Stock Mínimo</label>
           <NumericInput value={minStock} onChange={setMinStock} />
