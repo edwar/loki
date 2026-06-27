@@ -8,7 +8,7 @@ import { NumericInput } from '@/components/ui/numeric-input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { createSupply, updateSupply } from '@/lib/actions/supplies'
 import { UNIDADES } from '@/lib/constants'
-import { getUnitType } from '@/lib/conversions'
+import { getUnitType, convertUnits } from '@/lib/conversions'
 
 interface Category {
   id: string
@@ -55,6 +55,18 @@ export function SupplyForm({
     formData.set('unit', normalizedUnit)
     formData.set('unitsPerPack', showUnitsPerPack ? unitsPerPack.toString() : '1')
     formData.set('categoryId', categoryId || '')
+
+    // Convertir precio a la unidad base (ej: precio por litro → precio por ml)
+    if (displayUnit !== normalizedUnit) {
+      const factor = convertUnits(1, displayUnit, normalizedUnit)
+      if (factor && factor > 0) {
+        const basePrice = (formData.get('purchasePrice') as string)
+          ? parseFloat(formData.get('purchasePrice') as string) / factor
+          : 0
+        formData.set('purchasePrice', basePrice.toString())
+      }
+    }
+
     await action(formData)
     onSuccess?.()
   }

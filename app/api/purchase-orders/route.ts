@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { convertUnits } from '@/lib/conversions'
 
 export async function POST(request: Request) {
   try {
@@ -41,24 +42,42 @@ export async function POST(request: Request) {
         })
       }
 
+      // Normalizar unidad a la mínima expresión (litro → mililitro, kilogramo → gramo)
+      const normalizeUnit = (u: string) => {
+        const type = u === 'litro' || u === 'mililitro' ? 'volumen' : u === 'kilogramo' || u === 'gramo' ? 'peso' : null
+        if (type === 'volumen') return 'mililitro'
+        if (type === 'peso') return 'gramo'
+        return u
+      }
+
+      const targetUnit = supply ? supply.unit : normalizeUnit(item.unit || 'unidad')
+
+      // Convertir precio por unidad de presentación a precio por unidad base
+      // Ej: 20L de leche a $20.000 → $1.000/L → $1/ml
+      let baseUnitPrice = item.unitPrice
+      if (item.unit && targetUnit !== item.unit) {
+        const factor = convertUnits(1, item.unit, targetUnit)
+        if (factor && factor > 0) {
+          baseUnitPrice = item.unitPrice / factor
+        }
+      }
+
       if (supply) {
-        // Actualizar stock y precio del insumo existente
         supply = await prisma.supply.update({
           where: { id: supply.id },
           data: {
             currentStock: { increment: item.quantity },
-            purchasePrice: item.unitPrice,
+            purchasePrice: baseUnitPrice,
             supplierId: supplier?.id || supply.supplierId
           }
         })
       } else {
-        // Crear nuevo insumo si no existe
         supply = await prisma.supply.create({
           data: {
             name: item.supplyName || 'Sin nombre',
-            unit: item.unit || 'unidad',
+            unit: targetUnit,
             currentStock: item.quantity,
-            purchasePrice: item.unitPrice,
+            purchasePrice: baseUnitPrice,
             supplierId: supplier?.id
           }
         })

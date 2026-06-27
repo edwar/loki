@@ -15,7 +15,7 @@ import {
 } from '@/components/ui/select'
 import { X, Package } from 'lucide-react'
 import { UNIDADES } from '@/lib/constants'
-import { getUnitType } from '@/lib/conversions'
+import { getUnitType, convertUnits } from '@/lib/conversions'
 
 interface Category {
   id: string
@@ -35,6 +35,7 @@ export function SupplyForm({ onSuccess, onClose }: SupplyFormProps) {
   const [displayUnit, setDisplayUnit] = useState('unidad')
   const [minStock, setMinStock] = useState(1)
   const [unitsPerPack, setUnitsPerPack] = useState(1)
+  const [purchasePrice, setPurchasePrice] = useState(0)
   const { data: categories = [] } = useQuery<Category[]>({
     queryKey: ['categories', 'supply'],
     queryFn: async () => {
@@ -62,6 +63,15 @@ export function SupplyForm({ onSuccess, onClose }: SupplyFormProps) {
     const normalizedUnit = getNormalizedUnit(displayUnit)
     const finalUnitsPerPack = showUnitsPerPack ? unitsPerPack : 1
 
+    // Convertir precio a la unidad base (ej: precio por litro → precio por ml)
+    let basePrice = purchasePrice
+    if (displayUnit !== normalizedUnit) {
+      const factor = convertUnits(1, displayUnit, normalizedUnit)
+      if (factor && factor > 0) {
+        basePrice = purchasePrice / factor
+      }
+    }
+
     try {
       const response = await fetch('/api/supplies', {
         method: 'POST',
@@ -71,7 +81,8 @@ export function SupplyForm({ onSuccess, onClose }: SupplyFormProps) {
           categoryId: categoryId || null,
           unit: normalizedUnit,
           unitsPerPack: finalUnitsPerPack,
-          minStock
+          minStock,
+          purchasePrice: basePrice
         })
       })
 
@@ -160,6 +171,14 @@ export function SupplyForm({ onSuccess, onClose }: SupplyFormProps) {
         <div className="space-y-2">
           <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Stock Mínimo</label>
           <NumericInput value={minStock} onChange={setMinStock} />
+        </div>
+
+        <div className="space-y-2">
+          <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Precio de Compra Inicial</label>
+          <NumericInput value={purchasePrice} onChange={setPurchasePrice} />
+          <p className="text-[10px] text-muted-foreground">
+            Se actualizará automáticamente con cada compra.
+          </p>
         </div>
 
       </div>
