@@ -19,6 +19,7 @@ export default async function ProductosPage() {
     const currentStock = Number(p.currentStock)
     const profitMargin = Number(p.profitMargin) || 30
     const yieldAmount = Number(p.yield) || 1
+    const salePrice = Number(p.salePrice)
     const recipeItems = p.recipeItems?.map((ri: any) => ({
       ...ri,
       quantityRequired: Number(ri.quantityRequired),
@@ -51,6 +52,7 @@ export default async function ProductosPage() {
       currentStock,
       profitMargin,
       yield: yieldAmount,
+      salePrice,
       recipeItems,
       maxPossibleBatches: maxBatches === Infinity ? 0 : maxBatches
     }

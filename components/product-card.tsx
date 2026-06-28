@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { formatCurrency, cn } from '@/lib/utils'
+import { calculateUnitCost, calculateRentabilidad, getDisplayPrice, getDisplayMargin } from '@/lib/pricing'
 import { Trash2, ShoppingBag, Edit2, ChevronDown, Plus, Package } from 'lucide-react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { UNIDADES_POR_TIPO } from '@/lib/constants'
@@ -52,9 +53,12 @@ export function ProductCard({
     return acc + (qty * price)
   }, 0)
 
-  const unitCost = (product.yield || 1) > 0 ? recipeCost / (product.yield || 1) : 0
+  const unitCost = calculateUnitCost(recipeCost, product.yield || 1)
   const profitMarginPct = product.profitMargin ?? 30
-  const suggestedPrice = unitCost * (1 + profitMarginPct / 100)
+  const salePrice = Number(product.salePrice) || 0
+  const displayPrice = getDisplayPrice(salePrice, unitCost, profitMarginPct)
+  const actualMargin = getDisplayMargin(salePrice, unitCost, profitMarginPct)
+  const rentabilidad = calculateRentabilidad(displayPrice, unitCost)
 
   const handleOpenProduce = () => {
     if (product.maxPossibleBatches <= 0) return
@@ -214,7 +218,7 @@ export function ProductCard({
               )}
 
               {product.recipeItems.length > 0 && (
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 rounded-lg border border-border/30 bg-background/50">
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-4 p-4 rounded-lg border border-border/30 bg-background/50">
                   <div className="space-y-1">
                     <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">Costo del Lote</p>
                     <p className="text-sm font-black text-foreground">{formatCurrency(recipeCost)}</p>
@@ -224,16 +228,25 @@ export function ProductCard({
                     <p className="text-sm font-black text-rose-500">{formatCurrency(unitCost)}</p>
                   </div>
                   <div className="space-y-1">
-                    <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">Precio Venta Sugerido</p>
-                    <p className="text-sm font-black text-emerald-500">{formatCurrency(suggestedPrice)}</p>
+                    <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">Precio Venta</p>
+                    <p className="text-sm font-black text-emerald-500">{formatCurrency(displayPrice)}</p>
                   </div>
                   <div className="space-y-1">
                     <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">Margen</p>
                     <p className={cn(
                       "text-sm font-black",
-                      profitMarginPct >= 30 ? "text-emerald-500" : profitMarginPct >= 20 ? "text-amber-500" : "text-rose-500"
+                      actualMargin >= 30 ? "text-emerald-500" : actualMargin >= 20 ? "text-amber-500" : "text-rose-500"
                     )}>
-                      {profitMarginPct}%
+                      {actualMargin.toFixed(1)}%
+                    </p>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">Rentabilidad</p>
+                    <p className={cn(
+                      "text-sm font-black",
+                      rentabilidad >= 50 ? "text-emerald-500" : rentabilidad >= 30 ? "text-amber-500" : "text-rose-500"
+                    )}>
+                      {rentabilidad.toFixed(1)}%
                     </p>
                   </div>
                 </div>

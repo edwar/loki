@@ -23,6 +23,7 @@ export async function createProduct(formData: FormData) {
   const name = formData.get('name') as string
   const categoryName = formData.get('category') as string | null
   const profitMargin = parseFloat(formData.get('profitMargin') as string) || 30
+  const salePrice = parseFloat(formData.get('salePrice') as string) || 0
   const yieldAmount = parseFloat(formData.get('yield') as string) || 1
 
   let categoryId = null
@@ -38,6 +39,7 @@ export async function createProduct(formData: FormData) {
       name,
       categoryId,
       profitMargin,
+      salePrice,
       yield: yieldAmount,
     },
   })
@@ -96,6 +98,7 @@ export async function updateProduct(id: string, formData: FormData) {
   const name = formData.get('name') as string
   const categoryName = formData.get('category') as string | null
   const profitMargin = parseFloat(formData.get('profitMargin') as string) || 30
+  const salePrice = parseFloat(formData.get('salePrice') as string) || 0
   const yieldAmount = parseFloat(formData.get('yield') as string) || 1
 
   let categoryId = null
@@ -112,6 +115,7 @@ export async function updateProduct(id: string, formData: FormData) {
       name,
       categoryId,
       profitMargin,
+      salePrice,
       yield: yieldAmount,
     },
   })
