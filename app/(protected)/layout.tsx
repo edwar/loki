@@ -25,7 +25,8 @@ import {
   FileText,
   FileSignature,
   Tag,
-  Percent
+  Percent,
+  Settings
 } from 'lucide-react'
 import { useState, ViewTransition } from 'react'
 import { useQuery } from '@tanstack/react-query'
@@ -94,6 +95,7 @@ const navigation: NavSection[] = [
       { name: 'Bienes', href: '/bienes', icon: Building2, roles: ['admin'] },
       { name: 'Equipo', href: '/equipo', icon: Shield, roles: ['admin'] },
       { name: 'Auditoría', href: '/auditoria', icon: ShieldAlert, roles: ['admin'] },
+      { name: 'Configuración', href: '/configuracion', icon: Settings },
     ]
   },
 ]

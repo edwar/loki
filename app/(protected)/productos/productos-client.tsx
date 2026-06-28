@@ -46,15 +46,17 @@ interface Product {
   images: ProductImage[]
   recipeItems: RecipeItem[]
   maxPossibleBatches: number
+  isPublic?: boolean
 }
 
 interface ProductosClientProps {
   products: Product[]
   categories: string[]
   allSupplies: Supply[]
+  company?: { id: string; name: string; slug: string }
 }
 
-export function ProductosClient({ products: initialProducts, categories, allSupplies }: ProductosClientProps) {
+export function ProductosClient({ products: initialProducts, categories, allSupplies, company }: ProductosClientProps) {
   const queryClient = useQueryClient()
   const [modalOpen, setModalOpen] = useState(false)
   const [editingProduct, setEditingProduct] = useState<Product | null>(null)
@@ -144,6 +146,7 @@ export function ProductosClient({ products: initialProducts, categories, allSupp
           <ProductFormModal
             product={editingProduct}
             categories={categories}
+            company={company}
             unitCost={getUnitCost(editingProduct)}
             onSuccess={handleSuccess}
             onClose={() => setModalOpen(false)}

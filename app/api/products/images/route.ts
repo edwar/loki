@@ -24,7 +24,11 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    const { productId, url, publicId } = await request.json()
+    const body = await request.json()
+    const { productId, url, publicId, items } = body
+
+    // Soporte para batch (items) y single (url, publicId)
+    const toCreate = items || [{ url, publicId }]
 
     const maxOrder = await prisma.productImage.findFirst({
       where: { productId, deletedAt: null },
@@ -32,17 +36,23 @@ export async function POST(request: Request) {
       select: { order: true },
     })
 
-    const image = await prisma.productImage.create({
-      data: {
-        productId,
-        url,
-        publicId,
-        order: (maxOrder?.order ?? -1) + 1,
-      },
-    })
+    let nextOrder = (maxOrder?.order ?? -1) + 1
+
+    const images = await Promise.all(
+      toCreate.map((item: { url: string; publicId: string }) =>
+        prisma.productImage.create({
+          data: {
+            productId,
+            url: item.url,
+            publicId: item.publicId,
+            order: nextOrder++,
+          },
+        })
+      )
+    )
 
     revalidatePath('/productos')
-    return NextResponse.json(image, { status: 201 })
+    return NextResponse.json(images.length === 1 ? images[0] : images, { status: 201 })
   } catch (error) {
     console.error('Error saving product image:', error)
     return NextResponse.json({ error: 'Error saving image' }, { status: 500 })
