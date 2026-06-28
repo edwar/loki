@@ -3,10 +3,20 @@
 import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
 import { convertUnits } from '@/lib/conversions'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
 
 export async function getProducts() {
+  const session = await getServerSession(authOptions)
+  const user = session?.user?.id
+    ? await prisma.user.findUnique({ where: { id: session.user.id }, select: { companyId: true } })
+    : null
+
   return prisma.product.findMany({
-    where: { deletedAt: null },
+    where: {
+      deletedAt: null,
+      ...(user?.companyId ? { companyId: user.companyId } : {}),
+    },
     include: {
       category: true,
       images: {
@@ -24,11 +34,17 @@ export async function getProducts() {
 }
 
 export async function createProduct(formData: FormData) {
+  const session = await getServerSession(authOptions)
+  const user = session?.user?.id
+    ? await prisma.user.findUnique({ where: { id: session.user.id }, select: { companyId: true } })
+    : null
+
   const name = formData.get('name') as string
   const categoryName = formData.get('category') as string | null
   const profitMargin = parseFloat(formData.get('profitMargin') as string) || 30
   const salePrice = parseFloat(formData.get('salePrice') as string) || 0
   const yieldAmount = parseFloat(formData.get('yield') as string) || 1
+  const isPublic = formData.get('isPublic') === 'true'
 
   let categoryId = null
   if (categoryName) {
@@ -45,6 +61,8 @@ export async function createProduct(formData: FormData) {
       profitMargin,
       salePrice,
       yield: yieldAmount,
+      companyId: user?.companyId || null,
+      isPublic,
     },
   })
 
@@ -104,6 +122,7 @@ export async function updateProduct(id: string, formData: FormData) {
   const profitMargin = parseFloat(formData.get('profitMargin') as string) || 30
   const salePrice = parseFloat(formData.get('salePrice') as string) || 0
   const yieldAmount = parseFloat(formData.get('yield') as string) || 1
+  const isPublic = formData.get('isPublic') === 'true'
 
   let categoryId = null
   if (categoryName) {
@@ -121,6 +140,7 @@ export async function updateProduct(id: string, formData: FormData) {
       profitMargin,
       salePrice,
       yield: yieldAmount,
+      isPublic,
     },
   })
 

@@ -23,22 +23,25 @@ export function ImageUpload({ productId, images, onImagesChange }: ImageUploadPr
   const fileRef = useRef<HTMLInputElement>(null)
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
+    const files = e.target.files
+    if (!files || files.length === 0) return
 
     setUploading(true)
     try {
       const formData = new FormData()
-      formData.set('file', file)
+      for (const file of files) {
+        formData.append('file', file)
+      }
 
       const uploadRes = await fetch('/api/upload', { method: 'POST', body: formData })
       if (!uploadRes.ok) throw new Error('Upload failed')
-      const { url, publicId } = await uploadRes.json()
+      const results = await uploadRes.json()
+      const items = Array.isArray(results) ? results : [results]
 
       const saveRes = await fetch('/api/products/images', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ productId, url, publicId }),
+        body: JSON.stringify({ productId, items }),
       })
       if (!saveRes.ok) throw new Error('Save failed')
 
@@ -91,6 +94,7 @@ export function ImageUpload({ productId, images, onImagesChange }: ImageUploadPr
             ref={fileRef}
             type="file"
             accept="image/*"
+            multiple
             onChange={handleUpload}
             className="hidden"
             disabled={uploading}

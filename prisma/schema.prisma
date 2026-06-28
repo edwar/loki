@@ -97,11 +97,16 @@ model Product {
 
   category Category? @relation(fields: [categoryId], references: [id])
 
-  images         ProductImage[]
-  recipeItems    RecipeItem[]
-  saleItems      SaleItem[]
+  companyId  String?
+  isPublic   Boolean   @default(false)
+
+  company      Company?       @relation(fields: [companyId], references: [id])
+  images       ProductImage[]
+  recipeItems  RecipeItem[]
+  saleItems    SaleItem[]
   productionLogs ProductionLog[]
-  invoiceItems   InvoiceItem[]
+  invoiceItems InvoiceItem[]
+  orderItems   OrderItem[]
 
   @@map("products")
 }
@@ -241,9 +246,12 @@ model User {
   email     String    @unique
   password  String
   role      String    @default("employee") // admin, manager, employee
+  companyId String?
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
+
+  company Company? @relation(fields: [companyId], references: [id])
 
   @@map("users")
 }
@@ -385,4 +393,57 @@ model ConsumableUsage {
   supply Supply @relation(fields: [supplyId], references: [id])
 
   @@map("consumable_usages")
+}
+
+model Company {
+  id          String   @id @default(uuid())
+  name        String
+  slug        String   @unique
+  logo        String?
+  description String?
+  whatsapp    String?
+  email       String?
+  address     String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  deletedAt   DateTime?
+
+  users    User[]
+  products Product[]
+  orders   Order[]
+
+  @@map("companies")
+}
+
+model Order {
+  id            String   @id @default(uuid())
+  companyId     String
+  customerName  String
+  customerPhone String
+  customerNotes String?
+  totalAmount   Decimal  @default(0) @db.Decimal(12, 2)
+  status        String   @default("pending") // pending, confirmed, preparing, ready, delivered
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  company Company     @relation(fields: [companyId], references: [id])
+  items   OrderItem[]
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id          String  @id @default(uuid())
+  orderId     String
+  productId   String
+  productName String
+  quantity    Decimal @db.Decimal(10, 2)
+  unitPrice   Decimal @db.Decimal(10, 2)
+  subtotal    Decimal @db.Decimal(12, 2)
+
+  order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id])
+
+  @@map("order_items")
 }

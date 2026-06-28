@@ -1,18 +1,20 @@
 import { getProducts } from '@/lib/actions/products'
 import { getSupplies } from '@/lib/actions/supplies'
+import { getUserCompany } from '@/lib/actions/companies'
 import { prisma } from '@/lib/prisma'
 import { ProductosClient } from './productos-client'
 
 export const dynamic = 'force-dynamic'
 
 export default async function ProductosPage() {
-  const [productsRaw, suppliesRaw, dbCategories] = await Promise.all([
+  const [productsRaw, suppliesRaw, dbCategories, userCompany] = await Promise.all([
     getProducts(),
     getSupplies(),
     prisma.category.findMany({
       where: { type: 'product', deletedAt: null },
       orderBy: { name: 'asc' }
-    })
+    }),
+    getUserCompany(),
   ])
 
   const products = productsRaw.map((p: any) => {
@@ -58,7 +60,9 @@ export default async function ProductosPage() {
       salePrice,
       images,
       recipeItems,
-      maxPossibleBatches: maxBatches === Infinity ? 0 : maxBatches
+      maxPossibleBatches: maxBatches === Infinity ? 0 : maxBatches,
+      companyId: p.companyId,
+      isPublic: p.isPublic ?? false,
     }
   })
 
@@ -78,6 +82,7 @@ export default async function ProductosPage() {
       products={products}
       categories={categories}
       allSupplies={supplies}
+      company={userCompany ? { id: userCompany.id, name: userCompany.name, slug: userCompany.slug } : undefined}
     />
   )
 }

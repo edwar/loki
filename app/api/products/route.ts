@@ -59,7 +59,8 @@ export async function GET() {
         salePrice,
         images,
         recipeItems,
-        maxPossibleBatches: maxBatches === Infinity ? 0 : maxBatches
+        maxPossibleBatches: maxBatches === Infinity ? 0 : maxBatches,
+        isPublic: p.isPublic ?? false,
       }
     })
 

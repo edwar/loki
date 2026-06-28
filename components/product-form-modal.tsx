@@ -20,19 +20,21 @@ interface ProductImage {
 }
 
 interface ProductFormModalProps {
-  product?: { id: string; name: string; category: string | null; profitMargin: number; yield: number; salePrice: number; images?: ProductImage[] } | null
+  product?: { id: string; name: string; category: string | null; profitMargin: number; yield: number; salePrice: number; images?: ProductImage[]; isPublic?: boolean } | null
   categories: string[]
+  company?: { id: string; name: string; slug: string }
   unitCost?: number
   onSuccess?: () => void
   onClose?: () => void
 }
 
-export function ProductFormModal({ product, categories, unitCost = 0, onSuccess, onClose }: ProductFormModalProps) {
+export function ProductFormModal({ product, categories, company, unitCost = 0, onSuccess, onClose }: ProductFormModalProps) {
   const [salePrice, setSalePrice] = useState(product?.salePrice ?? 0)
   const [yieldAmount, setYieldAmount] = useState(product?.yield ?? 1)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [category, setCategory] = useState(product?.category ?? '')
+  const [isPublic, setIsPublic] = useState(product?.isPublic ?? false)
   const [images, setImages] = useState<ProductImage[]>(product?.images ?? [])
 
   // Calcular margen desde el precio de venta usando el costo real del producto
@@ -53,6 +55,8 @@ export function ProductFormModal({ product, categories, unitCost = 0, onSuccess,
     formData.set('profitMargin', marginToSave.toString())
     formData.set('salePrice', salePrice.toString())
     formData.set('yield', yieldAmount.toString())
+    formData.set('companyId', company?.id || '')
+    formData.set('isPublic', isPublic ? 'true' : 'false')
     if (category) {
       formData.set('category', category)
     }
@@ -145,6 +149,29 @@ export function ProductFormModal({ product, categories, unitCost = 0, onSuccess,
             </p>
           </div>
         </div>
+
+        {company && (
+          <div className="space-y-2">
+            <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Tienda Pública</label>
+            <button
+              type="button"
+              onClick={() => setIsPublic(!isPublic)}
+              className={cn(
+                "w-full h-12 rounded-lg border-2 transition-colors font-bold text-sm",
+                isPublic
+                  ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-600"
+                  : "bg-muted/30 border-border/50 text-muted-foreground"
+              )}
+            >
+              {isPublic ? 'Visible en tienda' : 'Oculto en tienda'}
+            </button>
+            {isPublic && (
+              <p className="text-[10px] text-muted-foreground">
+                Visible en <a href={`/tienda/${company.slug}`} target="_blank" className="text-primary underline">/tienda/{company.slug}</a>
+              </p>
+            )}
+          </div>
+        )}
 
         {isEditing && (
           <ImageUpload
