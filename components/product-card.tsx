@@ -125,8 +125,19 @@ export function ProductCard({
               </div>
             </div>
           </div>
-          <div className="flex items-center gap-2 md:gap-3 shrink-0" onClick={(e) => e.stopPropagation()}>
-            <div className="flex gap-1 md:gap-2 mr-1 md:mr-2 pr-2 md:pr-4 border-r border-border/30">
+          <div className="flex items-center gap-1.5 md:gap-2 shrink-0" onClick={(e) => e.stopPropagation()}>
+            {product.recipeItems.length > 0 && (
+              <Button
+                onClick={handleOpenProduce}
+                disabled={product.maxPossibleBatches <= 0}
+                size="sm"
+                className="h-8 text-xs font-bold rounded-lg bg-amber-500 hover:bg-amber-600 text-white shadow-lg shadow-amber-500/20 disabled:bg-muted-foreground/20 disabled:text-muted-foreground disabled:shadow-none px-3"
+              >
+                <Plus size={14} className="mr-1" />
+                Producir
+              </Button>
+            )}
+            <div className="flex gap-1 md:gap-2 pl-1.5 md:pl-2 border-l border-border/30">
               <Button
                 onClick={onEdit}
                 variant="ghost"
@@ -165,51 +176,16 @@ export function ProductCard({
           <CardContent className="p-5 bg-primary/1 animate-in fade-in slide-in-from-top-1 duration-300">
             <div className="space-y-4">
               {product.recipeItems.length > 0 && (
-                <div className={cn(
-                  "flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-lg border gap-4",
+                <p className={cn(
+                  "text-xs px-4 py-2 rounded-lg",
                   product.maxPossibleBatches > 0
-                    ? "bg-amber-500/10 border-amber-500/20"
-                    : "bg-muted/50 border-border/40"
+                    ? "bg-amber-500/10 text-amber-700 dark:text-amber-300"
+                    : "bg-muted/50 text-muted-foreground"
                 )}>
-                  <div className="flex items-center gap-3">
-                    <div className={cn(
-                      "w-10 h-10 rounded-lg shrink-0 flex items-center justify-center",
-                      product.maxPossibleBatches > 0
-                        ? "bg-amber-500/20 text-amber-600"
-                        : "bg-muted text-muted-foreground"
-                    )}>
-                      <Plus size={20} />
-                    </div>
-                    <div>
-                      <p className={cn(
-                        "text-sm font-bold",
-                        product.maxPossibleBatches > 0 ? "text-amber-900 dark:text-amber-100" : "text-foreground"
-                      )}>
-                        Producción de Lotes
-                      </p>
-                      <p className={cn(
-                        "text-xs",
-                        product.maxPossibleBatches > 0 ? "text-amber-700/70 dark:text-amber-400/70" : "text-muted-foreground"
-                      )}>
-                        {product.maxPossibleBatches > 0
-                          ? `Suficientes insumos para ${product.maxPossibleBatches} lote(s).`
-                          : "Insumos insuficientes para esta receta."}
-                      </p>
-                    </div>
-                  </div>
-                  <Button
-                    onClick={handleOpenProduce}
-                    disabled={product.maxPossibleBatches <= 0}
-                    className={cn(
-                      "w-full sm:w-auto font-bold shadow-lg",
-                      product.maxPossibleBatches > 0
-                        ? "bg-amber-500 hover:bg-amber-600 text-white shadow-amber-500/20"
-                        : "bg-muted-foreground/20 text-muted-foreground cursor-not-allowed shadow-none"
-                    )}
-                  >
-                    Producir 1 Lote
-                  </Button>
-                </div>
+                  {product.maxPossibleBatches > 0
+                    ? `Insumos suficientes para ${product.maxPossibleBatches} lote(s).`
+                    : "Insumos insuficientes para esta receta."}
+                </p>
               )}
 
               {Number(product.currentStock) > 0 && (
