@@ -34,17 +34,13 @@ export function ProductoDetalleClient({ product, company }: { product: Product; 
   const panelRef = useRef<HTMLDivElement>(null)
   const imgRef = useRef<HTMLImageElement>(null)
   const [imgOffset, setImgOffset] = useState({ x: 0, y: 0, w: 0, h: 0 })
+  const [panelSize, setPanelSize] = useState({ w: 400, h: 300 })
+  const [containerW, setContainerW] = useState(400)
   const outOfStock = product.currentStock <= 0
 
   const imgSrc = product.images[selectedImage]?.url
 
-  useEffect(() => {
-    if (imgRef.current && imgRef.current.complete) {
-      calcOffset()
-    }
-  }, [imgSrc])
-
-  const calcOffset = () => {
+  const calcOffset = useCallback(() => {
     const img = imgRef.current
     const container = containerRef.current
     if (!img || !container) return
@@ -56,7 +52,18 @@ export function ProductoDetalleClient({ product, company }: { product: Product; 
       w: ir.width,
       h: ir.height,
     })
-  }
+  }, [])
+
+  useEffect(() => {
+    if (containerRef.current) {
+      setContainerW(containerRef.current.getBoundingClientRect().width)
+    }
+    if (imgRef.current && imgRef.current.complete) calcOffset()
+    if (panelRef.current) {
+      const pr = panelRef.current.getBoundingClientRect()
+      setPanelSize({ w: pr.width, h: pr.height })
+    }
+  }, [imgSrc, calcOffset])
 
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
     const r = e.currentTarget.getBoundingClientRect()
@@ -73,11 +80,8 @@ export function ProductoDetalleClient({ product, company }: { product: Product; 
     setTimeout(() => setAdded(false), 2000)
   }
 
-  const cr = containerRef.current?.getBoundingClientRect()
-  const pr = panelRef.current?.getBoundingClientRect()
-  const containerW = cr?.width ?? 400
-  const panelW = pr?.width ?? 400
-  const panelH = pr?.height ?? 300
+  const panelW = panelSize.w
+  const panelH = panelSize.h
 
   const imgX = px.x - imgOffset.x
   const imgY = px.y - imgOffset.y
