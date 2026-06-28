@@ -20,6 +20,9 @@ export default async function ProductosPage() {
     const profitMargin = Number(p.profitMargin) || 30
     const yieldAmount = Number(p.yield) || 1
     const salePrice = Number(p.salePrice)
+    const images = (p.images || [])
+      .filter((i: any) => !i.deletedAt)
+      .map((i: any) => ({ id: i.id, url: i.url, publicId: i.publicId, order: i.order }))
     const recipeItems = p.recipeItems?.map((ri: any) => ({
       ...ri,
       quantityRequired: Number(ri.quantityRequired),
@@ -53,6 +56,7 @@ export default async function ProductosPage() {
       profitMargin,
       yield: yieldAmount,
       salePrice,
+      images,
       recipeItems,
       maxPossibleBatches: maxBatches === Infinity ? 0 : maxBatches
     }
