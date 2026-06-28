@@ -97,8 +97,12 @@ export function ProductCard({
           onClick={() => setIsExpanded(!isExpanded)}
         >
           <div className="flex items-start md:items-center gap-3 md:gap-4 flex-1 min-w-0">
-            <div className="w-10 h-10 shrink-0 mt-0.5 md:mt-0 rounded-lg bg-accent/50 flex items-center justify-center group-hover/header:scale-110 transition-transform shadow-sm">
-              <ShoppingBag size={18} className="text-primary/70" />
+            <div className="w-10 h-10 shrink-0 mt-0.5 md:mt-0 rounded-lg bg-accent/50 flex items-center justify-center group-hover/header:scale-110 transition-transform shadow-sm overflow-hidden">
+              {product.images?.[0] ? (
+                <img src={product.images[0].url} alt="" className="w-full h-full object-cover" />
+              ) : (
+                <ShoppingBag size={18} className="text-primary/70" />
+              )}
             </div>
             <div className="flex-1 min-w-0">
               <CardTitle className="text-base md:text-lg truncate">{product.name}</CardTitle>

@@ -9,6 +9,10 @@ export async function getProducts() {
     where: { deletedAt: null },
     include: {
       category: true,
+      images: {
+        where: { deletedAt: null },
+        orderBy: { order: 'asc' },
+      },
       recipeItems: {
         where: { deletedAt: null },
         include: { supply: true },

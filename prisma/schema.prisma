@@ -97,12 +97,27 @@ model Product {
 
   category Category? @relation(fields: [categoryId], references: [id])
 
+  images         ProductImage[]
   recipeItems    RecipeItem[]
   saleItems      SaleItem[]
   productionLogs ProductionLog[]
   invoiceItems   InvoiceItem[]
 
   @@map("products")
+}
+
+model ProductImage {
+  id        String   @id @default(uuid())
+  productId String
+  url       String
+  publicId  String
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  deletedAt DateTime?
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@map("product_images")
 }
 
 model RecipeItem {

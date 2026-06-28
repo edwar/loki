@@ -9,9 +9,18 @@ import { createProduct, updateProduct } from '@/lib/actions/products'
 import { cn } from '@/lib/utils'
 import { calculateMargin } from '@/lib/pricing'
 import { Plus, X } from 'lucide-react'
+import { ImageUpload } from './image-upload'
+import { useQuery } from '@tanstack/react-query'
+
+interface ProductImage {
+  id: string
+  url: string
+  publicId: string
+  order: number
+}
 
 interface ProductFormModalProps {
-  product?: { id: string; name: string; category: string | null; profitMargin: number; yield: number; salePrice: number } | null
+  product?: { id: string; name: string; category: string | null; profitMargin: number; yield: number; salePrice: number; images?: ProductImage[] } | null
   categories: string[]
   unitCost?: number
   onSuccess?: () => void
@@ -24,6 +33,7 @@ export function ProductFormModal({ product, categories, unitCost = 0, onSuccess,
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [category, setCategory] = useState(product?.category ?? '')
+  const [images, setImages] = useState<ProductImage[]>(product?.images ?? [])
 
   // Calcular margen desde el precio de venta usando el costo real del producto
   const calculatedMargin = unitCost > 0 && salePrice > 0
@@ -135,6 +145,20 @@ export function ProductFormModal({ product, categories, unitCost = 0, onSuccess,
             </p>
           </div>
         </div>
+
+        {isEditing && (
+          <ImageUpload
+            productId={product!.id}
+            images={images}
+            onImagesChange={async () => {
+              const res = await fetch(`/api/products/images?productId=${product!.id}`)
+              if (res.ok) {
+                const updated = await res.json()
+                setImages(updated)
+              }
+            }}
+          />
+        )}
 
         {error && (
           <div className="p-3 bg-rose-500/10 text-rose-500 rounded-lg text-sm font-medium">

@@ -16,6 +16,13 @@ interface Supply {
   unitsPerPack: number
 }
 
+interface ProductImage {
+  id: string
+  url: string
+  publicId: string
+  order: number
+}
+
 interface RecipeItem {
   id: string
   quantityRequired: number
@@ -36,6 +43,7 @@ interface Product {
   profitMargin: number
   yield: number
   salePrice: number
+  images: ProductImage[]
   recipeItems: RecipeItem[]
   maxPossibleBatches: number
 }
