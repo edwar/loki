@@ -23,6 +23,7 @@ export async function createProduct(formData: FormData) {
   const name = formData.get('name') as string
   const categoryName = formData.get('category') as string | null
   const profitMargin = parseFloat(formData.get('profitMargin') as string) || 30
+  const yieldAmount = parseFloat(formData.get('yield') as string) || 1
 
   let categoryId = null
   if (categoryName) {
@@ -37,6 +38,7 @@ export async function createProduct(formData: FormData) {
       name,
       categoryId,
       profitMargin,
+      yield: yieldAmount,
     },
   })
 
@@ -94,6 +96,7 @@ export async function updateProduct(id: string, formData: FormData) {
   const name = formData.get('name') as string
   const categoryName = formData.get('category') as string | null
   const profitMargin = parseFloat(formData.get('profitMargin') as string) || 30
+  const yieldAmount = parseFloat(formData.get('yield') as string) || 1
 
   let categoryId = null
   if (categoryName) {
@@ -109,6 +112,7 @@ export async function updateProduct(id: string, formData: FormData) {
       name,
       categoryId,
       profitMargin,
+      yield: yieldAmount,
     },
   })
 
@@ -177,6 +181,12 @@ export async function prepareProduct(productId: string, batches: number, actualY
     await tx.product.update({
       where: { id: productId },
       data: { currentStock: { increment: actualYield } }
+    })
+
+    // Actualizar rendimiento esperado del producto con el real obtenido
+    await tx.product.update({
+      where: { id: productId },
+      data: { yield: actualYield }
     })
 
     // Registrar el log de producción

@@ -34,6 +34,7 @@ interface Product {
   category: string | null
   currentStock: number
   profitMargin: number
+  yield: number
   recipeItems: RecipeItem[]
   maxPossibleBatches: number
 }

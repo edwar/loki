@@ -19,6 +19,7 @@ export async function GET() {
     const mapped = products.map((p: any) => {
       const currentStock = Number(p.currentStock)
       const profitMargin = Number(p.profitMargin) || 30
+      const yieldAmount = Number(p.yield) || 1
       const recipeItems = p.recipeItems?.map((ri: any) => ({
         ...ri,
         quantityRequired: Number(ri.quantityRequired),
@@ -50,6 +51,7 @@ export async function GET() {
         category: p.category?.name || null,
         currentStock,
         profitMargin,
+        yield: yieldAmount,
         recipeItems,
         maxPossibleBatches: maxBatches === Infinity ? 0 : maxBatches
       }
