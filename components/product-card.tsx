@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { formatCurrency, cn } from '@/lib/utils'
 import { calculateUnitCost, calculateRentabilidad, getDisplayPrice, getDisplayMargin } from '@/lib/pricing'
-import { Trash2, ShoppingBag, Edit2, ChevronDown, Plus, Package } from 'lucide-react'
+import { Trash2, ShoppingBag, Edit2, ChevronDown, Plus, Package, BookOpen } from 'lucide-react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { UNIDADES_POR_TIPO } from '@/lib/constants'
 import { getUnitType } from '@/lib/conversions'
@@ -15,6 +15,7 @@ import { deleteProduct, deleteRecipeItem, prepareProduct, updateRecipeItem, cons
 import { RecipeForm } from './product-forms'
 import { NumericInput } from './ui/numeric-input'
 import { ConfirmationModal } from './ui/confirmation-modal'
+import { Modal } from '@/components/ui/modal'
 import { sileo as toast } from 'sileo'
 
 export function ProductCard({
@@ -33,6 +34,7 @@ export function ProductCard({
   const [isExpanded, setIsExpanded] = useState(false)
   const [isProducing, setIsProducing] = useState(false)
   const [isConsuming, setIsConsuming] = useState(false)
+  const [isRecipeOpen, setIsRecipeOpen] = useState(false)
   const [consumeQuantity, setConsumeQuantity] = useState(1)
   const [recipeItemToDelete, setRecipeItemToDelete] = useState<string | null>(null)
   const [productToDelete, setProductToDelete] = useState<string | null>(null)
@@ -143,6 +145,17 @@ export function ProductCard({
               >
                 <Plus size={14} className="mr-1" />
                 Producir
+              </Button>
+            )}
+            {product.preparation && (
+              <Button
+                onClick={(e) => { e.stopPropagation(); setIsRecipeOpen(true) }}
+                variant="outline"
+                size="sm"
+                className="h-8 text-xs font-bold rounded-lg px-3"
+              >
+                <BookOpen size={14} className="mr-1" />
+                Receta
               </Button>
             )}
             <div className="flex gap-1 md:gap-2 pl-1.5 md:pl-2 border-l border-border/30">
@@ -466,6 +479,19 @@ export function ProductCard({
           </div>
         </div>
       </ConfirmationModal>
+
+      {/* Recipe Modal */}
+      <Modal isOpen={isRecipeOpen} onClose={() => setIsRecipeOpen(false)} title={`Receta: ${product.name}`}>
+        <div className="p-6">
+          <div
+            className="prose prose-sm max-w-none leading-relaxed
+              [&_table]:w-full [&_table]:border-collapse [&_table]:my-2
+              [&_th]:border [&_th]:border-border/50 [&_th]:bg-muted/30 [&_th]:px-3 [&_th]:py-2 [&_th]:text-left [&_th]:font-bold
+              [&_td]:border [&_td]:border-border/50 [&_td]:px-3 [&_td]:py-2"
+            dangerouslySetInnerHTML={{ __html: product.preparation }}
+          />
+        </div>
+      </Modal>
     </>
   )
 }
