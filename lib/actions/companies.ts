@@ -26,7 +26,7 @@ async function generateUniqueSlug(base: string): Promise<string> {
 }
 
 async function ensureUserCompany(userId: string) {
-  let user = await prisma.user.findUnique({
+  const user = await prisma.user.findUnique({
     where: { id: userId },
     include: { company: true },
   })
