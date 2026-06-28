@@ -3,7 +3,7 @@
 import { useState, useRef, useCallback, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { formatCurrency } from '@/lib/utils'
-import { ArrowLeft, Plus, ShoppingCart, Minus, Check } from 'lucide-react'
+import { ArrowLeft, Plus, ShoppingCart, Minus, Check, ChevronRight } from 'lucide-react'
 import Link from 'next/link'
 
 interface Product {
@@ -15,6 +15,14 @@ interface Product {
   ingredients: { name: string; quantity: number; unit: string }[]
 }
 
+interface RecommendedProduct {
+  id: string
+  name: string
+  salePrice: number
+  currentStock: number
+  images: { url: string; publicId: string }[]
+}
+
 interface Company {
   name: string
   slug: string
@@ -24,7 +32,7 @@ interface Company {
 
 const ZOOM = 4
 
-export function ProductoDetalleClient({ product, company }: { product: Product; company: Company }) {
+export function ProductoDetalleClient({ product, company, recommended = [] }: { product: Product; company: Company; recommended?: RecommendedProduct[] }) {
   const [selectedImage, setSelectedImage] = useState(0)
   const [qty, setQty] = useState(1)
   const [added, setAdded] = useState(false)
@@ -87,29 +95,39 @@ export function ProductoDetalleClient({ product, company }: { product: Product; 
   const imgY = px.y - imgOffset.y
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b border-border/40 bg-card/30 backdrop-blur-md sticky top-0 z-40">
-        <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            {company.logo && <img src={company.logo} alt="" className="w-8 h-8 rounded-lg object-cover" />}
-            <Link href={`/tienda/${company.slug}`} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
-              <ArrowLeft className="w-4 h-4" />
-              {company.name}
+    <div className="min-h-screen bg-gradient-to-b from-background to-accent/5">
+      {/* Header */}
+      <header className="border-b border-border/20 bg-card/80 backdrop-blur-xl sticky top-0 z-40">
+        <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
+          <div className="flex items-center gap-3 min-w-0">
+            {company.logo && (
+              <img src={company.logo} alt="" className="w-8 h-8 rounded-lg object-cover ring-2 ring-border/20 shrink-0" />
+            )}
+            <Link
+              href={`/tienda/${company.slug}`}
+              className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors truncate"
+            >
+              <ArrowLeft className="w-4 h-4 shrink-0" />
+              <span className="truncate font-medium">{company.name}</span>
             </Link>
           </div>
-          <Link href={`/tienda/${company.slug}`} className="flex items-center gap-2 text-sm font-medium">
-            <ShoppingCart className="w-4 h-4" /> Volver a tienda
+          <Link
+            href={`/tienda/${company.slug}`}
+            className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-primary hover:text-primary/80 transition-colors shrink-0"
+          >
+            <ShoppingCart className="w-4 h-4" />
+            <span className="hidden sm:inline">Volver</span>
           </Link>
         </div>
       </header>
 
-      <main className="max-w-6xl mx-auto px-4 py-8">
+      <main className="max-w-6xl mx-auto px-4 py-8 lg:py-12">
         <div className="grid md:grid-cols-2 gap-8 lg:gap-12">
           {/* Gallery */}
           <div className="space-y-4">
             <div
               ref={containerRef}
-              className="relative bg-black rounded-xl overflow-hidden cursor-crosshair"
+              className="relative bg-black rounded-2xl overflow-hidden cursor-crosshair"
               style={{ aspectRatio: '4/3' }}
               onMouseEnter={() => setShowZoom(true)}
               onMouseLeave={() => setShowZoom(false)}
@@ -132,10 +150,10 @@ export function ProductoDetalleClient({ product, company }: { product: Product; 
                 }} />
             </div>
             {product.images.length > 1 && (
-              <div className="flex gap-2 overflow-x-auto pb-2">
+              <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-none">
                 {product.images.map((img, i) => (
                   <button key={i} onClick={() => setSelectedImage(i)}
-                    className={`w-20 h-20 rounded-lg overflow-hidden shrink-0 border-2 transition-colors ${i === selectedImage ? 'border-primary' : 'border-transparent hover:border-border/50'}`}>
+                    className={`w-20 h-20 rounded-xl overflow-hidden shrink-0 border-2 transition-all duration-200 ${i === selectedImage ? 'border-primary ring-2 ring-primary/20' : 'border-transparent hover:border-border/30'}`}>
                     <img src={img.url} alt="" className="w-full h-full object-cover" />
                   </button>
                 ))}
@@ -166,8 +184,8 @@ export function ProductoDetalleClient({ product, company }: { product: Product; 
             )}
             <div>
               {outOfStock && <span className="text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 bg-rose-500/10 text-rose-500 rounded-md">Sin stock</span>}
-              <h1 className="text-3xl font-bold mt-2">{product.name}</h1>
-              <p className="text-3xl font-black text-emerald-500 mt-3">{formatCurrency(product.salePrice)}</p>
+              <h1 className="text-3xl lg:text-4xl font-bold mt-2">{product.name}</h1>
+              <p className="text-3xl lg:text-4xl font-black text-emerald-500 mt-3">{formatCurrency(product.salePrice)}</p>
             </div>
 
             {product.ingredients.length > 0 && (
@@ -200,6 +218,50 @@ export function ProductoDetalleClient({ product, company }: { product: Product; 
             </div>
           </div>
         </div>
+
+        {/* Recommended Products */}
+        {recommended.length > 0 && (
+          <section className="mt-16 lg:mt-24">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-lg font-bold">También te puede gustar</h2>
+              <Link
+                href={`/tienda/${company.slug}`}
+                className="flex items-center gap-1 text-xs font-bold uppercase tracking-wider text-primary hover:text-primary/80 transition-colors"
+              >
+                Ver todo <ChevronRight className="w-3.5 h-3.5" />
+              </Link>
+            </div>
+            <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-none -mx-4 px-4 snap-x snap-mandatory">
+              {recommended.map((rp) => {
+                const storeUrl = `/tienda/${company.slug}/producto/${rp.id}`
+                return (
+                  <Link
+                    key={rp.id}
+                    href={storeUrl}
+                    className="group snap-start shrink-0 w-44 sm:w-48 rounded-xl border border-border/30 bg-card/50 hover:bg-card hover:border-primary/30 transition-all duration-300 overflow-hidden"
+                  >
+                    <div className="aspect-square bg-muted/10 flex items-center justify-center overflow-hidden">
+                      {rp.images[0] ? (
+                        <img src={rp.images[0].url} alt={rp.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                      ) : (
+                        <div className="text-muted-foreground/20 text-4xl">🛍️</div>
+                      )}
+                      {rp.currentStock <= 0 && (
+                        <span className="absolute top-2 right-2 text-[10px] font-bold px-2 py-0.5 bg-rose-500/80 text-white rounded-md">
+                          Sin stock
+                        </span>
+                      )}
+                    </div>
+                    <div className="p-3 space-y-1.5">
+                      <p className="text-sm font-bold truncate">{rp.name}</p>
+                      <p className="text-sm font-black text-emerald-500">{formatCurrency(rp.salePrice)}</p>
+                    </div>
+                  </Link>
+                )
+              })}
+            </div>
+          </section>
+        )}
       </main>
     </div>
   )

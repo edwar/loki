@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { formatCurrency } from '@/lib/utils'
 import Link from 'next/link'
-import { ShoppingCart, Plus, Minus, X, Send, Loader2, CheckCircle } from 'lucide-react'
+import { ShoppingCart, Plus, Minus, X, Send, Loader2, CheckCircle, Store } from 'lucide-react'
 
 interface Product {
   id: string
@@ -97,21 +97,32 @@ export function TiendaClient({ company, products }: { company: Company; products
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-b from-background to-accent/5">
       {/* Header */}
-      <header className="border-b border-border/40 bg-card/30 backdrop-blur-md sticky top-0 z-40">
-        <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            {company.logo && <img src={company.logo} alt="" className="w-10 h-10 rounded-lg object-cover" />}
-            <div>
-              <h1 className="font-bold text-lg">{company.name}</h1>
-              {company.description && <p className="text-xs text-muted-foreground">{company.description}</p>}
+      <header className="border-b border-border/20 bg-card/80 backdrop-blur-xl sticky top-0 z-40">
+        <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-3 min-w-0">
+            {company.logo ? (
+              <img src={company.logo} alt="" className="w-10 h-10 rounded-xl object-cover ring-2 ring-border/20 shrink-0" />
+            ) : (
+              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                <Store className="w-5 h-5 text-primary" />
+              </div>
+            )}
+            <div className="min-w-0">
+              <h1 className="font-bold text-lg truncate">{company.name}</h1>
+              {company.description && (
+                <p className="text-xs text-muted-foreground truncate">{company.description}</p>
+              )}
             </div>
           </div>
-          <button onClick={() => setShowCart(!showCart)} className="relative">
-            <ShoppingCart className="w-6 h-6" />
+          <button
+            onClick={() => setShowCart(!showCart)}
+            className="relative w-10 h-10 rounded-xl hover:bg-accent transition-colors flex items-center justify-center"
+          >
+            <ShoppingCart className="w-5 h-5" />
             {cartCount > 0 && (
-              <span className="absolute -top-2 -right-2 w-5 h-5 bg-primary text-primary-foreground text-[10px] font-bold rounded-full flex items-center justify-center">
+              <span className="absolute -top-0.5 -right-0.5 w-5 h-5 bg-primary text-primary-foreground text-[10px] font-bold rounded-full flex items-center justify-center shadow-lg shadow-primary/30">
                 {cartCount}
               </span>
             )}
@@ -119,7 +130,7 @@ export function TiendaClient({ company, products }: { company: Company; products
         </div>
       </header>
 
-      <main className="max-w-6xl mx-auto px-4 py-8">
+      <main className="max-w-6xl mx-auto px-4 py-8 lg:py-12">
         {products.length === 0 ? (
           <div className="text-center py-20">
             <p className="text-muted-foreground font-medium">No hay productos en la tienda aún</p>
@@ -132,17 +143,17 @@ export function TiendaClient({ company, products }: { company: Company; products
               return (
                 <div
                   key={p.id}
-                  className="rounded-xl border border-border/40 bg-card/30 backdrop-blur-md overflow-hidden hover:border-primary/30 transition-all"
+                  className="rounded-xl border border-border/30 bg-card/40 hover:bg-card/80 hover:border-primary/30 transition-all duration-300 overflow-hidden group"
                 >
                   <Link href={storeUrl} className="block">
-                    <div className="aspect-square bg-muted/20 flex items-center justify-center overflow-hidden relative">
+                    <div className="aspect-square bg-muted/10 flex items-center justify-center overflow-hidden relative">
                       {p.images[0] ? (
-                        <img src={p.images[0].url} alt={p.name} className="w-full h-full object-cover" />
+                        <img src={p.images[0].url} alt={p.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                       ) : (
-                        <div className="text-muted-foreground/30 text-6xl">🛍️</div>
+                        <div className="text-muted-foreground/20 text-6xl">🛍️</div>
                       )}
                       {p.currentStock <= 0 && (
-                        <span className="absolute top-2 right-2 text-[10px] font-bold px-2 py-0.5 bg-rose-500/80 text-white rounded-md">
+                        <span className="absolute top-3 right-3 text-[10px] font-bold px-2 py-0.5 bg-rose-500/80 text-white rounded-md backdrop-blur-sm">
                           Sin stock
                         </span>
                       )}
@@ -150,11 +161,11 @@ export function TiendaClient({ company, products }: { company: Company; products
                     <div className="p-4 space-y-3">
                       <h3 className="font-bold">{p.name}</h3>
                       {p.ingredients.length > 0 && (
-                        <p className="text-xs text-muted-foreground line-clamp-2">
+                        <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">
                           {p.ingredients.map((ig) => `${ig.name}`).join(', ')}
                         </p>
                       )}
-                      <div className="flex items-center justify-between">
+                      <div className="flex items-center justify-between pt-1">
                         <span className="text-lg font-black text-emerald-500">{formatCurrency(p.salePrice)}</span>
                         <Button
                           size="sm"
@@ -178,11 +189,11 @@ export function TiendaClient({ company, products }: { company: Company; products
       {/* Cart Sidebar */}
       {showCart && (
         <div className="fixed inset-0 z-50 flex justify-end">
-          <div className="bg-black/40 flex-1" onClick={() => setShowCart(false)} />
-          <div className="w-full max-w-sm bg-background border-l border-border/40 flex flex-col">
-            <div className="flex items-center justify-between p-4 border-b">
-              <h2 className="font-bold">Carrito ({cartCount})</h2>
-              <button onClick={() => setShowCart(false)}><X className="w-5 h-5" /></button>
+          <div className="bg-black/40 flex-1 animate-in fade-in duration-200" onClick={() => setShowCart(false)} />
+          <div className="w-full max-w-sm bg-background border-l border-border/40 flex flex-col animate-in slide-in-from-right duration-300">
+            <div className="flex items-center justify-between p-4 border-b border-border/20">
+              <h2 className="font-bold text-lg">Carrito <span className="text-muted-foreground font-normal text-sm">({cartCount})</span></h2>
+              <button onClick={() => setShowCart(false)} className="w-8 h-8 rounded-lg hover:bg-muted flex items-center justify-center transition-colors"><X className="w-4 h-4" /></button>
             </div>
             <div className="flex-1 overflow-y-auto p-4 space-y-3">
               {cart.length === 0 && <p className="text-center text-muted-foreground py-10">Carrito vacío</p>}
@@ -202,7 +213,7 @@ export function TiendaClient({ company, products }: { company: Company; products
               ))}
             </div>
             {cart.length > 0 && (
-              <div className="p-4 border-t space-y-3">
+              <div className="p-4 border-t border-border/20 space-y-3">
                 <div className="flex justify-between font-bold text-lg">
                   <span>Total</span>
                   <span>{formatCurrency(cartTotal)}</span>
@@ -218,21 +229,21 @@ export function TiendaClient({ company, products }: { company: Company; products
 
       {/* Checkout Modal */}
       {showCheckout && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={() => !submitting && setShowCheckout(false)}>
-          <div className="bg-background rounded-xl p-6 w-full max-w-md mx-4" onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 animate-in fade-in duration-200" onClick={() => !submitting && setShowCheckout(false)}>
+          <div className="bg-background rounded-xl p-6 w-full max-w-md mx-4 shadow-2xl animate-in zoom-in-95 duration-200" onClick={(e) => e.stopPropagation()}>
             <h2 className="text-lg font-bold mb-4">Confirmar Pedido</h2>
             <div className="space-y-4">
               <div>
                 <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Nombre</label>
-                <input value={customerName} onChange={(e) => setCustomerName(e.target.value)} className="mt-1 w-full h-12 px-4 rounded-lg border border-border/50 bg-background/50" placeholder="Tu nombre" />
+                <input value={customerName} onChange={(e) => setCustomerName(e.target.value)} className="mt-1 w-full h-12 px-4 rounded-lg border border-border/50 bg-background/50 focus:border-primary/50 focus:ring-2 focus:ring-primary/10 transition-all outline-none" placeholder="Tu nombre" />
               </div>
               <div>
                 <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Teléfono</label>
-                <input value={customerPhone} onChange={(e) => setCustomerPhone(e.target.value)} className="mt-1 w-full h-12 px-4 rounded-lg border border-border/50 bg-background/50" placeholder="+573001234567" />
+                <input value={customerPhone} onChange={(e) => setCustomerPhone(e.target.value)} className="mt-1 w-full h-12 px-4 rounded-lg border border-border/50 bg-background/50 focus:border-primary/50 focus:ring-2 focus:ring-primary/10 transition-all outline-none" placeholder="+573001234567" />
               </div>
               <div>
                 <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Notas (opcional)</label>
-                <textarea value={customerNotes} onChange={(e) => setCustomerNotes(e.target.value)} className="mt-1 w-full h-20 px-4 py-3 rounded-lg border border-border/50 bg-background/50 resize-none" placeholder="Dirección, hora de entrega, etc." />
+                <textarea value={customerNotes} onChange={(e) => setCustomerNotes(e.target.value)} className="mt-1 w-full h-20 px-4 py-3 rounded-lg border border-border/50 bg-background/50 focus:border-primary/50 focus:ring-2 focus:ring-primary/10 transition-all outline-none resize-none" placeholder="Dirección, hora de entrega, etc." />
               </div>
               <div className="p-3 bg-muted/30 rounded-lg space-y-1 text-sm">
                 {cart.map((i) => (
