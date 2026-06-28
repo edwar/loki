@@ -74,7 +74,7 @@ export default async function ProductosPage() {
   }))
 
   const productCategories = products.map((p: any) => p.category).filter(Boolean) as string[]
-  const dbCategoryNames = dbCategories.map((c) => c.name)
+  const dbCategoryNames = dbCategories.map((c: any) => c.name)
   const categories = [...new Set([...productCategories, ...dbCategoryNames])]
 
   return (
