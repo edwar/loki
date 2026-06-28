@@ -47,6 +47,7 @@ interface Product {
   recipeItems: RecipeItem[]
   maxPossibleBatches: number
   isPublic?: boolean
+  preparation?: string | null
 }
 
 interface ProductosClientProps {

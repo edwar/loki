@@ -40,7 +40,6 @@ export default async function ProductoDetallePage(props: {
     name: product.name,
     salePrice: Number(product.salePrice),
     currentStock: Number(product.currentStock),
-    preparation: product.preparation,
     images: product.images.map((i) => ({ url: i.url, publicId: i.publicId })),
     ingredients: product.recipeItems.map((ri) => ({
       name: ri.supply?.name || '',
