@@ -39,6 +39,14 @@ export async function GET() {
         } : null
       })) || []
 
+      const recipeCost = recipeItems.reduce((acc: number, ri: any) => {
+        return acc + (Number(ri.quantityRequired) || 0) * (Number(ri.supply?.purchasePrice) || 0)
+      }, 0)
+      const unitCost = yieldAmount > 0 ? recipeCost / yieldAmount : 0
+      const computedMargin = salePrice > 0 && unitCost > 0
+        ? ((salePrice - unitCost) / salePrice) * 100
+        : profitMargin
+
       let maxBatches = Infinity
       if (recipeItems.length === 0) {
         maxBatches = 0
@@ -66,8 +74,11 @@ export async function GET() {
         maxPossibleBatches: maxBatches === Infinity ? 0 : maxBatches,
         isPublic: p.isPublic ?? false,
         preparation: p.preparation,
+        computedMargin,
       }
     })
+
+    mapped.sort((a: any, b: any) => b.computedMargin - a.computedMargin)
 
     return NextResponse.json(mapped)
   } catch (error) {
