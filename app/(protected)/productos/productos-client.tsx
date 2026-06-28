@@ -1,13 +1,15 @@
 'use client'
 
-import { useState } from 'react'
-import { Package, Plus } from 'lucide-react'
+import { useState, useSyncExternalStore } from 'react'
+import { Package, Plus, ShoppingCart } from 'lucide-react'
 import { ProductCard } from '@/components/product-card'
 import { Modal } from '@/components/ui/modal'
 import { ProductFormModal } from '@/components/product-form-modal'
+import { ShoppingCartModal } from '@/components/shopping-cart-modal'
 import { EmptyState } from '@/components/ui/empty-state'
 import { Button } from '@/components/ui/button'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { getCart } from '@/lib/shopping-cart'
 
 interface Supply {
   id: string
@@ -60,7 +62,17 @@ interface ProductosClientProps {
 export function ProductosClient({ products: initialProducts, categories, allSupplies, company }: ProductosClientProps) {
   const queryClient = useQueryClient()
   const [modalOpen, setModalOpen] = useState(false)
+  const [cartModalOpen, setCartModalOpen] = useState(false)
   const [editingProduct, setEditingProduct] = useState<Product | null>(null)
+
+  const cartCount = useSyncExternalStore(
+    (onChange) => {
+      window.addEventListener('cart-updated', onChange)
+      return () => window.removeEventListener('cart-updated', onChange)
+    },
+    () => getCart().reduce((acc, item) => acc + item.lots, 0),
+    () => 0,
+  )
 
   const { data: products } = useQuery<Product[]>({
     queryKey: ['products'],
@@ -109,12 +121,26 @@ export function ProductosClient({ products: initialProducts, categories, allSupp
             Define tus productos y sus recetas para un control automático de inventario.
           </p>
         </div>
-        <Button
-          onClick={handleOpenNew}
-        >
-          <Plus size={20} />
-          Nuevo Producto
-        </Button>
+        <div className="flex items-center gap-3">
+          <Button
+            variant="outline"
+            onClick={() => setCartModalOpen(true)}
+            className="relative rounded-lg"
+            data-cart-trigger
+          >
+            <ShoppingCart size={20} />
+            Lista de Compra
+            <span data-cart-badge className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center shadow-lg">
+              {cartCount}
+            </span>
+          </Button>
+          <Button
+            onClick={handleOpenNew}
+          >
+            <Plus size={20} />
+            Nuevo Producto
+          </Button>
+        </div>
       </div>
 
       {/* Product List */}
@@ -141,7 +167,7 @@ export function ProductosClient({ products: initialProducts, categories, allSupp
         )}
       </div>
 
-      {/* Modal */}
+      {/* Modals */}
       <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)}>
         <div className="p-8">
           <ProductFormModal
@@ -154,6 +180,8 @@ export function ProductosClient({ products: initialProducts, categories, allSupp
           />
         </div>
       </Modal>
+
+      <ShoppingCartModal isOpen={cartModalOpen} onClose={() => setCartModalOpen(false)} />
     </div>
   )
 }

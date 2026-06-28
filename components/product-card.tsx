@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { formatCurrency, cn } from '@/lib/utils'
 import { calculateUnitCost, calculateRentabilidad, getDisplayPrice, getDisplayMargin } from '@/lib/pricing'
-import { Trash2, ShoppingBag, Edit2, ChevronDown, Plus, Package, BookOpen } from 'lucide-react'
+import { Trash2, ShoppingBag, Edit2, ChevronDown, Plus, Package, BookOpen, ShoppingCart } from 'lucide-react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { UNIDADES_POR_TIPO } from '@/lib/constants'
 import { getUnitType } from '@/lib/conversions'
@@ -16,6 +16,8 @@ import { RecipeForm } from './product-forms'
 import { NumericInput } from './ui/numeric-input'
 import { ConfirmationModal } from './ui/confirmation-modal'
 import { Modal } from '@/components/ui/modal'
+import { addToCart } from '@/lib/shopping-cart'
+import { flyToCart } from '@/lib/fly-to-cart'
 import { sileo as toast } from 'sileo'
 
 export function ProductCard({
@@ -35,6 +37,7 @@ export function ProductCard({
   const [isProducing, setIsProducing] = useState(false)
   const [isConsuming, setIsConsuming] = useState(false)
   const [isRecipeOpen, setIsRecipeOpen] = useState(false)
+  const [lotInput, setLotInput] = useState(1)
   const [consumeQuantity, setConsumeQuantity] = useState(1)
   const [recipeItemToDelete, setRecipeItemToDelete] = useState<string | null>(null)
   const [productToDelete, setProductToDelete] = useState<string | null>(null)
@@ -197,16 +200,51 @@ export function ProductCard({
           <CardContent className="p-5 bg-primary/1 animate-in fade-in slide-in-from-top-1 duration-300">
             <div className="space-y-4">
               {product.recipeItems.length > 0 && (
-                <p className={cn(
-                  "text-xs px-4 py-2 rounded-lg",
-                  product.maxPossibleBatches > 0
-                    ? "bg-amber-500/10 text-amber-700 dark:text-amber-300"
-                    : "bg-muted/50 text-muted-foreground"
-                )}>
-                  {product.maxPossibleBatches > 0
-                    ? `Insumos suficientes para ${product.maxPossibleBatches} lote(s).`
-                    : "Insumos insuficientes para esta receta."}
-                </p>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-lg border border-emerald-500/20 bg-emerald-500/5 gap-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg shrink-0 flex items-center justify-center bg-emerald-500/20 text-emerald-600">
+                      <ShoppingCart size={20} />
+                    </div>
+                    <div>
+                      <p className="text-sm font-bold text-emerald-900 dark:text-emerald-100">
+                        Lista de Compra
+                      </p>
+                      <p className="text-xs text-emerald-700/70 dark:text-emerald-400/70">
+                        {product.maxPossibleBatches > 0
+                          ? `Insumos suficientes para ${product.maxPossibleBatches} lote(s).`
+                          : "Insumos insuficientes para esta receta."}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 w-full sm:w-auto">
+                    <NumericInput
+                      value={lotInput}
+                      onChange={setLotInput}
+                      min={1}
+                      className="h-9 w-20 text-sm font-bold text-center"
+                    />
+                    <Button
+                      disabled={lotInput < 1}
+                      onClick={(e) => {
+                        const recipeItems = (product.recipeItems || []).map((ri: any) => ({
+                          name: ri.supply?.name || 'Desconocido',
+                          quantity: Number(ri.quantityRequired) || 0,
+                          unit: ri.unit || 'unidad',
+                        }))
+                        flyToCart(e.currentTarget, lotInput, () => {
+                          addToCart(product.id, product.name, lotInput, recipeItems)
+                          toast.success({ title: `${lotInput} lote(s) de ${product.name} agregado a la lista` })
+                        })
+                        setLotInput(1)
+                      }}
+                      size="sm"
+                      className="h-9 text-xs font-bold rounded-lg px-3 shrink-0"
+                    >
+                      <ShoppingCart size={14} className="mr-1.5" />
+                      Agregar
+                    </Button>
+                  </div>
+                </div>
               )}
 
               {Number(product.currentStock) > 0 && (
