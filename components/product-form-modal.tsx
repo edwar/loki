@@ -6,21 +6,29 @@ import { Input } from '@/components/ui/input'
 import { NumericInput } from '@/components/ui/numeric-input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { createProduct, updateProduct } from '@/lib/actions/products'
+import { cn } from '@/lib/utils'
+import { calculateMargin } from '@/lib/pricing'
 import { Plus, X } from 'lucide-react'
 
 interface ProductFormModalProps {
-  product?: { id: string; name: string; category: string | null; profitMargin: number; yield: number } | null
+  product?: { id: string; name: string; category: string | null; profitMargin: number; yield: number; salePrice: number } | null
   categories: string[]
+  unitCost?: number
   onSuccess?: () => void
   onClose?: () => void
 }
 
-export function ProductFormModal({ product, categories, onSuccess, onClose }: ProductFormModalProps) {
-  const [profitMargin, setProfitMargin] = useState(product?.profitMargin ?? 30)
+export function ProductFormModal({ product, categories, unitCost = 0, onSuccess, onClose }: ProductFormModalProps) {
+  const [salePrice, setSalePrice] = useState(product?.salePrice ?? 0)
   const [yieldAmount, setYieldAmount] = useState(product?.yield ?? 1)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [category, setCategory] = useState(product?.category ?? '')
+
+  // Calcular margen desde el precio de venta usando el costo real del producto
+  const calculatedMargin = unitCost > 0 && salePrice > 0
+    ? calculateMargin(salePrice, unitCost)
+    : 0
 
   const isEditing = !!product
   const action = isEditing ? updateProduct.bind(null, product.id) : createProduct
@@ -31,7 +39,9 @@ export function ProductFormModal({ product, categories, onSuccess, onClose }: Pr
     setError(null)
 
     const formData = new FormData(e.currentTarget)
-    formData.set('profitMargin', profitMargin.toString())
+    const marginToSave = calculatedMargin > 0 ? calculatedMargin : (product?.profitMargin ?? 30)
+    formData.set('profitMargin', marginToSave.toString())
+    formData.set('salePrice', salePrice.toString())
     formData.set('yield', yieldAmount.toString())
     if (category) {
       formData.set('category', category)
@@ -95,18 +105,21 @@ export function ProductFormModal({ product, categories, onSuccess, onClose }: Pr
           </div>
 
           <div className="space-y-2">
-            <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Margen de Utilidad (%)</label>
+            <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Precio de Venta Unitario</label>
             <NumericInput
-              value={profitMargin}
-              onChange={setProfitMargin}
-              placeholder="30"
-              min={0}
-              max={100}
+              value={salePrice}
+              onChange={setSalePrice}
+              placeholder="0"
               className="h-12"
             />
-            <p className="text-[10px] text-muted-foreground">
-              El precio de venta se calculará automáticamente al registrar producción.
-            </p>
+            {unitCost > 0 && salePrice > 0 && (
+              <p className={cn(
+                "text-xs font-bold",
+                calculatedMargin >= 30 ? "text-emerald-500" : calculatedMargin >= 20 ? "text-amber-500" : "text-rose-500"
+              )}>
+                Margen de utilidad: {calculatedMargin.toFixed(1)}%
+              </p>
+            )}
           </div>
           <div className="space-y-2">
             <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Rendimiento Esperado (uds/lote)</label>

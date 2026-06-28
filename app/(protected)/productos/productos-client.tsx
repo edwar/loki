@@ -35,6 +35,7 @@ interface Product {
   currentStock: number
   profitMargin: number
   yield: number
+  salePrice: number
   recipeItems: RecipeItem[]
   maxPossibleBatches: number
 }
@@ -74,6 +75,17 @@ export function ProductosClient({ products: initialProducts, categories, allSupp
   const handleOpenEdit = (product: Product) => {
     setEditingProduct(product)
     setModalOpen(true)
+  }
+
+  const getUnitCost = (product: Product | null) => {
+    if (!product) return 0
+    const recipeCost = product.recipeItems.reduce((acc: number, ri: any) => {
+      const qty = Number(ri.quantityRequired) || 0
+      const price = Number(ri.supply?.purchasePrice) || 0
+      return acc + (qty * price)
+    }, 0)
+    const yieldAmount = product.yield || 1
+    return yieldAmount > 0 ? recipeCost / yieldAmount : 0
   }
 
   return (
@@ -124,6 +136,7 @@ export function ProductosClient({ products: initialProducts, categories, allSupp
           <ProductFormModal
             product={editingProduct}
             categories={categories}
+            unitCost={getUnitCost(editingProduct)}
             onSuccess={handleSuccess}
             onClose={() => setModalOpen(false)}
           />

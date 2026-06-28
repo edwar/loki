@@ -17,7 +17,7 @@ export function ProductForm({
   categories,
   onSuccess
 }: {
-  product?: { id: string; name: string; category: string | null; profitMargin: number; yield: number } | null
+  product?: { id: string; name: string; category: string | null; profitMargin: number; yield: number; salePrice: number } | null
   categories: string[]
   onSuccess?: () => void
 }) {
@@ -37,7 +37,7 @@ export function ProductForm({
           <label className="text-xs font-bold uppercase tracking-widest text-foreground/60">Nombre del Producto</label>
           <Input name="name" defaultValue={product?.name} required placeholder="Ej: Empanada de Carne" className="h-12" />
         </div>
-        <div className="grid gap-6 md:grid-cols-3">
+        <div className="grid gap-6 md:grid-cols-2">
           <div className="space-y-2">
             <label className="text-xs font-bold uppercase tracking-widest text-foreground/60">Categoría</label>
             <Input
@@ -58,10 +58,10 @@ export function ProductForm({
               onChange={setProfitMargin}
               placeholder="30"
               min={0}
-              max={100}
+              max={1000}
               className="h-12"
             />
-            <input type="hidden" name="profitMargin" value={profitMargin?.toString() || "30"} />
+            <input type="hidden" name="salePrice" value="0" />
           </div>
           <div className="space-y-2">
             <label className="text-xs font-bold uppercase tracking-widest text-foreground/60">Rendimiento (uds/lote)</label>
