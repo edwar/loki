@@ -95,7 +95,7 @@ export function ProductCard({
         style={{ animationDelay: `${index * 100}ms` }}
       >
         <CardHeader
-          className={`mb-0 px-4 md:px-5 py-4 flex flex-row items-start md:items-center justify-between gap-2 cursor-pointer hover:bg-primary/2 transition-colors group/header ${isExpanded ? 'border-b border-border/30' : ''}`}
+          className={`relative mb-0 px-4 md:px-5 py-4 flex flex-row items-start md:items-center justify-between gap-2 cursor-pointer hover:bg-primary/2 transition-colors group/header ${isExpanded ? 'border-b border-border/30' : ''}`}
           onClick={() => setIsExpanded(!isExpanded)}
         >
           <div className="flex items-start md:items-center gap-3 md:gap-4 flex-1 min-w-0">
@@ -109,7 +109,7 @@ export function ProductCard({
             <div className="flex-1 min-w-0">
               <CardTitle className="text-base md:text-lg truncate">{product.name}</CardTitle>
               <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mt-1">
-                <span className="text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 bg-primary/10 text-primary rounded-md shrink-0">
+                <span className="absolute bottom-5 right-4 sm:static text-[8px] md:text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 bg-primary/10 text-primary rounded-md shrink-0">
                   {product.category || 'Sin categoría'}
                 </span>
                 <div className="flex items-center gap-3 sm:gap-2 sm:ml-2 sm:pl-3 sm:border-l border-border/30 mt-1 sm:mt-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-dashed sm:border-solid">
@@ -141,10 +141,10 @@ export function ProductCard({
                 onClick={handleOpenProduce}
                 disabled={product.maxPossibleBatches <= 0}
                 size="sm"
-                className="h-8 text-xs font-bold rounded-lg bg-amber-500 hover:bg-amber-600 text-white shadow-lg shadow-amber-500/20 disabled:bg-muted-foreground/20 disabled:text-muted-foreground disabled:shadow-none px-3"
+                className="h-8 text-xs font-bold rounded-lg bg-amber-500 hover:bg-amber-600 text-white shadow-lg shadow-amber-500/20 disabled:bg-muted-foreground/20 disabled:text-muted-foreground disabled:shadow-none sm:px-3 px-0 sm:w-auto w-8"
               >
-                <Plus size={14} className="mr-1" />
-                Producir
+                <Plus size={14} className="sm:mr-1" />
+                <span className="hidden sm:inline">Producir</span>
               </Button>
             )}
             {product.preparation && (
@@ -152,10 +152,10 @@ export function ProductCard({
                 onClick={(e) => { e.stopPropagation(); setIsRecipeOpen(true) }}
                 variant="outline"
                 size="sm"
-                className="h-8 text-xs font-bold rounded-lg px-3"
+                className="h-8 text-xs font-bold rounded-lg sm:px-3 px-0 sm:w-auto w-8"
               >
-                <BookOpen size={14} className="mr-1" />
-                Receta
+                <BookOpen size={14} className="sm:mr-1" />
+                <span className="hidden sm:inline">Receta</span>
               </Button>
             )}
             <div className="flex gap-1 md:gap-2 pl-1.5 md:pl-2 border-l border-border/30">
