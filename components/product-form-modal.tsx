@@ -9,7 +9,7 @@ import { createProduct, updateProduct } from '@/lib/actions/products'
 import { Plus, X } from 'lucide-react'
 
 interface ProductFormModalProps {
-  product?: { id: string; name: string; category: string | null; profitMargin: number } | null
+  product?: { id: string; name: string; category: string | null; profitMargin: number; yield: number } | null
   categories: string[]
   onSuccess?: () => void
   onClose?: () => void
@@ -17,6 +17,7 @@ interface ProductFormModalProps {
 
 export function ProductFormModal({ product, categories, onSuccess, onClose }: ProductFormModalProps) {
   const [profitMargin, setProfitMargin] = useState(product?.profitMargin ?? 30)
+  const [yieldAmount, setYieldAmount] = useState(product?.yield ?? 1)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [category, setCategory] = useState(product?.category ?? '')
@@ -31,6 +32,7 @@ export function ProductFormModal({ product, categories, onSuccess, onClose }: Pr
 
     const formData = new FormData(e.currentTarget)
     formData.set('profitMargin', profitMargin.toString())
+    formData.set('yield', yieldAmount.toString())
     if (category) {
       formData.set('category', category)
     }
@@ -104,6 +106,19 @@ export function ProductFormModal({ product, categories, onSuccess, onClose }: Pr
             />
             <p className="text-[10px] text-muted-foreground">
               El precio de venta se calculará automáticamente al registrar producción.
+            </p>
+          </div>
+          <div className="space-y-2">
+            <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Rendimiento Esperado (uds/lote)</label>
+            <NumericInput
+              value={yieldAmount}
+              onChange={setYieldAmount}
+              placeholder="1"
+              min={1}
+              className="h-12"
+            />
+            <p className="text-[10px] text-muted-foreground">
+              Se actualizará automáticamente al registrar una producción.
             </p>
           </div>
         </div>

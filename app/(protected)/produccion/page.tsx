@@ -49,6 +49,7 @@ export default async function ProductionPage() {
   const products = productsRaw.map(p => ({
     id: p.id,
     name: p.name,
+    yield: Number(p.yield) || 1,
     recipeItems: p.recipeItems.map(ri => ({
       id: ri.id,
       quantityRequired: Number(ri.quantityRequired),

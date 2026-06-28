@@ -54,7 +54,7 @@ export function ProductCard({
 
   const handleOpenProduce = () => {
     if (product.maxPossibleBatches <= 0) return
-    setActualYield(1)
+    setActualYield(product.yield || 1)
     setIsProducing(true)
   }
 
@@ -307,18 +307,22 @@ export function ProductCard({
         variant="warning"
       >
         <div className="space-y-4 pt-2">
-          <div className="p-4 bg-muted/30 rounded-lg">
+          <div className="p-4 bg-muted/30 rounded-lg space-y-2">
             <p className="text-sm text-muted-foreground">
-              Se consumirán los materiales necesarios para producir <strong>1 lote</strong> de la receta y se registrarán las unidades obtenidas.
+              Se consumirán los materiales necesarios para producir <strong>1 lote</strong> de la receta.
             </p>
+            <div className="flex justify-between items-center py-1.5 border-t border-border/30">
+              <span className="text-sm font-medium text-foreground">Rendimiento Esperado:</span>
+              <span className="text-sm font-black text-amber-500">{product.yield || 1} unidades</span>
+            </div>
           </div>
 
           <div className="space-y-3">
             <label className="text-xs font-bold uppercase tracking-widest text-foreground">
-              Unidades Obtenidas
+              Unidades Reales Obtenidas
             </label>
             <p className="text-xs text-foreground/60 mb-2">
-              Ingresa cuántas unidades salieron de este lote de producción.
+              Ajusta si salieron más o menos de lo esperado. Este valor actualizará el rendimiento del producto.
             </p>
             <NumericInput
               value={actualYield}
