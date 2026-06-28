@@ -52,6 +52,10 @@ export function ProductCard({
     return acc + (qty * price)
   }, 0)
 
+  const unitCost = (product.yield || 1) > 0 ? recipeCost / (product.yield || 1) : 0
+  const profitMarginPct = product.profitMargin ?? 30
+  const suggestedPrice = unitCost * (1 + profitMarginPct / 100)
+
   const handleOpenProduce = () => {
     if (product.maxPossibleBatches <= 0) return
     setActualYield(product.yield || 1)
@@ -234,18 +238,26 @@ export function ProductCard({
               )}
 
               {product.recipeItems.length > 0 && (
-                <div className="grid grid-cols-2 gap-4 p-4 rounded-lg border border-border/30 bg-background/50">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 rounded-lg border border-border/30 bg-background/50">
                   <div className="space-y-1">
                     <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">Costo del Lote</p>
                     <p className="text-sm font-black text-foreground">{formatCurrency(recipeCost)}</p>
                   </div>
                   <div className="space-y-1">
-                    <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">Margen de Utilidad</p>
-                    <p className="text-sm font-black text-emerald-500">{product.profitMargin ?? 30}%</p>
+                    <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">Costo Unitario</p>
+                    <p className="text-sm font-black text-rose-500">{formatCurrency(unitCost)}</p>
                   </div>
-                  <div className="col-span-2 p-3 rounded-lg bg-accent/30 text-center">
-                    <p className="text-[11px] text-muted-foreground">
-                      El precio de venta se calculará al registrar la producción, basado en el costo real del lote y el margen de utilidad.
+                  <div className="space-y-1">
+                    <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">Precio Venta Sugerido</p>
+                    <p className="text-sm font-black text-emerald-500">{formatCurrency(suggestedPrice)}</p>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">Margen</p>
+                    <p className={cn(
+                      "text-sm font-black",
+                      profitMarginPct >= 30 ? "text-emerald-500" : profitMarginPct >= 20 ? "text-amber-500" : "text-rose-500"
+                    )}>
+                      {profitMarginPct}%
                     </p>
                   </div>
                 </div>
