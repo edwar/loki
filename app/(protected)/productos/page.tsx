@@ -33,8 +33,16 @@ export default async function ProductosPage() {
         currentStock: Number(ri.supply.currentStock),
         minStock: Number(ri.supply.minStock),
         purchasePrice: Number(ri.supply.purchasePrice)
-      } : null
+      }       : null
     })) || []
+
+    const recipeCost = recipeItems.reduce((acc: number, ri: any) => {
+      return acc + (Number(ri.quantityRequired) || 0) * (Number(ri.supply?.purchasePrice) || 0)
+    }, 0)
+    const unitCost = yieldAmount > 0 ? recipeCost / yieldAmount : 0
+    const computedMargin = salePrice > 0 && unitCost > 0
+      ? ((salePrice - unitCost) / salePrice) * 100
+      : profitMargin
 
     let maxBatches = Infinity
     if (recipeItems.length === 0) {
@@ -64,8 +72,11 @@ export default async function ProductosPage() {
       companyId: p.companyId,
       isPublic: p.isPublic ?? false,
       preparation: p.preparation,
+      computedMargin,
     }
   })
+
+  products.sort((a: any, b: any) => b.computedMargin - a.computedMargin)
 
   const supplies = suppliesRaw.map((s: any) => ({
     id: s.id,

@@ -177,7 +177,7 @@ export function ProductoDetalleClient({ product, company }: { product: Product; 
                   {product.ingredients.map((ig, i) => (
                     <div key={i} className="flex items-center gap-2 p-2.5 rounded-lg bg-accent/20">
                       <Check className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
-                      <span className="text-sm">{ig.name}<span className="text-muted-foreground ml-1">({ig.quantity} {ig.unit})</span></span>
+                      <span className="text-sm">{ig.name}</span>
                     </div>
                   ))}
                 </div>
