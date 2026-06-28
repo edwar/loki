@@ -48,6 +48,32 @@ export default async function ProductoDetallePage(props: {
     })),
   }
 
+  const recommended = await prisma.product.findMany({
+    where: {
+      companyId: company.id,
+      id: { not: productId },
+      deletedAt: null,
+      isActive: true,
+      isPublic: true,
+    },
+    include: {
+      images: {
+        where: { deletedAt: null },
+        orderBy: { order: 'asc' },
+      },
+    },
+    take: 8,
+    orderBy: { name: 'asc' },
+  })
+
+  const serializedRecommended = recommended.map((p) => ({
+    id: p.id,
+    name: p.name,
+    salePrice: Number(p.salePrice),
+    currentStock: Number(p.currentStock),
+    images: (p.images || []).map((i) => ({ url: i.url, publicId: i.publicId })),
+  }))
+
   const companyInfo = {
     name: company.name,
     slug: company.slug,
@@ -55,5 +81,5 @@ export default async function ProductoDetallePage(props: {
     whatsapp: company.whatsapp,
   }
 
-  return <ProductoDetalleClient product={serialized} company={companyInfo} />
+  return <ProductoDetalleClient product={serialized} company={companyInfo} recommended={serializedRecommended} />
 }
