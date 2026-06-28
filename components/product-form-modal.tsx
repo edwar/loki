@@ -10,7 +10,7 @@ import { cn } from '@/lib/utils'
 import { calculateMargin } from '@/lib/pricing'
 import { Plus, X } from 'lucide-react'
 import { ImageUpload } from './image-upload'
-import { useQuery } from '@tanstack/react-query'
+import { RichEditor } from './rich-editor'
 
 interface ProductImage {
   id: string
@@ -20,7 +20,7 @@ interface ProductImage {
 }
 
 interface ProductFormModalProps {
-  product?: { id: string; name: string; category: string | null; profitMargin: number; yield: number; salePrice: number; images?: ProductImage[]; isPublic?: boolean } | null
+  product?: { id: string; name: string; category: string | null; profitMargin: number; yield: number; salePrice: number; images?: ProductImage[]; isPublic?: boolean; preparation?: string | null } | null
   categories: string[]
   company?: { id: string; name: string; slug: string }
   unitCost?: number
@@ -35,6 +35,7 @@ export function ProductFormModal({ product, categories, company, unitCost = 0, o
   const [error, setError] = useState<string | null>(null)
   const [category, setCategory] = useState(product?.category ?? '')
   const [isPublic, setIsPublic] = useState(product?.isPublic ?? false)
+  const [preparation, setPreparation] = useState(product?.preparation ?? '')
   const [images, setImages] = useState<ProductImage[]>(product?.images ?? [])
 
   // Calcular margen desde el precio de venta usando el costo real del producto
@@ -57,6 +58,7 @@ export function ProductFormModal({ product, categories, company, unitCost = 0, o
     formData.set('yield', yieldAmount.toString())
     formData.set('companyId', company?.id || '')
     formData.set('isPublic', isPublic ? 'true' : 'false')
+    formData.set('preparation', preparation)
     if (category) {
       formData.set('category', category)
     }
@@ -172,6 +174,15 @@ export function ProductFormModal({ product, categories, company, unitCost = 0, o
             )}
           </div>
         )}
+
+        <div className="space-y-2">
+          <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Preparación</label>
+          <RichEditor
+            value={preparation}
+            onChange={setPreparation}
+            placeholder="Instrucciones para preparar este producto..."
+          />
+        </div>
 
         {isEditing && (
           <ImageUpload

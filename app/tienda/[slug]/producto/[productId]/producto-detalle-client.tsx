@@ -11,6 +11,7 @@ interface Product {
   name: string
   salePrice: number
   currentStock: number
+  preparation: string | null
   images: { url: string; publicId: string }[]
   ingredients: { name: string; quantity: number; unit: string }[]
 }
@@ -181,6 +182,19 @@ export function ProductoDetalleClient({ product, company }: { product: Product; 
                     </div>
                   ))}
                 </div>
+              </div>
+            )}
+
+            {product.preparation && (
+              <div>
+                <h2 className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-2">Preparación</h2>
+                <div
+                  className="p-4 rounded-lg bg-accent/10 border border-border/30 text-sm leading-relaxed prose prose-sm max-w-none
+                    [&_table]:w-full [&_table]:border-collapse [&_table]:my-2
+                    [&_th]:border [&_th]:border-border/50 [&_th]:bg-muted/30 [&_th]:px-3 [&_th]:py-2 [&_th]:text-left [&_th]:font-bold
+                    [&_td]:border [&_td]:border-border/50 [&_td]:px-3 [&_td]:py-2"
+                  dangerouslySetInnerHTML={{ __html: product.preparation }}
+                />
               </div>
             )}
 

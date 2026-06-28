@@ -63,6 +63,7 @@ export default async function ProductosPage() {
       maxPossibleBatches: maxBatches === Infinity ? 0 : maxBatches,
       companyId: p.companyId,
       isPublic: p.isPublic ?? false,
+      preparation: p.preparation,
     }
   })
 

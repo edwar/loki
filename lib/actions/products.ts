@@ -45,6 +45,7 @@ export async function createProduct(formData: FormData) {
   const salePrice = parseFloat(formData.get('salePrice') as string) || 0
   const yieldAmount = parseFloat(formData.get('yield') as string) || 1
   const isPublic = formData.get('isPublic') === 'true'
+  const preparation = formData.get('preparation') as string
 
   let categoryId = null
   if (categoryName) {
@@ -63,6 +64,7 @@ export async function createProduct(formData: FormData) {
       yield: yieldAmount,
       companyId: user?.companyId || null,
       isPublic,
+      preparation: preparation || null,
     },
   })
 
@@ -123,6 +125,7 @@ export async function updateProduct(id: string, formData: FormData) {
   const salePrice = parseFloat(formData.get('salePrice') as string) || 0
   const yieldAmount = parseFloat(formData.get('yield') as string) || 1
   const isPublic = formData.get('isPublic') === 'true'
+  const preparation = formData.get('preparation') as string
 
   let categoryId = null
   if (categoryName) {
@@ -141,6 +144,7 @@ export async function updateProduct(id: string, formData: FormData) {
       salePrice,
       yield: yieldAmount,
       isPublic,
+      preparation: preparation || null,
     },
   })
 

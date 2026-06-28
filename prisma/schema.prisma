@@ -90,6 +90,7 @@ model Product {
   yield        Decimal   @default(1) @db.Decimal(10, 2)
   profitMargin Decimal   @default(30) @db.Decimal(5, 2)
   imageUrl     String?
+  preparation  String?
   isActive     Boolean   @default(true)
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt

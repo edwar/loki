@@ -61,6 +61,7 @@ export async function GET() {
         recipeItems,
         maxPossibleBatches: maxBatches === Infinity ? 0 : maxBatches,
         isPublic: p.isPublic ?? false,
+        preparation: p.preparation,
       }
     })
 
