@@ -26,7 +26,7 @@ export const metadata: Metadata = {
   description: 'Plataforma de gestión integral para emprendedores. Controla inventario, ventas, producción, gastos y genera reportes PDF.',
   openGraph: {
     title: 'Loki - Gestión Empresarial Completa para Emprendedores',
-description: 'Plataforma de gestión integral para emprendedores. Controla inventario, ventas, producción, gastos, clientes y genera reportes PDF.',
+    description: 'Plataforma de gestión integral para emprendedores. Controla inventario, ventas, producción, gastos, clientes y genera reportes PDF.',
     url: '/',
     images: [{ url: '/og.webp', width: 1200, height: 630, alt: 'Loki - Gestión Empresarial' }],
   },
@@ -170,10 +170,6 @@ export default async function LandingPage() {
         {/* Hero Section */}
         <section className="relative pt-40 pb-24 px-6 overflow-hidden">
           <div className="max-w-5xl mx-auto text-center space-y-8">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/5 border border-primary/20 text-sm font-medium text-primary animate-fade-in">
-              <Zap size={14} className="fill-primary" />
-              <span>Nueva versión 2.0 ya disponible</span>
-            </div>
 
             <h1 className="text-6xl md:text-8xl font-bold tracking-tight text-foreground animate-fade-in [animation-delay:200ms] font-display">
               Controla tu negocio
@@ -325,7 +321,6 @@ export default async function LandingPage() {
             </h2>
             <p className="text-xl text-muted-foreground max-w-xl mx-auto">
               Únete a cientos de emprendedores que ya transformaron su gestión.
-              Sin tarjetas de crédito, empieza gratis en segundos.
             </p>
             <div className="pt-8">
               {session ? (
@@ -342,9 +337,7 @@ export default async function LandingPage() {
                 </Link>
               )}
             </div>
-            <p className="text-sm text-muted-foreground pt-4">
-              Pruébalo gratis por 14 días. No requiere tarjeta.
-            </p>
+
           </div>
         </section>
       </main>
@@ -362,9 +355,9 @@ export default async function LandingPage() {
 
           <div className="flex gap-8 text-sm font-medium text-muted-foreground">
             <Link href="/guia" className="hover:text-foreground transition-colors">Guía de Uso</Link>
-            <a href="#" className="hover:text-foreground transition-colors">Privacidad</a>
-            <a href="#" className="hover:text-foreground transition-colors">Términos</a>
-            <a href="#" className="hover:text-foreground transition-colors">Soporte</a>
+            <Link href="/privacidad" className="hover:text-foreground transition-colors">Privacidad</Link>
+            <Link href="/terminos" className="hover:text-foreground transition-colors">Términos</Link>
+            <Link href="/soporte" className="hover:text-foreground transition-colors">Soporte</Link>
           </div>
 
           <p className="text-sm text-muted-foreground">
