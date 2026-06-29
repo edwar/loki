@@ -1,6 +1,7 @@
 import { prisma } from '@/lib/prisma'
 import { eachDayOfInterval, subDays, format } from 'date-fns'
 import { getAdvancedMetrics } from './advanced-metrics'
+import { predictSales, type PredictionResult } from '@/lib/predictions'
 
 function getStartDate(range: string) {
   if (range === '7d') return subDays(new Date(), 7)
@@ -69,7 +70,14 @@ export async function getDashboardData(range: string = '30d') {
     .findMany({ where: { deletedAt: null } })
     .then((supplies) => supplies.filter((s) => Number(s.currentStock) < Number(s.minStock)).slice(0, 5))
 
+  const salesByDayForPrediction = historicalData.salesByDay.map(d => ({
+    date: new Date(d.date),
+    amount: d.amount,
+  }))
+  const predictions = salesByDayForPrediction.length > 0 ? predictSales(salesByDayForPrediction) : null
+
   return {
+    predictions,
     stats: {
       suppliesCount,
       productsCount,

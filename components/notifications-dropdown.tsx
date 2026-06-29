@@ -1,8 +1,8 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import { useQuery } from '@tanstack/react-query'
-import { Bell, AlertTriangle, Package, Receipt, TrendingDown, X } from 'lucide-react'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { Bell, AlertTriangle, Package, Receipt, TrendingDown, Check, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { formatDistanceToNow } from 'date-fns'
 import { es } from 'date-fns/locale'
@@ -10,12 +10,13 @@ import Link from 'next/link'
 
 interface Alert {
   id: string
-  type: 'stock_low' | 'stock_critical' | 'expense_high' | 'low_margin'
+  type: 'stock_low' | 'stock_critical' | 'expense_high' | 'low_margin' | 'sales_drop' | 'no_sales_today'
   title: string
   description: string
   severity: 'warning' | 'error' | 'info'
   link?: string
   createdAt: Date
+  read: boolean
 }
 
 interface AlertsSummary {
@@ -26,8 +27,9 @@ interface AlertsSummary {
 export function NotificationsDropdown() {
   const [isOpen, setIsOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
+  const queryClient = useQueryClient()
 
-  const { data: alerts = { alerts: [], unreadCount: 0 } } = useQuery<AlertsSummary>({
+  const { data: summary = { alerts: [], unreadCount: 0 } } = useQuery<AlertsSummary>({
     queryKey: ['alerts'],
     queryFn: async () => {
       const res = await fetch('/api/alerts')
@@ -36,6 +38,39 @@ export function NotificationsDropdown() {
     },
     refetchInterval: isOpen ? 60000 : false,
     enabled: isOpen,
+  })
+
+  const markReadMutation = useMutation({
+    mutationFn: async (id: string) => {
+      await fetch('/api/alerts', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'markRead', id }),
+      })
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['alerts'] }),
+  })
+
+  const markAllReadMutation = useMutation({
+    mutationFn: async () => {
+      await fetch('/api/alerts', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'markAllRead' }),
+      })
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['alerts'] }),
+  })
+
+  const dismissMutation = useMutation({
+    mutationFn: async (id: string) => {
+      await fetch('/api/alerts', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'dismiss', id }),
+      })
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['alerts'] }),
   })
 
   useEffect(() => {
@@ -56,6 +91,9 @@ export function NotificationsDropdown() {
       case 'expense_high':
         return Receipt
       case 'low_margin':
+        return TrendingDown
+      case 'sales_drop':
+      case 'no_sales_today':
         return TrendingDown
       default:
         return AlertTriangle
@@ -83,9 +121,9 @@ export function NotificationsDropdown() {
         )}
       >
         <Bell size={20} />
-        {alerts.unreadCount > 0 && (
+        {summary.unreadCount > 0 && (
           <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-rose-500 text-white text-[10px] font-bold flex items-center justify-center animate-pulse">
-            {alerts.unreadCount > 9 ? '9+' : alerts.unreadCount}
+            {summary.unreadCount > 9 ? '9+' : summary.unreadCount}
           </span>
         )}
       </button>
@@ -94,25 +132,35 @@ export function NotificationsDropdown() {
         <div className="absolute right-0 top-full mt-2 w-80 sm:w-96 bg-card border border-border rounded-lg shadow-xl z-50 overflow-hidden animate-in fade-in zoom-in-95">
           <div className="p-4 border-b border-border flex items-center justify-between">
             <h3 className="font-bold text-lg">Notificaciones</h3>
-            <span className="text-xs text-muted-foreground font-medium">
-              {alerts.unreadCount} alertas
-            </span>
+            <div className="flex items-center gap-2">
+              {summary.unreadCount > 0 && (
+                <button
+                  onClick={() => markAllReadMutation.mutate()}
+                  className="text-xs text-primary font-medium hover:underline"
+                >
+                  Marcar todas leídas
+                </button>
+              )}
+              <span className="text-xs text-muted-foreground font-medium">
+                {summary.unreadCount} sin leer
+              </span>
+            </div>
           </div>
 
           <div className="max-h-96 overflow-y-auto">
-            {alerts.alerts.length === 0 ? (
+            {summary.alerts.length === 0 ? (
               <div className="p-8 text-center text-muted-foreground">
                 <Bell size={32} className="mx-auto mb-2 opacity-50" />
                 <p className="text-sm">Sin notificaciones</p>
               </div>
             ) : (
               <div className="divide-y divide-border/50">
-                {alerts.alerts.slice(0, 10).map((alert) => {
+                {summary.alerts.slice(0, 10).map((alert) => {
                   const Icon = getAlertIcon(alert.type)
                   const colorClass = getAlertColor(alert.severity)
 
                   const content = (
-                    <div className="p-4 hover:bg-accent/30 transition-colors">
+                    <div className={cn("p-4 hover:bg-accent/30 transition-colors", !alert.read && "bg-primary/3")}>
                       <div className="flex items-start gap-3">
                         <div className={cn('w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0', colorClass)}>
                           <Icon size={18} />
@@ -125,6 +173,32 @@ export function NotificationsDropdown() {
                           <p className="text-[10px] text-muted-foreground/60 mt-1">
                             {formatDistanceToNow(new Date(alert.createdAt), { addSuffix: true, locale: es })}
                           </p>
+                        </div>
+                        <div className="flex flex-col gap-1 shrink-0">
+                          {!alert.read && (
+                            <button
+                              onClick={(e) => {
+                                e.preventDefault()
+                                e.stopPropagation()
+                                markReadMutation.mutate(alert.id)
+                              }}
+                              className="w-6 h-6 rounded-md bg-primary/10 text-primary flex items-center justify-center hover:bg-primary/20 transition-colors"
+                              title="Marcar como leída"
+                            >
+                              <Check size={12} />
+                            </button>
+                          )}
+                          <button
+                            onClick={(e) => {
+                              e.preventDefault()
+                              e.stopPropagation()
+                              dismissMutation.mutate(alert.id)
+                            }}
+                            className="w-6 h-6 rounded-md bg-muted text-muted-foreground flex items-center justify-center hover:bg-muted/80 transition-colors"
+                            title="Descartar"
+                          >
+                            <X size={12} />
+                          </button>
                         </div>
                       </div>
                     </div>
@@ -146,7 +220,7 @@ export function NotificationsDropdown() {
             )}
           </div>
 
-          {alerts.alerts.length > 0 && (
+          {summary.alerts.length > 0 && (
             <div className="p-3 border-t border-border">
               <Link
                 href="/dashboard"
