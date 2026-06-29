@@ -1,13 +1,12 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { convertUnits } from '@/lib/conversions'
+import { convertUnits, getUnitType } from '@/lib/conversions'
 
 export async function POST(request: Request) {
   try {
     const body = await request.json()
     const { supplierName, totalAmount, subtotal, discountPercentage, taxPercentage, purchaseDate, items } = body
 
-    // Buscar o crear el proveedor
     let supplier = await prisma.supplier.findFirst({
       where: {
         name: { contains: supplierName, mode: 'insensitive' },
@@ -21,18 +20,15 @@ export async function POST(request: Request) {
       })
     }
 
-    // Procesar cada item para crear o actualizar insumos
     const processedItems = await Promise.all(items.map(async (item: any) => {
       let supply = null
 
-      // Si viene supplyId, usar ese supply directamente
       if (item.supplyId) {
         supply = await prisma.supply.findUnique({
           where: { id: item.supplyId, deletedAt: null }
         })
       }
 
-      // Si no se encontró por ID, buscar por nombre (fallback)
       if (!supply && item.supplyName) {
         supply = await prisma.supply.findFirst({
           where: {
@@ -42,23 +38,31 @@ export async function POST(request: Request) {
         })
       }
 
-      // Normalizar unidad a la mínima expresión (litro → mililitro, kilogramo → gramo)
-      const normalizeUnit = (u: string) => {
-        const type = u === 'litro' || u === 'mililitro' ? 'volumen' : u === 'kilogramo' || u === 'gramo' ? 'peso' : null
-        if (type === 'volumen') return 'mililitro'
-        if (type === 'peso') return 'gramo'
-        return u
+      const targetUnit = supply ? supply.unit : (getUnitType(item.unit) ? 'mililitro' : item.unit || 'unidad')
+
+      const purchaseUnit = item.purchaseUnit || item.unit || targetUnit
+
+      // Calcular cantidad total: soporta "5 paquetes × 250ml = 1250ml"
+      let totalQuantityInPurchaseUnit = Number(item.quantity) || 0
+      if (item.unitQty && Number(item.unitQty) > 0) {
+        totalQuantityInPurchaseUnit = totalQuantityInPurchaseUnit * Number(item.unitQty)
       }
 
-      const targetUnit = supply ? supply.unit : normalizeUnit(item.unit || 'unidad')
+      // Convertir a la unidad base del insumo
+      let baseQuantity = totalQuantityInPurchaseUnit
+      let baseUnitPrice = Number(item.unitPrice) || 0
 
-      // Convertir precio por unidad de presentación a precio por unidad base
-      // Ej: 20L de leche a $20.000 → $1.000/L → $1/ml
-      let baseUnitPrice = item.unitPrice
-      if (item.unit && targetUnit !== item.unit) {
-        const factor = convertUnits(1, item.unit, targetUnit)
-        if (factor && factor > 0) {
-          baseUnitPrice = item.unitPrice / factor
+      if (purchaseUnit !== targetUnit) {
+        // Mismo tipo de unidad (ej. L → ml)
+        const unitFactor = convertUnits(1, purchaseUnit, targetUnit)
+        if (unitFactor && unitFactor > 0) {
+          baseQuantity = totalQuantityInPurchaseUnit * unitFactor
+          baseUnitPrice = baseUnitPrice / unitFactor
+        } else if (supply?.conversionFactor && Number(supply.conversionFactor) > 0) {
+          // Distinto tipo (ej. ml → g), usar factor de conversión del insumo
+          const factor = Number(supply.conversionFactor)
+          baseQuantity = totalQuantityInPurchaseUnit * factor
+          baseUnitPrice = baseUnitPrice / factor
         }
       }
 
@@ -66,7 +70,7 @@ export async function POST(request: Request) {
         supply = await prisma.supply.update({
           where: { id: supply.id },
           data: {
-            currentStock: { increment: item.quantity },
+            currentStock: { increment: baseQuantity },
             purchasePrice: baseUnitPrice,
             supplierId: supplier?.id || supply.supplierId
           }
@@ -76,7 +80,7 @@ export async function POST(request: Request) {
           data: {
             name: item.supplyName || 'Sin nombre',
             unit: targetUnit,
-            currentStock: item.quantity,
+            currentStock: baseQuantity,
             purchasePrice: baseUnitPrice,
             supplierId: supplier?.id
           }
@@ -86,14 +90,13 @@ export async function POST(request: Request) {
       return {
         supplyId: supply.id,
         supplyName: supply.name,
-        quantity: item.quantity,
-        unit: item.unit || 'unidad',
-        unitPrice: item.unitPrice,
+        quantity: baseQuantity,
+        unit: targetUnit,
+        unitPrice: baseUnitPrice,
         subtotal: item.subtotal
       }
     }))
 
-    // Crear la orden de compra con los items procesados
     const purchaseOrder = await prisma.purchaseOrder.create({
       data: {
         supplier: supplier ? { connect: { id: supplier.id } } : undefined,

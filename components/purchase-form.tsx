@@ -18,6 +18,7 @@ import { Combobox } from '@/components/ui/combobox'
 import { ConfirmationModal } from '@/components/ui/confirmation-modal'
 import { DatePicker } from '@/components/ui/date-picker'
 import { UNIDADES } from '@/lib/constants'
+import { getUnitType, canConvert } from '@/lib/conversions'
 
 interface Supplier {
   id: string
@@ -36,7 +37,8 @@ interface PurchaseItem {
   supplyName: string
   cantidad: number
   unidad: string
-  precioUnitario: number
+  unitQty: number // para modo "N paquetes × X unidad" (0 = desactivado)
+  valorTotal: number // total pagado, no precio por unidad
   subtotal: number
 }
 
@@ -54,7 +56,7 @@ export function PurchaseForm({ suppliers, supplies = [], onSuccess, onClose }: P
   const [supplierName, setSupplierName] = useState('')
   const [purchaseDate, setPurchaseDate] = useState(new Date().toISOString().split('T')[0])
   const [items, setItems] = useState<PurchaseItem[]>([
-    { id: crypto.randomUUID(), supplyId: '', supplyName: '', cantidad: 1, unidad: 'unidad', precioUnitario: 0, subtotal: 0 }
+    { id: crypto.randomUUID(), supplyId: '', supplyName: '', cantidad: 1, unidad: 'unidad', unitQty: 0, valorTotal: 0, subtotal: 0 }
   ])
   const [descuentoPorcentaje, setDescuentoPorcentaje] = useState(0)
   const [impuestoPorcentaje, setImpuestoPorcentaje] = useState(0)
@@ -71,14 +73,20 @@ export function PurchaseForm({ suppliers, supplies = [], onSuccess, onClose }: P
   }
 
   const handleAddItem = () => {
-    setItems([...items, { id: crypto.randomUUID(), supplyId: '', supplyName: '', cantidad: 1, unidad: 'unidad', precioUnitario: 0, subtotal: 0 }])
+    setItems([...items, { id: crypto.randomUUID(), supplyId: '', supplyName: '', cantidad: 1, unidad: 'unidad', unitQty: 0, valorTotal: 0, subtotal: 0 }])
   }
 
   const confirmRemoveItem = () => {
     if (indexToRemove === null) return
     const newItems = items.filter((_, i) => i !== indexToRemove)
-    setItems(newItems.length > 0 ? newItems : [{ id: crypto.randomUUID(), supplyId: '', supplyName: '', cantidad: 1, unidad: 'unidad', precioUnitario: 0, subtotal: 0 }])
+    setItems(newItems.length > 0 ? newItems : [{ id: crypto.randomUUID(), supplyId: '', supplyName: '', cantidad: 1, unidad: 'unidad', unitQty: 0, valorTotal: 0, subtotal: 0 }])
     setIndexToRemove(null)
+  }
+
+  const getConvenientUnit = (unit: string): string => {
+    if (unit === 'mililitro') return 'litro'
+    if (unit === 'gramo') return 'kilogramo'
+    return unit
   }
 
   const handleItemChange = (index: number, field: keyof PurchaseItem, value: string | number) => {
@@ -89,17 +97,15 @@ export function PurchaseForm({ suppliers, supplies = [], onSuccess, onClose }: P
       const supply = localSupplies.find(s => s.id === value)
       if (supply) {
         newItems[index].supplyName = supply.name
-        newItems[index].unidad = supply.unit
+        newItems[index].unidad = getConvenientUnit(supply.unit)
       } else {
         newItems[index].supplyName = ''
         newItems[index].unidad = 'unidad'
       }
     }
 
-    if (field === 'cantidad' || field === 'precioUnitario') {
-      const qty = Number(newItems[index].cantidad) || 0
-      const price = Number(newItems[index].precioUnitario) || 0
-      newItems[index].subtotal = qty * price
+    if (field === 'cantidad' || field === 'valorTotal' || field === 'unitQty') {
+      newItems[index].subtotal = Number(newItems[index].valorTotal) || 0
     }
 
     setItems(newItems)
@@ -140,14 +146,23 @@ export function PurchaseForm({ suppliers, supplies = [], onSuccess, onClose }: P
           discountPercentage: descuentoPorcentaje,
           taxPercentage: impuestoPorcentaje,
           purchaseDate: new Date(purchaseDate),
-          items: items.map((item) => ({
-            supplyId: item.supplyId,
-            supplyName: item.supplyName || item.supplyId,
-            quantity: Number(item.cantidad) || 0,
-            unit: item.unidad || 'unidad',
-            unitPrice: Number(item.precioUnitario) || 0,
-            subtotal: item.subtotal,
-          })),
+          items: items.map((item) => {
+            const qty = Number(item.cantidad) || 0
+            const unitQty = Number(item.unitQty) || 0
+            const effectiveQty = unitQty > 0 ? qty * unitQty : qty
+            const totalVal = Number(item.valorTotal) || 0
+            return {
+              supplyId: item.supplyId,
+              supplyName: item.supplyName || item.supplyId,
+              quantity: qty,
+              unit: item.unidad || 'unidad',
+              unitQty,
+              totalValue: totalVal,
+              unitPrice: effectiveQty > 0 ? totalVal / effectiveQty : 0,
+              purchaseUnit: item.unidad || 'unidad',
+              subtotal: item.subtotal,
+            }
+          }),
         }),
       })
 
@@ -165,7 +180,7 @@ export function PurchaseForm({ suppliers, supplies = [], onSuccess, onClose }: P
   const resetForm = () => {
     setSupplierName('')
     setPurchaseDate(new Date().toISOString().split('T')[0])
-    setItems([{ id: crypto.randomUUID(), supplyId: '', supplyName: '', cantidad: 1, unidad: 'unidad', precioUnitario: 0, subtotal: 0 }])
+    setItems([{ id: crypto.randomUUID(), supplyId: '', supplyName: '', cantidad: 1, unidad: 'unidad', unitQty: 0, valorTotal: 0, subtotal: 0 }])
     setDescuentoPorcentaje(0)
     setImpuestoPorcentaje(0)
     setError(null)
@@ -190,7 +205,7 @@ export function PurchaseForm({ suppliers, supplies = [], onSuccess, onClose }: P
 
   const { subtotal, total } = calculateTotal()
 
-  const availableSupplies = localSupplies.filter(supply => 
+  const availableSupplies = localSupplies.filter(supply =>
     !items.some(item => item.supplyId === supply.id)
   )
 
@@ -283,33 +298,75 @@ export function PurchaseForm({ suppliers, supplies = [], onSuccess, onClose }: P
                       allowCustom
                     />
                   </div>
-                  <div className="grid grid-cols-2 gap-2">
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Cantidad</label>
-                      <NumericInput
-                        value={item.cantidad}
-                        onChange={(val) => handleItemChange(index, 'cantidad', val)}
-                        className="h-11"
-                      />
-                    </div>
+                  <div className="grid grid-cols-7 gap-2">
+                    {item.unitQty > 0 ? (
+                      <>
+                        <div className="col-span-1">
+                          <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Paquetes</label>
+                          <NumericInput
+                            value={item.cantidad}
+                            onChange={(val) => handleItemChange(index, 'cantidad', val)}
+                            className="h-11"
+                          />
+                        </div>
+                        <div className="flex items-center justify-center pt-5">
+                          <span className="text-lg text-muted-foreground font-bold">×</span>
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Cant. x paq</label>
+                          <NumericInput
+                            value={item.unitQty}
+                            onChange={(val) => handleItemChange(index, 'unitQty', val)}
+                            className="h-11"
+                          />
+                        </div>
+                        <div className="flex items-end pb-1">
+                          <button
+                            onClick={() => handleItemChange(index, 'unitQty', 0)}
+                            className="px-2 py-1 rounded-md bg-primary/10 text-primary text-[10px] font-semibold hover:bg-primary/20 transition-colors"
+                          >
+                            Modo Simple
+                          </button>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <div className="col-span-2 space-y-1">
+                          <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Cantidad</label>
+                          <NumericInput
+                            value={item.cantidad}
+                            onChange={(val) => handleItemChange(index, 'cantidad', val)}
+                            className="h-11"
+                          />
+                        </div>
+                        <div className="col-span-2 space-y-1">
+                          <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Unidad</label>
+                          <Combobox
+                            options={UNIDADES.map(u => ({ value: u, label: u }))}
+                            value={item.unidad}
+                            onValueChange={(val) => handleItemChange(index, 'unidad', val)}
+                            placeholder="Buscar unidad..."
+                            className="w-full"
+                          />
+                        </div>
+                        <div className="col-span-1 flex items-end pb-1">
+                          <button
+                            onClick={() => handleItemChange(index, 'unitQty', 1)}
+                            className="px-2 py-1 rounded-md bg-primary/10 text-primary text-[10px] font-semibold hover:bg-primary/20 transition-colors cursor-pointer"
+                          >
+                            × fracción
+                          </button>
+                        </div>
+                      </>
+                    )}
                   </div>
                   <div className="grid grid-cols-5 gap-2 items-end">
-                    <div className="col-span-4 space-y-1">
-                      <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Precio por {item.unidad}</label>
-                      <Input
-                        type="text"
-                        inputMode="decimal"
-                        value={item.precioUnitario.toLocaleString('es-CO', {
-                          minimumFractionDigits: 0,
-                          maximumFractionDigits: 2,
-                          useGrouping: true
-                        })}
-                        onChange={(e) => {
-                          const raw = e.target.value.replace(/\./g, '').replace(',', '.')
-                          handleItemChange(index, 'precioUnitario', parseFloat(raw) || 0)
-                        }}
-                        onFocus={(e) => e.target.select()}
-                        className="h-11 text-right"
+                    <div className="col-span-3 space-y-1">
+                      <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Valor Total</label>
+                      <NumericInput
+                        value={item.valorTotal}
+                        onChange={(val) => handleItemChange(index, 'valorTotal', val)}
+                        className="h-11"
                       />
                     </div>
                     <Button
@@ -332,7 +389,7 @@ export function PurchaseForm({ suppliers, supplies = [], onSuccess, onClose }: P
 
                 {/* Desktop: inline layout */}
                 <div className="hidden md:grid grid-cols-12 gap-2 items-end">
-                  <div className="col-span-5">
+                  <div className="col-span-4">
                     <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1 block">Producto</label>
                     <Combobox
                       options={[
@@ -356,22 +413,90 @@ export function PurchaseForm({ suppliers, supplies = [], onSuccess, onClose }: P
                       allowCustom
                     />
                   </div>
-                  <div className="col-span-3">
-                    <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1 block">Cantidad</label>
-                    <NumericInput
-                      value={item.cantidad}
-                      onChange={(val) => handleItemChange(index, 'cantidad', val)}
-                      className="h-11"
-                    />
-                  </div>
-                  <div className="col-span-3">
+                  {item.unitQty > 0 ? (
+                    <>
+                      <div className="col-span-3 flex items-end gap-1">
+                        <div className="flex-1">
+                          <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1 block">Paq.</label>
+                          <NumericInput
+                            value={item.cantidad}
+                            onChange={(val) => handleItemChange(index, 'cantidad', val)}
+                            className="h-11"
+                          />
+                        </div>
+                        <div className="flex items-center pb-2">
+                          <span className="text-lg text-muted-foreground font-bold px-1">×</span>
+                        </div>
+                        <div className="flex-1">
+                          <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1 block">Cant.</label>
+                          <NumericInput
+                            value={item.unitQty}
+                            onChange={(val) => handleItemChange(index, 'unitQty', val)}
+                            className="h-11"
+                          />
+                        </div>
+                      </div>
+                      <div className="col-span-2">
+                        <div className="flex items-end gap-1">
+                          <div className="flex-1">
+                            <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1 block">Unidad</label>
+                            <Combobox
+                              options={UNIDADES.map(u => ({ value: u, label: u }))}
+                              value={item.unidad}
+                              onValueChange={(val) => handleItemChange(index, 'unidad', val)}
+                              placeholder="Buscar..."
+                              className="w-full"
+                            />
+                          </div>
+                          <div className="pb-2 shrink-0">
+                            <button
+                              onClick={() => handleItemChange(index, 'unitQty', 0)}
+                              className="px-2 py-1 rounded-md bg-primary/10 text-primary text-[10px] font-semibold hover:bg-primary/20 transition-colors cursor-pointer"
+                            >
+                              Simple
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="col-span-1">
+                        <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1 block">Cant.</label>
+                        <NumericInput
+                          value={item.cantidad}
+                          onChange={(val) => handleItemChange(index, 'cantidad', val)}
+                          className="h-11"
+                        />
+                      </div>
+                      <div className="col-span-3">
+                        <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1 block">Unidad</label>
+                        <Combobox
+                          options={UNIDADES.map(u => ({ value: u, label: u }))}
+                          value={item.unidad}
+                          onValueChange={(val) => handleItemChange(index, 'unidad', val)}
+                          placeholder="Buscar..."
+                          className="w-full"
+                        />
+                      </div>
+                      <div className="col-span-1 flex items-end pb-2">
+                        <button
+                          onClick={() => handleItemChange(index, 'unitQty', 1)}
+                          className="px-2 py-1 rounded-md bg-primary/10 text-primary text-[10px] font-semibold hover:bbg-primary/20 transition-colors cursor-pointer"
+                        >
+                          × fracción
+                        </button>
+                      </div>
+                    </>
+                  )}
+                  <div className="col-span-2">
                     <div className="space-y-1">
                       <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                        Precio por {item.unidad}
+                        Valor Total
                       </label>
                       <NumericInput
-                        value={item.precioUnitario}
-                        onChange={(val) => handleItemChange(index, 'precioUnitario', val)}
+                        value={item.valorTotal}
+                        onChange={(val) => handleItemChange(index, 'valorTotal', val)}
                         className="h-11"
                       />
                     </div>

@@ -28,6 +28,7 @@ export function SupplyForm({
   const [displayUnit, setDisplayUnit] = useState(supply?.unit ?? 'unidad')
   const [unitsPerPack, setUnitsPerPack] = useState(supply?.unitsPerPack ?? 1)
   const [categoryId, setCategoryId] = useState<string>(supply?.categoryId || '')
+  const [conversionFactor, setConversionFactor] = useState(supply?.conversionFactor?.toString() || '')
   const { data: categories = [] } = useQuery<Category[]>({
     queryKey: ['categories', 'supply'],
     queryFn: async () => {
@@ -40,21 +41,15 @@ export function SupplyForm({
   
   const unitType = getUnitType(displayUnit)
   const showUnitsPerPack = !unitType && ['pack', 'caja', 'bolsa', 'cubeta', 'par', 'docena'].includes(displayUnit)
-
-  const getNormalizedUnit = (selectedUnit: string): string => {
-    const type = getUnitType(selectedUnit)
-    if (type === 'peso') return 'gramo'
-    if (type === 'volumen') return 'mililitro'
-    return selectedUnit
-  }
+  const normalizedUnit = unitType === 'peso' ? 'gramo' : unitType === 'volumen' ? 'mililitro' : displayUnit
 
   const action = supply ? updateSupply.bind(null, supply.id) : createSupply
 
   const handleSubmit = async (formData: FormData) => {
-    const normalizedUnit = getNormalizedUnit(displayUnit)
     formData.set('unit', normalizedUnit)
     formData.set('unitsPerPack', showUnitsPerPack ? unitsPerPack.toString() : '1')
     formData.set('categoryId', categoryId || '')
+    formData.set('conversionFactor', conversionFactor || '')
 
     // Convertir precio a la unidad base (ej: precio por litro → precio por ml)
     if (displayUnit !== normalizedUnit) {
@@ -122,9 +117,30 @@ export function SupplyForm({
           </Select>
           {unitType && (
             <p className="text-[10px] text-muted-foreground">
-              Se guardará como: {getNormalizedUnit(displayUnit)}
+              Se guardará como: {normalizedUnit}
             </p>
           )}
+          <div className="mt-4 p-3 bg-muted/30 border border-border/50 rounded-lg space-y-2">
+            <label className="text-xs font-bold uppercase tracking-widest text-foreground/60">
+              Factor de Conversión (opcional)
+            </label>
+            <p className="text-[10px] text-muted-foreground">
+              Solo si compras en una unidad diferente a como se guarda. Ej: guardas en gramos pero compras en mililitros.
+            </p>
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-muted-foreground">1 ml comprado =</span>
+              <input
+                type="number"
+                step="0.0001"
+                min="0"
+                value={conversionFactor}
+                onChange={(e) => setConversionFactor(e.target.value)}
+                className="w-24 px-3 py-2 rounded-lg bg-background border border-border text-sm text-center"
+                placeholder="1.0"
+              />
+              <span className="text-sm text-muted-foreground">{normalizedUnit} en receta</span>
+            </div>
+          </div>
         </div>
         {showUnitsPerPack && (
           <div className="space-y-2">

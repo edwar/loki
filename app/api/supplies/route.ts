@@ -14,6 +14,7 @@ export async function GET() {
       currentStock: Number(s.currentStock),
       minStock: Number(s.minStock),
       purchasePrice: Number(s.purchasePrice),
+      conversionFactor: s.conversionFactor ? Number(s.conversionFactor) : null,
       supplier: s.supplier,
       updatedAt: s.updatedAt.toISOString()
     }))
@@ -27,7 +28,7 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const body = await request.json()
-    const { name, categoryId, unit, unitsPerPack, minStock, purchasePrice } = body
+    const { name, categoryId, unit, unitsPerPack, minStock, purchasePrice, conversionFactor } = body
 
     const supply = await prisma.supply.create({
       data: {
@@ -38,6 +39,7 @@ export async function POST(request: Request) {
         minStock: minStock || 1,
         currentStock: 0,
         purchasePrice: purchasePrice || 0,
+        conversionFactor: conversionFactor ? parseFloat(conversionFactor) : null,
       },
     })
 

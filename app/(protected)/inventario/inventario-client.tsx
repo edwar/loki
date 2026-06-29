@@ -270,7 +270,7 @@ export function InventarioClient({ supplies: initialSupplies, suppliers }: Inven
       </Card>
 
       {/* Modal Compra */}
-      <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)}>
+      <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)} className="max-w-5xl">
         <div className="p-8">
           <PurchaseForm
             suppliers={suppliers}
