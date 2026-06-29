@@ -10,7 +10,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Combobox } from '@/components/ui/combobox'
 import { formatCurrency } from '@/lib/utils'
 import { Trash2, Search } from 'lucide-react'
-import { createInvoice } from '@/lib/actions/invoices'
+import { createInvoice, updateInvoice } from '@/lib/actions/invoices'
+import { useQuery } from '@tanstack/react-query'
 
 interface Product {
   id: string
@@ -41,6 +42,7 @@ interface InvoiceFormModalProps {
   customers: Customer[]
   products: Product[]
   businessSettings: BusinessSettings | null
+  invoice?: any
 }
 
 interface InvoiceItem {
@@ -51,15 +53,26 @@ interface InvoiceItem {
   unitPrice: number
 }
 
-export function InvoiceFormModal({ isOpen, onClose, onSuccess, customers, products, businessSettings }: InvoiceFormModalProps) {
+export function InvoiceFormModal({ isOpen, onClose, onSuccess, customers, products, businessSettings, invoice }: InvoiceFormModalProps) {
   const [loading, setLoading] = useState(false)
   const [selectedCustomerId, setSelectedCustomerId] = useState<string>('')
   const [items, setItems] = useState<InvoiceItem[]>([])
   const [showProductDropdown, setShowProductDropdown] = useState(false)
   const [productSearch, setProductSearch] = useState('')
   const [itemToRemove, setItemToRemove] = useState<string | null>(null)
+  const [draftQuantities, setDraftQuantities] = useState<Record<string, string>>({})
 
+  const isEditing = !!invoice
   const taxRate = businessSettings?.taxRate || 16
+
+  const { data: paymentMethods = [] } = useQuery({
+    queryKey: ['payment-methods'],
+    queryFn: async () => {
+      const res = await fetch('/api/payment-methods')
+      if (!res.ok) return []
+      return res.json()
+    },
+  })
 
   const customerOptions = [
     { value: 'publico', label: 'Público General' },
@@ -67,6 +80,30 @@ export function InvoiceFormModal({ isOpen, onClose, onSuccess, customers, produc
   ]
 
   const selectedCustomer = customers.find(c => c.id === selectedCustomerId)
+
+  useEffect(() => {
+    if (isOpen && invoice) {
+      setSelectedCustomerId(invoice.customerId || 'publico')
+      setDraftQuantities({})
+      if (invoice.invoiceItems?.length > 0) {
+        const mapped = invoice.invoiceItems.map((item: any) => ({
+          id: item.id || crypto.randomUUID(),
+          productId: item.productId || '',
+          productName: item.productName,
+          quantity: Number(item.quantity),
+          unitPrice: Number(item.unitPrice)
+        }))
+        setItems(mapped)
+        const drafts: Record<string, string> = {}
+        mapped.forEach((i: InvoiceItem) => { drafts[i.id] = i.quantity.toString() })
+        setDraftQuantities(drafts)
+      }
+    } else if (isOpen && !invoice) {
+      setSelectedCustomerId('')
+      setItems([])
+      setDraftQuantities({})
+    }
+  }, [isOpen, invoice])
 
   const filteredProducts = products.filter(p =>
     p.name.toLowerCase().includes(productSearch.toLowerCase()) &&
@@ -78,13 +115,15 @@ export function InvoiceFormModal({ isOpen, onClose, onSuccess, customers, produc
   const total = subtotal + taxAmount
 
   const addItem = (product: Product) => {
+    const id = crypto.randomUUID()
     setItems([...items, {
-      id: crypto.randomUUID(),
+      id,
       productId: product.id,
       productName: product.name,
       quantity: 1,
       unitPrice: product.salePrice
     }])
+    setDraftQuantities(prev => ({ ...prev, [id]: '1' }))
     setProductSearch('')
     setShowProductDropdown(false)
   }
@@ -136,18 +175,22 @@ export function InvoiceFormModal({ isOpen, onClose, onSuccess, customers, produc
 
     setLoading(true)
     try {
-      await createInvoice(formData)
+      if (isEditing && invoice) {
+        await updateInvoice(invoice.id, formData)
+      } else {
+        await createInvoice(formData)
+      }
       onSuccess()
     } catch (error) {
       console.error(error)
-      alert('Error al crear factura')
+      alert('Error al guardar factura')
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Nueva Factura">
+    <Modal isOpen={isOpen} onClose={onClose} title={isEditing ? 'Editar Factura' : 'Nueva Factura'}>
       <form onSubmit={handleSubmit} className="space-y-4 p-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
@@ -169,10 +212,9 @@ export function InvoiceFormModal({ isOpen, onClose, onSuccess, customers, produc
                 <SelectValue placeholder="Seleccionar..." />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="efectivo">Efectivo</SelectItem>
-                <SelectItem value="transferencia">Transferencia</SelectItem>
-                <SelectItem value="tarjeta">Tarjeta</SelectItem>
-                <SelectItem value="otro">Otro</SelectItem>
+                {paymentMethods.map((pm: any) => (
+                  <SelectItem key={pm.id} value={pm.name}>{pm.name}</SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
@@ -229,24 +271,34 @@ export function InvoiceFormModal({ isOpen, onClose, onSuccess, customers, produc
               </div>
               {items.map(item => (
                 <div key={item.id} className="grid grid-cols-12 gap-2 items-center">
-                  <div className="col-span-5 text-sm">{item.productName}</div>
+                  <div className="col-span-5 font-semibold text-sm">{item.productName}</div>
                   <div className="col-span-2">
                     <input
                       type="number"
                       min="1"
-                      value={item.quantity}
-                      onChange={(e) => updateItem(item.id, 'quantity', parseInt(e.target.value) || 1)}
+                      value={draftQuantities[item.id] ?? item.quantity}
+                      onChange={(e) => {
+                        const raw = e.target.value
+                        setDraftQuantities(prev => ({ ...prev, [item.id]: raw }))
+                        if (raw !== '') {
+                          const parsed = parseInt(raw)
+                          if (!isNaN(parsed) && parsed >= 1) {
+                            updateItem(item.id, 'quantity', parsed)
+                          }
+                        }
+                      }}
+                      onBlur={() => {
+                        const draft = draftQuantities[item.id]
+                        if (!draft || draft === '') {
+                          setDraftQuantities(prev => ({ ...prev, [item.id]: '1' }))
+                          updateItem(item.id, 'quantity', 1)
+                        }
+                      }}
                       className="w-full px-2 py-1 border rounded text-center"
                     />
                   </div>
-                  <div className="col-span-2">
-                    <input
-                      type="number"
-                      step="0.01"
-                      value={item.unitPrice}
-                      onChange={(e) => updateItem(item.id, 'unitPrice', parseFloat(e.target.value) || 0)}
-                      className="w-full px-2 py-1 border rounded"
-                    />
+                  <div className="col-span-2 text-sm font-medium text-center py-1">
+                    {formatCurrency(item.unitPrice)}
                   </div>
                   <div className="col-span-2 text-sm font-medium">
                     {formatCurrency(item.quantity * item.unitPrice)}
@@ -296,7 +348,7 @@ export function InvoiceFormModal({ isOpen, onClose, onSuccess, customers, produc
         <div className="flex justify-end gap-2 pt-4">
           <Button type="button" variant="ghost" onClick={onClose}>Cancelar</Button>
           <Button type="submit" disabled={loading || items.length === 0}>
-            {loading ? 'Creando...' : 'Crear Factura'}
+            {loading ? 'Guardando...' : isEditing ? 'Actualizar Factura' : 'Crear Factura'}
           </Button>
         </div>
       </form>

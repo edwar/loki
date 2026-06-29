@@ -60,13 +60,6 @@ export function InvoicePDFButton({ invoice, businessSettings }: Props) {
     setTimeout(() => {
       const bs = businessSettings || { businessName: 'Mi Negocio', tin: '', address: '', phone: '', email: '', taxRate: 19 }
       
-      const paymentMethodLabels: Record<string, string> = {
-        efectivo: 'Efectivo',
-        transferencia: 'Transferencia',
-        tarjeta: 'Tarjeta de Débito/Crédito',
-        otro: 'Otro'
-      }
-
       const html = `
 <!DOCTYPE html>
 <html>
@@ -143,7 +136,7 @@ export function InvoicePDFButton({ invoice, businessSettings }: Props) {
     <div class="total-row grand-total"><span>Total:</span> <span>${formatCurrency(invoice.total)}</span></div>
   </div>
 
-  ${invoice.paymentMethod ? `<div style="margin-top: 15px;"><strong>Método de Pago:</strong> ${paymentMethodLabels[invoice.paymentMethod] || invoice.paymentMethod}</div>` : ''}
+  ${invoice.paymentMethod ? `<div style="margin-top: 15px;"><strong>Método de Pago:</strong> ${invoice.paymentMethod}</div>` : ''}
   ${invoice.notes ? `<div style="margin-top: 15px;"><strong>Notas:</strong> ${invoice.notes}</div>` : ''}
 
   <div class="footer">

@@ -203,7 +203,7 @@ export function VentasClient({ products, customers, sales: initialSales }: Venta
               </TableHeader>
               <TableBody>
                 {(sales ?? []).map((sale: any) => (
-                  <TableRow key={sale.id} className="group hover:bg-accent/5 transition-colors border-border/10">
+                  <TableRow key={sale.id} className="hover:bg-accent/30 group transition-colors border-border/10">
                     <TableCell className="py-4 pl-4 sm:pl-6">
                       <p className="text-xs font-bold text-foreground">{formatDate(sale.createdAt).split(',')[0]}</p>
                       <p className="text-[10px] text-muted-foreground font-medium mt-0.5">{formatDate(sale.createdAt).split(',')[1]}</p>

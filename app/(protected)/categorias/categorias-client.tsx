@@ -5,8 +5,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Plus, Tag, Trash2, Edit2, X } from 'lucide-react'
+import { Plus, Tag, Trash2, Edit2, Package, ShoppingBag } from 'lucide-react'
 import { Modal } from '@/components/ui/modal'
+import { EmptyState } from '@/components/ui/empty-state'
 import { createCategory, deleteCategory, updateCategory } from '@/lib/actions/categories'
 import { ConfirmationModal } from '@/components/ui/confirmation-modal'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
@@ -105,7 +106,12 @@ export function CategoriasClient({ categories: initialCategories }: CategoriasCl
           </CardHeader>
           <CardContent className="p-0">
             {supplyCategories.length === 0 ? (
-              <div className="p-8 text-center text-muted-foreground">No hay categorías de este tipo</div>
+              <EmptyState
+                icon={Package}
+                title="Sin categorías de insumos"
+                description="Crea categorías para organizar tus insumos."
+                compact
+              />
             ) : (
               <div className="divide-y divide-border/30">
                 {supplyCategories.map(category => (
@@ -134,7 +140,12 @@ export function CategoriasClient({ categories: initialCategories }: CategoriasCl
           </CardHeader>
           <CardContent className="p-0">
             {productCategories.length === 0 ? (
-              <div className="p-8 text-center text-muted-foreground">No hay categorías de este tipo</div>
+              <EmptyState
+                icon={ShoppingBag}
+                title="Sin categorías de productos"
+                description="Crea categorías para organizar tus productos."
+                compact
+              />
             ) : (
               <div className="divide-y divide-border/30">
                 {productCategories.map(category => (

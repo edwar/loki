@@ -73,8 +73,7 @@ const navigation: NavSection[] = [
     title: 'Ventas',
     defaultOpen: true,
     items: [
-      { name: 'Ventas', href: '/ventas', icon: TrendingUp },
-      { name: 'Facturación', href: '/facturas', icon: FileSignature },
+      { name: 'Facturación', href: '/facturas', icon: TrendingUp },
       { name: 'Rentabilidad', href: '/rentabilidad', icon: Percent },
     ]
   },

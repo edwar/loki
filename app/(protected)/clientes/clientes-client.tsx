@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Button } from '@/components/ui/button'
 import { Users, Plus, Phone, Mail, MapPin, Edit2, Trash2 } from 'lucide-react'
@@ -9,7 +9,6 @@ import { ConfirmationModal } from '@/components/ui/confirmation-modal'
 import { Modal } from '@/components/ui/modal'
 import { CustomerFormModal } from '@/components/customer-form-modal'
 import { EmptyState } from '@/components/ui/empty-state'
-import { ExportButton } from '@/components/ui/export-button'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { deleteCustomer } from '@/lib/actions/customers'
 
@@ -136,76 +135,69 @@ export function ClientesClient({ customers: initialCustomers }: ClientesClientPr
           onAction={handleOpenNew}
         />
       ) : (
-        <Card className="rounded-lg border-border/40 bg-card/30 backdrop-blur-md overflow-hidden p-0">
-          <CardHeader className="px-8 py-6 border-b border-border/30 bg-primary/5">
-            <CardTitle className="text-xl">Base de Clientes</CardTitle>
-          </CardHeader>
-          <CardContent className="p-0">
-            <Table className="min-w-[800px]">
-              <TableHeader>
-                <TableRow className="hover:bg-transparent">
-                  <TableHead className="font-semibold uppercase text-[10px] tracking-widest text-muted-foreground">Cliente</TableHead>
-                  <TableHead className="font-semibold uppercase text-[10px] tracking-widest text-muted-foreground">Contacto</TableHead>
-                  <TableHead className="font-semibold uppercase text-[10px] tracking-widest text-muted-foreground">Ventas</TableHead>
-                  <TableHead className="font-semibold uppercase text-[10px] tracking-widest text-muted-foreground text-right sticky right-0 bg-card z-20 shadow-[-8px_0_8px_-8px_rgba(0,0,0,0.1)] border-l border-border/10 w-24 pr-4">Acciones</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {(customers ?? []).map((customer: Customer) => (
-                  <TableRow key={customer.id} className="hover:bg-accent/30 group transition-colors">
-                    <TableCell className="py-4">
-                      <div className="flex flex-col">
-                        <span className="font-bold text-lg">{customer.name}</span>
-                        <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
-                          <MapPin size={12} />
-                          {customer.address || 'Sin dirección'}
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-2 text-sm">
-                          <Mail size={14} className="text-muted-foreground" />
-                          {customer.email || '-'}
-                        </div>
-                        <div className="flex items-center gap-2 text-sm font-medium">
-                          <Phone size={14} className="text-primary" />
-                          {customer.phone || '-'}
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <span className="text-xl font-extrabold text-primary">{customer.saleCount}</span>
-                        <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Compras</span>
-                      </div>
-                    </TableCell>
-                    <TableCell className="sticky right-0 bg-card z-10 shadow-[-8px_0_8px_-8px_rgba(0,0,0,0.1)] border-l border-border/10 w-24 pr-4">
-                      <div className="flex justify-end gap-2">
-                        <Button
-                          onClick={() => handleOpenEdit(customer)}
-                          variant="ghost"
-                          size="sm"
-                          className="h-10 w-10 p-0 rounded-lg hover:bg-primary/10 hover:text-primary transition-colors group"
-                        >
-                          <Edit2 className='w-4 h-4 group-hover:text-primary' />
-                        </Button>
-                        <Button
-                          onClick={() => setDeletingCustomer(customer)}
-                          variant="ghost"
-                          size="sm"
-                          className="h-10 w-10 p-0 rounded-lg hover:bg-rose-500/10 hover:text-rose-500 transition-colors group"
-                        >
-                          <Trash2 className='w-4 h-4 group-hover:text-rose-500' />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
+        <Table className="min-w-[800px]">
+          <TableHeader>
+            <TableRow className="hover:bg-transparent">
+              <TableHead className="font-semibold uppercase text-[10px] tracking-widest text-muted-foreground">Cliente</TableHead>
+              <TableHead className="font-semibold uppercase text-[10px] tracking-widest text-muted-foreground">Contacto</TableHead>
+              <TableHead className="font-semibold uppercase text-[10px] tracking-widest text-muted-foreground">Ventas</TableHead>
+              <TableHead className="font-semibold uppercase text-[10px] tracking-widest text-muted-foreground text-right sticky right-0 bg-card z-20 shadow-[-8px_0_8px_-8px_rgba(0,0,0,0.1)] border-l border-border/10 w-24 pr-4">Acciones</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {(customers ?? []).map((customer: Customer) => (
+              <TableRow key={customer.id} className="hover:bg-accent/30 group transition-colors">
+                <TableCell className="py-4">
+                  <div className="flex flex-col">
+                    <span className="font-bold text-lg">{customer.name}</span>
+                    <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
+                      <MapPin size={12} />
+                      {customer.address || 'Sin dirección'}
+                    </div>
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2 text-sm">
+                      <Mail size={14} className="text-muted-foreground" />
+                      {customer.email || '-'}
+                    </div>
+                    <div className="flex items-center gap-2 text-sm font-medium">
+                      <Phone size={14} className="text-primary" />
+                      {customer.phone || '-'}
+                    </div>
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xl font-extrabold text-primary">{customer.saleCount}</span>
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Compras</span>
+                  </div>
+                </TableCell>
+                <TableCell className="sticky right-0 bg-card z-10 shadow-[-8px_0_8px_-8px_rgba(0,0,0,0.1)] border-l border-border/10 w-24 pr-4">
+                  <div className="flex justify-end gap-2">
+                    <Button
+                      onClick={() => handleOpenEdit(customer)}
+                      variant="ghost"
+                      size="sm"
+                      className="h-10 w-10 p-0 rounded-lg hover:bg-primary/10 hover:text-primary transition-colors group"
+                    >
+                      <Edit2 className='w-4 h-4 group-hover:text-primary' />
+                    </Button>
+                    <Button
+                      onClick={() => setDeletingCustomer(customer)}
+                      variant="ghost"
+                      size="sm"
+                      className="h-10 w-10 p-0 rounded-lg hover:bg-rose-500/10 hover:text-rose-500 transition-colors group"
+                    >
+                      <Trash2 className='w-4 h-4 group-hover:text-rose-500' />
+                    </Button>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
       )}
 
       {/* Modal */}

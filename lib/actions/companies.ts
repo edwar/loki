@@ -25,6 +25,8 @@ async function generateUniqueSlug(base: string): Promise<string> {
   return slug
 }
 
+const DEFAULT_PAYMENT_METHODS = ['Efectivo', 'Tarjeta', 'Transferencia']
+
 async function ensureUserCompany(userId: string) {
   const user = await prisma.user.findUnique({
     where: { id: userId },
@@ -39,6 +41,9 @@ async function ensureUserCompany(userId: string) {
       data: {
         name: user.name,
         slug,
+        paymentMethods: {
+          create: DEFAULT_PAYMENT_METHODS.map(name => ({ name })),
+        },
       },
     })
 
@@ -50,7 +55,22 @@ async function ensureUserCompany(userId: string) {
     return company
   }
 
-  return user.company
+  const existingCompany = user.company
+  if (!existingCompany) return null
+
+  const existingCount = await prisma.paymentMethod.count({
+    where: { companyId: existingCompany.id },
+  })
+  if (existingCount === 0) {
+    await prisma.paymentMethod.createMany({
+      data: DEFAULT_PAYMENT_METHODS.map(name => ({
+        name,
+        companyId: existingCompany.id,
+      })),
+    })
+  }
+
+  return existingCompany
 }
 
 export async function getUserCompany() {
