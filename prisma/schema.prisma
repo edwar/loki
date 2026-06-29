@@ -450,6 +450,21 @@ model OrderItem {
   @@map("order_items")
 }
 
+model Alert {
+  id          String   @id @default(uuid())
+  type        String   // stock_low, stock_critical, expense_high, low_margin, sales_drop, no_sales_today
+  title       String
+  description String
+  severity    String   // warning, error, info
+  link        String?
+  read        Boolean  @default(false)
+  dismissed   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  userId      String?
+
+  @@map("alerts")
+}
+
 model PaymentMethod {
   id        String   @id @default(uuid())
   name      String

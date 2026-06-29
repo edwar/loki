@@ -22,8 +22,10 @@ import { SalesChart } from '@/components/dashboard/sales-chart'
 import { ExpensesChart } from '@/components/dashboard/expenses-chart'
 import { DashboardFilters } from '@/components/dashboard/dashboard-filters'
 import { RecentActivityCard } from '@/components/dashboard/recent-activity-card'
+import { PredictionsCard } from '@/components/dashboard/predictions-card'
 import { eachDayOfInterval, subDays, format } from 'date-fns'
 import { getAdvancedMetrics } from '@/lib/actions/advanced-metrics'
+import { predictSales, type PredictionResult } from '@/lib/predictions'
 
 export const dynamic = 'force-dynamic'
 
@@ -256,6 +258,10 @@ export default async function DashboardPage(props: {
     getAdvancedMetrics(range)
   ])
 
+  const predictions = historicalData.salesByDay.length > 0
+    ? predictSales(historicalData.salesByDay.map(d => ({ date: new Date(d.date), amount: d.amount })))
+    : null
+
   const rangeLabels: Record<string, string> = {
     '7d': 'últimos 7 días',
     '30d': 'últimos 30 días',
@@ -345,7 +351,7 @@ export default async function DashboardPage(props: {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Charts Row - spans 8 columns */}
         <div className="lg:col-span-8 grid grid-cols-1 md:grid-cols-2 gap-6">
-          <SalesChart data={historicalData.salesByDay} />
+          <SalesChart data={historicalData.salesByDay} predictions={predictions} />
           <ExpensesChart data={historicalData.expensesByCategory} />
         </div>
 
@@ -467,6 +473,8 @@ export default async function DashboardPage(props: {
 
         {/* Alerts & Insights */}
         <div className="lg:col-span-4 space-y-6">
+
+          {predictions && <PredictionsCard predictions={predictions} />}
 
           {/* Productivity Insight */}
           <Card className="rounded-lg border-primary/20 bg-primary/3 p-2 space-y-2">
