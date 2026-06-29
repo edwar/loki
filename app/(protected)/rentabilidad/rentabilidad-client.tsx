@@ -1,6 +1,7 @@
 'use client'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { formatCurrency } from '@/lib/utils'
 import { cn } from '@/lib/utils'
@@ -12,11 +13,13 @@ import {
   Package,
   Percent,
   BarChart3,
-  Settings
+  Settings,
+  ChefHat
 } from 'lucide-react'
 import { useState } from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
+import { EmptyState } from '@/components/ui/empty-state'
 
 interface ProductProfitability {
   id: string
@@ -72,9 +75,9 @@ export function RentabilidadClient({ data, threshold }: Props) {
     })
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 animate-fade-in">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 animate-fade-in">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
           <h1 className="text-4xl font-extrabold tracking-tight font-display">Métricas de Rentabilidad</h1>
           <p className="text-muted-foreground font-medium mt-1">
@@ -91,67 +94,63 @@ export function RentabilidadClient({ data, threshold }: Props) {
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card className="rounded-lg border-border/40 bg-card/50 backdrop-blur-sm">
-          <CardContent className="p-6">
-            <div className="flex justify-between items-start mb-4">
-              <div className="p-2.5 rounded-lg bg-background/50 border border-border/50 text-primary">
-                <Percent size={20} />
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4 min-w-0">
+        <Card className="rounded-lg border-none bg-linear-to-br from-primary/10 to-primary/5 shadow-sm overflow-hidden relative group">
+          <div className="absolute -right-4 -top-4 w-24 h-24 bg-primary/10 rounded-full blur-2xl group-hover:bg-primary/20 transition-all" />
+          <CardContent className="p-8">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-lg bg-primary flex items-center justify-center shadow-lg shadow-primary/20">
+                <Percent className="w-6 h-6 text-white" />
               </div>
-            </div>
-            <div className="space-y-1">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground opacity-70">Margen Promedio</p>
-              <h3 className="text-3xl font-bold tracking-tight font-display">
-                {data.averageMargin.toFixed(1)}%
-              </h3>
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-primary">Margen Promedio</p>
+                <p className="text-3xl font-extrabold">{data.averageMargin.toFixed(1)}%</p>
+              </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="rounded-lg border-border/40 bg-card/50 backdrop-blur-sm">
-          <CardContent className="p-6">
-            <div className="flex justify-between items-start mb-4">
-              <div className="p-2.5 rounded-lg bg-background/50 border border-border/50 text-emerald-500">
-                <TrendingUp size={20} />
+        <Card className="rounded-lg border-none bg-linear-to-br from-emerald-500/10 to-emerald-500/5 shadow-sm overflow-hidden relative group">
+          <div className="absolute -right-4 -top-4 w-24 h-24 bg-emerald-500/10 rounded-full blur-2xl group-hover:bg-emerald-500/20 transition-all" />
+          <CardContent className="p-8">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-lg bg-emerald-500 flex items-center justify-center shadow-lg shadow-emerald-500/20">
+                <TrendingUp className="w-6 h-6 text-white" />
               </div>
-            </div>
-            <div className="space-y-1">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground opacity-70">Productos Rentables</p>
-              <h3 className="text-3xl font-bold tracking-tight font-display text-emerald-500">
-                {data.profitableProducts}
-              </h3>
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-600 dark:text-emerald-400">Productos Rentables</p>
+                <p className="text-3xl font-extrabold text-emerald-600 dark:text-emerald-400">{data.profitableProducts}</p>
+              </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="rounded-lg border-border/40 bg-card/50 backdrop-blur-sm">
-          <CardContent className="p-6">
-            <div className="flex justify-between items-start mb-4">
-              <div className="p-2.5 rounded-lg bg-background/50 border border-border/50 text-rose-500">
-                <TrendingDown size={20} />
+        <Card className="rounded-lg border-none bg-linear-to-br from-rose-500/10 to-rose-500/5 shadow-sm overflow-hidden relative group">
+          <div className="absolute -right-4 -top-4 w-24 h-24 bg-rose-500/10 rounded-full blur-2xl group-hover:bg-rose-500/20 transition-all" />
+          <CardContent className="p-8">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-lg bg-rose-500 flex items-center justify-center shadow-lg shadow-rose-500/20">
+                <TrendingDown className="w-6 h-6 text-white" />
               </div>
-            </div>
-            <div className="space-y-1">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground opacity-70">Productos con Pérdida</p>
-              <h3 className="text-3xl font-bold tracking-tight font-display text-rose-500">
-                {data.unprofitableProducts}
-              </h3>
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-rose-600 dark:text-rose-400">Productos con Pérdida</p>
+                <p className="text-3xl font-extrabold text-rose-600 dark:text-rose-400">{data.unprofitableProducts}</p>
+              </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="rounded-lg border-border/40 bg-card/50 backdrop-blur-sm">
-          <CardContent className="p-6">
-            <div className="flex justify-between items-start mb-4">
-              <div className="p-2.5 rounded-lg bg-background/50 border border-border/50 text-amber-500">
-                <Package size={20} />
+        <Card className="rounded-lg border-none bg-linear-to-br from-amber-500/10 to-amber-500/5 shadow-sm overflow-hidden relative group">
+          <div className="absolute -right-4 -top-4 w-24 h-24 bg-amber-500/10 rounded-full blur-2xl group-hover:bg-amber-500/20 transition-all" />
+          <CardContent className="p-8">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-lg bg-amber-500 flex items-center justify-center shadow-lg shadow-amber-500/20">
+                <Package className="w-6 h-6 text-white" />
               </div>
-            </div>
-            <div className="space-y-1">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground opacity-70">Con Recetas</p>
-              <h3 className="text-3xl font-bold tracking-tight font-display">
-                {data.products.filter(p => p.hasRecipe).length}
-              </h3>
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-amber-600 dark:text-amber-400">Con Recetas</p>
+                <p className="text-3xl font-extrabold">{data.products.filter(p => p.hasRecipe).length}</p>
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -192,10 +191,10 @@ export function RentabilidadClient({ data, threshold }: Props) {
       <div className="grid lg:grid-cols-3 gap-8">
         {/* Products Table */}
         <div className="lg:col-span-2">
-          <Card className="rounded-lg">
-            <CardHeader className="pb-4">
+          <Card className="rounded-lg border-border/40 bg-card/30 backdrop-blur-md overflow-hidden p-0">
+            <CardHeader className="px-8 py-6 border-b border-border/30 bg-primary/5">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <CardTitle className="text-lg font-bold">Rentabilidad por Producto</CardTitle>
+                <CardTitle className="text-xl">Rentabilidad por Producto</CardTitle>
                 <div className="flex gap-2">
                   <Select value={filterCategory} onValueChange={setFilterCategory}>
                     <SelectTrigger className="w-48">
@@ -221,64 +220,67 @@ export function RentabilidadClient({ data, threshold }: Props) {
                 </div>
               </div>
             </CardHeader>
-            <CardContent>
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b border-border">
-                      <th className="text-left text-[10px] font-bold uppercase tracking-wider text-muted-foreground p-3">Producto</th>
-                      <th className="text-right text-[10px] font-bold uppercase tracking-wider text-muted-foreground p-3">Precio Venta</th>
-                      <th className="text-right text-[10px] font-bold uppercase tracking-wider text-muted-foreground p-3">Costo</th>
-                      <th className="text-right text-[10px] font-bold uppercase tracking-wider text-muted-foreground p-3">Margen</th>
-                      <th className="text-right text-[10px] font-bold uppercase tracking-wider text-muted-foreground p-3">% Margen</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredProducts.length === 0 ? (
-                      <tr>
-                        <td colSpan={5} className="text-center p-8 text-muted-foreground">
-                          No hay productos con recetas para analizar.
-                        </td>
-                      </tr>
-                    ) : (
-                      filteredProducts.map(product => (
-                        <tr key={product.id} className="border-b border-border/50 hover:bg-accent/30 transition-colors">
-                          <td className="p-3">
-                            <div>
-                              <p className="text-sm font-bold">{product.name}</p>
-                              <p className="text-xs text-muted-foreground">{product.category || 'Sin categoría'}</p>
-                            </div>
-                          </td>
-                          <td className="text-right p-3">
-                            <span className="text-sm font-medium">{formatCurrency(product.salePrice)}</span>
-                          </td>
-                          <td className="text-right p-3">
-                            <span className="text-sm font-medium text-muted-foreground">{formatCurrency(product.costPerUnit)}</span>
-                          </td>
-                          <td className="text-right p-3">
-                            <span className={cn(
-                              "text-sm font-bold",
-                              product.isProfitable ? "text-emerald-500" : "text-rose-500"
-                            )}>
-                              {formatCurrency(product.margin)}
-                            </span>
-                          </td>
-                          <td className="text-right p-3">
-                            <span className={cn(
-                              "text-sm font-bold px-2 py-1 rounded-lg",
-                              product.marginPercentage >= threshold ? "bg-emerald-500/10 text-emerald-500" :
-                                product.marginPercentage >= 0 ? "bg-amber-500/10 text-amber-500" :
-                                  "bg-rose-500/10 text-rose-500"
-                            )}>
-                              {product.marginPercentage.toFixed(1)}%
-                            </span>
-                          </td>
-                        </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
-              </div>
+            <CardContent className="p-0">
+              <Table className="min-w-[800px]">
+                <TableHeader>
+                  <TableRow className="hover:bg-transparent">
+                    <TableHead className="font-semibold uppercase text-[10px] tracking-widest text-muted-foreground">Producto</TableHead>
+                    <TableHead className="font-semibold uppercase text-[10px] tracking-widest text-muted-foreground text-right">Precio Venta</TableHead>
+                    <TableHead className="font-semibold uppercase text-[10px] tracking-widest text-muted-foreground text-right">Costo</TableHead>
+                    <TableHead className="font-semibold uppercase text-[10px] tracking-widest text-muted-foreground text-right">Margen</TableHead>
+                    <TableHead className="font-semibold uppercase text-[10px] tracking-widest text-muted-foreground text-right">% Margen</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredProducts.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={5} className="text-center py-16">
+                        <EmptyState
+                          icon={ChefHat}
+                          title="Sin productos con recetas"
+                          description="Agrega recetas a tus productos para analizar su rentabilidad."
+                          compact
+                        />
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    filteredProducts.map(product => (
+                      <TableRow key={product.id}>
+                        <TableCell className="py-4">
+                          <div>
+                            <p className="text-sm font-bold">{product.name}</p>
+                            <p className="text-xs text-muted-foreground">{product.category || 'Sin categoría'}</p>
+                          </div>
+                        </TableCell>
+                        <TableCell className="py-4 text-right">
+                          <span className="text-sm font-medium">{formatCurrency(product.salePrice)}</span>
+                        </TableCell>
+                        <TableCell className="py-4 text-right">
+                          <span className="text-sm font-medium text-muted-foreground">{formatCurrency(product.costPerUnit)}</span>
+                        </TableCell>
+                        <TableCell className="py-4 text-right">
+                          <span className={cn(
+                            "text-sm font-bold",
+                            product.isProfitable ? "text-emerald-500" : "text-rose-500"
+                          )}>
+                            {formatCurrency(product.margin)}
+                          </span>
+                        </TableCell>
+                        <TableCell className="py-4 text-right">
+                          <span className={cn(
+                            "text-sm font-bold px-2 py-1 rounded-lg",
+                            product.marginPercentage >= threshold ? "bg-emerald-500/10 text-emerald-500" :
+                              product.marginPercentage >= 0 ? "bg-amber-500/10 text-amber-500" :
+                                "bg-rose-500/10 text-rose-500"
+                          )}>
+                            {product.marginPercentage.toFixed(1)}%
+                          </span>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
             </CardContent>
           </Card>
         </div>
@@ -294,7 +296,12 @@ export function RentabilidadClient({ data, threshold }: Props) {
             </CardHeader>
             <CardContent>
               {data.categories.length === 0 ? (
-                <p className="text-center text-muted-foreground p-8">No hay datos de categorías.</p>
+                <EmptyState
+                  icon={BarChart3}
+                  title="Sin datos de categorías"
+                  description="Las categorías aparecerán aquí cuando tengas productos con recetas."
+                  compact
+                />
               ) : (
                 <div className="space-y-4">
                   {data.categories.sort((a, b) => b.avgMarginPercentage - a.avgMarginPercentage).map(cat => (

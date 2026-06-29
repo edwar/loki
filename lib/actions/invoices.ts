@@ -245,17 +245,124 @@ export async function cancelInvoice(id: string) {
   revalidatePath('/productos')
 }
 
+export async function updateInvoice(id: string, formData: FormData) {
+  const session = await getSession()
+  if (!session?.user?.email) {
+    throw new Error('No autorizado')
+  }
+
+  const oldInvoice = await prisma.invoice.findUnique({
+    where: { id },
+    include: { invoiceItems: true }
+  })
+
+  if (!oldInvoice) throw new Error('Factura no encontrada')
+
+  const customerId = formData.get('customerId') as string | null
+  const customerName = formData.get('customerName') as string
+  const customerTin = formData.get('customerTin') as string | null
+  const customerAddress = formData.get('customerAddress') as string | null
+  const customerEmail = formData.get('customerEmail') as string | null
+  const itemsJson = formData.get('items') as string
+  const taxRate = parseFloat(formData.get('taxRate') as string) || 16
+  const paymentMethod = formData.get('paymentMethod') as string | null
+  const notes = formData.get('notes') as string | null
+
+  const items = JSON.parse(itemsJson) as { productId: string; productName: string; quantity: number; unitPrice: number }[]
+
+  let subtotal = 0
+  for (const item of items) {
+    subtotal += item.quantity * item.unitPrice
+  }
+
+  const taxAmount = subtotal * (taxRate / 100)
+  const total = subtotal + taxAmount
+
+  await prisma.$transaction(async (tx) => {
+    // Revertir stock de items anteriores
+    for (const oldItem of oldInvoice.invoiceItems) {
+      if (oldItem.productId) {
+        await tx.product.update({
+          where: { id: oldItem.productId },
+          data: { currentStock: { increment: Number(oldItem.quantity) } }
+        })
+      }
+    }
+
+    // Aplicar nuevo stock
+    for (const item of items) {
+      if (item.productId) {
+        await tx.product.update({
+          where: { id: item.productId },
+          data: { currentStock: { decrement: item.quantity } }
+        })
+      }
+    }
+
+    // Actualizar factura
+    await tx.invoice.update({
+      where: { id },
+      data: {
+        customerId: customerId || null,
+        customerName,
+        customerTin,
+        customerAddress,
+        customerEmail,
+        subtotal,
+        taxRate,
+        taxAmount,
+        total,
+        paymentMethod,
+        notes,
+        invoiceItems: {
+          deleteMany: {},
+          create: items.map(item => ({
+            productId: item.productId || null,
+            productName: item.productName,
+            quantity: item.quantity,
+            unitPrice: item.unitPrice,
+            subtotal: item.quantity * item.unitPrice
+          }))
+        }
+      }
+    })
+  })
+
+  await logAction('UPDATE', 'invoice', id, { total: total.toString() })
+  revalidatePath('/facturas')
+  revalidatePath('/productos')
+}
+
 export async function deleteInvoice(id: string) {
   const session = await getSession()
   if (!session?.user?.email) {
     throw new Error('No autorizado')
   }
 
-  await prisma.invoice.update({
+  const invoice = await prisma.invoice.findUnique({
     where: { id },
-    data: { deletedAt: new Date() }
+    include: { invoiceItems: true }
+  })
+
+  if (!invoice) throw new Error('Factura no encontrada')
+
+  await prisma.$transaction(async (tx) => {
+    for (const item of invoice.invoiceItems) {
+      if (item.productId) {
+        await tx.product.update({
+          where: { id: item.productId },
+          data: { currentStock: { increment: Number(item.quantity) } }
+        })
+      }
+    }
+
+    await tx.invoice.update({
+      where: { id },
+      data: { deletedAt: new Date() }
+    })
   })
 
   await logAction('DELETE', 'invoice', id)
   revalidatePath('/facturas')
+  revalidatePath('/productos')
 }

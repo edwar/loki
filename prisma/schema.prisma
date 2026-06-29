@@ -410,9 +410,10 @@ model Company {
   updatedAt   DateTime @updatedAt
   deletedAt   DateTime?
 
-  users    User[]
-  products Product[]
-  orders   Order[]
+  users          User[]
+  products       Product[]
+  orders         Order[]
+  paymentMethods PaymentMethod[]
 
   @@map("companies")
 }
@@ -447,4 +448,16 @@ model OrderItem {
   product Product @relation(fields: [productId], references: [id])
 
   @@map("order_items")
+}
+
+model PaymentMethod {
+  id        String   @id @default(uuid())
+  name      String
+  companyId String
+  createdAt DateTime @default(now())
+
+  company Company @relation(fields: [companyId], references: [id])
+
+  @@unique([companyId, name])
+  @@map("payment_methods")
 }

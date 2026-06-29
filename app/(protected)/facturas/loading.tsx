@@ -2,35 +2,40 @@ import { Skeleton } from '@/components/ui/skeleton'
 
 export default function Loading() {
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-8 animate-fade-in">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div className="space-y-2">
-          <Skeleton className="h-8 w-40" />
-          <Skeleton className="h-4 w-64" />
+          <Skeleton className="h-10 w-48" />
+          <Skeleton className="h-5 w-72" />
         </div>
         <div className="flex gap-3">
-          <Skeleton className="h-10 w-36 rounded-lg" />
-          <Skeleton className="h-10 w-36 rounded-lg" />
+          <Skeleton className="h-12 px-6 rounded-lg w-36" />
+          <Skeleton className="h-12 px-6 rounded-lg w-40" />
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid gap-6 md:grid-cols-4 min-w-0">
         {Array.from({ length: 4 }).map((_, i) => (
-          <div key={i} className="rounded-xl border border-border/50 bg-card/30 backdrop-blur-sm shadow-sm p-6 space-y-2">
-            <Skeleton className="h-3 w-24" />
-            <Skeleton className="h-7 w-28" />
+          <div key={i} className="rounded-lg border-none bg-linear-to-br from-primary/10 to-primary/5 shadow-sm overflow-hidden relative p-8 space-y-3">
+            <div className="flex items-center gap-4">
+              <Skeleton className="h-12 w-12 rounded-lg" />
+              <div className="space-y-2">
+                <Skeleton className="h-3 w-24" />
+                <Skeleton className="h-8 w-28" />
+              </div>
+            </div>
           </div>
         ))}
       </div>
 
-      <div className="rounded-xl border border-border/50 bg-card/30 backdrop-blur-sm shadow-sm p-4 flex items-center gap-4">
-        <Skeleton className="h-4 w-24" />
+      <div className="rounded-lg border border-border/40 bg-card/30 backdrop-blur-md overflow-hidden p-4 flex items-center gap-4">
         <Skeleton className="h-4 w-32" />
+        <Skeleton className="h-4 w-24" />
         <Skeleton className="h-4 w-20" />
       </div>
 
-      <div className="rounded-xl border border-border/50 bg-card/30 backdrop-blur-sm shadow-sm overflow-hidden">
-        <div className="px-8 py-6 border-b border-border/30">
+      <div className="rounded-lg border border-border/40 bg-card/30 backdrop-blur-md overflow-hidden p-0">
+        <div className="px-8 py-6 border-b border-border/30 bg-primary/5">
           <Skeleton className="h-6 w-32" />
         </div>
         <div className="overflow-x-auto">
@@ -54,8 +59,8 @@ export default function Loading() {
                     <Skeleton className="h-3 w-28" />
                   </td>
                   <td className="px-3 sm:px-6 py-4"><Skeleton className="h-5 w-20" /></td>
-                  <td className="px-3 sm:px-6 py-4"><Skeleton className="h-5 w-24 rounded-full" /></td>
-                  <td className="px-3 sm:px-6 py-4"><Skeleton className="h-5 w-24 rounded-full" /></td>
+                  <td className="px-3 sm:px-6 py-4"><Skeleton className="h-5 w-24 rounded-lg" /></td>
+                  <td className="px-3 sm:px-6 py-4"><Skeleton className="h-5 w-24 rounded-lg" /></td>
                   <td className="px-3 sm:px-6 py-4"><Skeleton className="h-8 w-16 rounded ml-auto" /></td>
                 </tr>
               ))}

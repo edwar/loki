@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Button } from '@/components/ui/button'
 import { formatCurrency } from '@/lib/utils'
 import { Building2, Plus, Edit2, Trash2 } from 'lucide-react'
@@ -163,61 +164,61 @@ export function BienesClient({ properties: initialProperties }: BienesClientProp
           <CardHeader className="px-8 py-6 border-b border-border/30 bg-primary/5">
             <CardTitle className="text-xl">Lista de Bienes</CardTitle>
           </CardHeader>
-          <CardContent className="p-0 overflow-x-auto">
-            <table className="w-full min-w-[900px]">
-              <thead>
-                <tr className="border-b border-border/30 bg-accent/5">
-                  <th className="text-left text-[10px] font-bold text-muted-foreground uppercase tracking-widest px-8 py-4">Nombre</th>
-                  <th className="text-left text-[10px] font-bold text-muted-foreground uppercase tracking-widest px-4 py-4">Tipo</th>
-                  <th className="text-left text-[10px] font-bold text-muted-foreground uppercase tracking-widest px-4 py-4">Dirección</th>
-                  <th className="text-right text-[10px] font-bold text-muted-foreground uppercase tracking-widest px-4 py-4">Valor Compra</th>
-                  <th className="text-right text-[10px] font-bold text-muted-foreground uppercase tracking-widest px-4 py-4">Valor Actual</th>
-                  <th className="text-right text-[10px] font-bold text-muted-foreground uppercase tracking-widest px-8 py-4 w-32">Acciones</th>
-                </tr>
-              </thead>
-              <tbody>
+          <CardContent className="p-0">
+            <Table className="min-w-[800px]">
+              <TableHeader>
+                <TableRow className="hover:bg-transparent">
+                  <TableHead className="font-semibold uppercase text-[10px] tracking-widest text-muted-foreground">Nombre</TableHead>
+                  <TableHead className="font-semibold uppercase text-[10px] tracking-widest text-muted-foreground">Tipo</TableHead>
+                  <TableHead className="font-semibold uppercase text-[10px] tracking-widest text-muted-foreground">Dirección</TableHead>
+                  <TableHead className="font-semibold uppercase text-[10px] tracking-widest text-muted-foreground text-right">Valor Compra</TableHead>
+                  <TableHead className="font-semibold uppercase text-[10px] tracking-widest text-muted-foreground text-right">Valor Actual</TableHead>
+                  <TableHead className="font-semibold uppercase text-[10px] tracking-widest text-muted-foreground text-right sticky right-0 bg-card z-20 shadow-[-8px_0_8px_-8px_rgba(0,0,0,0.1)] border-l border-border/10 w-24 pr-4">Acciones</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {safeProperties.map((property) => (
-                  <tr key={property.id} className="border-b border-border/10 hover:bg-accent/30 transition-colors group">
-                    <td className="px-8 py-4">
+                  <TableRow key={property.id}>
+                    <TableCell className="py-4">
                       <p className="font-bold text-lg">{property.name}</p>
                       {property.description && (
                         <p className="text-xs text-muted-foreground mt-0.5 truncate max-w-[200px]">{property.description}</p>
                       )}
-                    </td>
-                    <td className="px-4 py-4">
+                    </TableCell>
+                    <TableCell className="py-4">
                       <span className="inline-flex items-center px-3 py-1 bg-accent/50 text-muted-foreground rounded-lg text-xs font-bold uppercase tracking-tighter">
                         {typeLabel(property.type)}
                       </span>
-                    </td>
-                    <td className="px-4 py-4 text-sm text-muted-foreground">{property.address || '-'}</td>
-                    <td className="px-4 py-4 text-right text-sm text-muted-foreground">{formatCurrency(property.purchaseValue)}</td>
-                    <td className="px-4 py-4 text-right">
+                    </TableCell>
+                    <TableCell className="py-4 text-sm text-muted-foreground">{property.address || '-'}</TableCell>
+                    <TableCell className="py-4 text-right text-sm text-muted-foreground">{formatCurrency(property.purchaseValue)}</TableCell>
+                    <TableCell className="py-4 text-right">
                       <span className="text-lg font-bold text-primary">{formatCurrency(property.currentValue)}</span>
-                    </td>
-                    <td className="px-8 py-4">
+                    </TableCell>
+                    <TableCell className="sticky right-0 bg-card z-10 shadow-[-8px_0_8px_-8px_rgba(0,0,0,0.1)] border-l border-border/10 w-24 pr-4">
                       <div className="flex items-center justify-end gap-2">
                         <Button
                           onClick={() => handleOpenEdit(property)}
                           variant="ghost"
                           size="sm"
-                          className="h-10 w-10 p-0 rounded-lg hover:bg-primary/10 hover:text-primary transition-colors group"
+                          className="h-10 w-10 p-0 rounded-lg hover:bg-primary/10 hover:text-primary transition-colors"
                         >
-                          <Edit2 className='w-4 h-4 group-hover:text-primary' />
+                          <Edit2 className='w-4 h-4' />
                         </Button>
                         <Button
                           onClick={() => setDeletingId(property.id)}
                           variant="ghost"
                           size="sm"
-                          className="h-10 w-10 p-0 rounded-lg hover:bg-rose-500/10 hover:text-rose-500 transition-colors group"
+                          className="h-10 w-10 p-0 rounded-lg hover:bg-rose-500/10 hover:text-rose-500 transition-colors"
                         >
-                          <Trash2 className='w-4 h-4 group-hover:text-rose-500' />
+                          <Trash2 className='w-4 h-4' />
                         </Button>
                       </div>
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 ))}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
           </CardContent>
         </Card>
       )}

@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { NumericInput } from '@/components/ui/numeric-input'
 import { formatCurrency, formatDate } from '@/lib/utils'
-import { Package, Plus, Trash2, AlertCircle } from 'lucide-react'
+import { Package, Plus, AlertCircle } from 'lucide-react'
 import { registerConsumableUsage } from '@/lib/actions/consumables'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { EmptyState } from '@/components/ui/empty-state'
@@ -222,10 +222,12 @@ export function ConsumiblesClient({ supplies: initialSupplies, history: initialH
         </CardHeader>
         <CardContent>
           {history.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              <Package size={40} className="mx-auto mb-2 opacity-50" />
-              <p>No hay registros de consumo</p>
-            </div>
+            <EmptyState
+              icon={Package}
+              title="No hay registros de consumo"
+              description="Registra el consumo de vasos, servilletas y otros insumos."
+              compact
+            />
           ) : (
             <div className="space-y-2">
               {history.map((item) => (
