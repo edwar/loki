@@ -155,7 +155,7 @@ export function Combobox({
         type="button"
         onClick={() => setOpen(!open)}
         className={cn(
-          "flex h-12 w-full items-center justify-between rounded-lg border border-input bg-background/50 px-4 py-2 text-sm transition-all hover:border-primary/30 focus:outline-none text-left group",
+          "flex h-11 w-full items-center justify-between rounded-lg border border-input bg-background/50 px-4 py-2 text-sm transition-all hover:border-primary/30 focus:outline-none text-left group",
           !value && "text-muted-foreground",
           open && "border-primary"
         )}
