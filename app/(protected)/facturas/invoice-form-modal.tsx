@@ -3,13 +3,12 @@
 import { useState, useEffect } from 'react'
 import { Modal } from '@/components/ui/modal'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import { ConfirmationModal } from '@/components/ui/confirmation-modal'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Combobox } from '@/components/ui/combobox'
 import { formatCurrency } from '@/lib/utils'
-import { Trash2, Search } from 'lucide-react'
+import { Trash2 } from 'lucide-react'
 import { createInvoice, updateInvoice } from '@/lib/actions/invoices'
 import { useQuery } from '@tanstack/react-query'
 
@@ -56,14 +55,13 @@ interface InvoiceItem {
 export function InvoiceFormModal({ isOpen, onClose, onSuccess, customers, products, businessSettings, invoice }: InvoiceFormModalProps) {
   const [loading, setLoading] = useState(false)
   const [selectedCustomerId, setSelectedCustomerId] = useState<string>('')
+  const [paymentMethod, setPaymentMethod] = useState('')
   const [items, setItems] = useState<InvoiceItem[]>([])
-  const [showProductDropdown, setShowProductDropdown] = useState(false)
-  const [productSearch, setProductSearch] = useState('')
   const [itemToRemove, setItemToRemove] = useState<string | null>(null)
   const [draftQuantities, setDraftQuantities] = useState<Record<string, string>>({})
 
   const isEditing = !!invoice
-  const taxRate = businessSettings?.taxRate || 16
+  const taxRate = businessSettings?.taxRate ?? 16
 
   const { data: paymentMethods = [] } = useQuery({
     queryKey: ['payment-methods'],
@@ -105,10 +103,9 @@ export function InvoiceFormModal({ isOpen, onClose, onSuccess, customers, produc
     }
   }, [isOpen, invoice])
 
-  const filteredProducts = products.filter(p =>
-    p.name.toLowerCase().includes(productSearch.toLowerCase()) &&
-    !items.find(i => i.productId === p.id)
-  ).slice(0, 5)
+  const productOptions = products
+    .filter(p => !items.find(i => i.productId === p.id))
+    .map(p => ({ value: p.id, label: p.name }))
 
   const subtotal = items.reduce((sum, item) => sum + item.quantity * item.unitPrice, 0)
   const taxAmount = subtotal * (taxRate / 100)
@@ -124,8 +121,6 @@ export function InvoiceFormModal({ isOpen, onClose, onSuccess, customers, produc
       unitPrice: product.salePrice
     }])
     setDraftQuantities(prev => ({ ...prev, [id]: '1' }))
-    setProductSearch('')
-    setShowProductDropdown(false)
   }
 
   const updateItem = (id: string, field: string, value: number) => {
@@ -168,6 +163,7 @@ export function InvoiceFormModal({ isOpen, onClose, onSuccess, customers, produc
     formData.set('customerTin', selectedCustomer?.tin || '')
     formData.set('customerAddress', selectedCustomer?.address || '')
     formData.set('customerEmail', selectedCustomer?.email || '')
+    formData.set('paymentMethod', paymentMethod)
     formData.set('items', JSON.stringify(items.map(({ id, productId, productName, quantity, unitPrice }) => ({
       productId, productName, quantity, unitPrice
     }))))
@@ -207,54 +203,44 @@ export function InvoiceFormModal({ isOpen, onClose, onSuccess, customers, produc
           </div>
           <div>
             <label className="block text-sm font-medium mb-1">Método de Pago</label>
-            <Select name="paymentMethod" required>
-              <SelectTrigger>
-                <SelectValue placeholder="Seleccionar..." />
-              </SelectTrigger>
-              <SelectContent>
-                {paymentMethods.map((pm: any) => (
-                  <SelectItem key={pm.id} value={pm.name}>{pm.name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            {paymentMethods.length > 8 ? (
+              <Combobox
+                options={paymentMethods.map((pm: any) => ({ value: pm.name, label: pm.name }))}
+                value={paymentMethod}
+                onValueChange={setPaymentMethod}
+                placeholder="Seleccionar..."
+                className="w-full"
+              />
+            ) : (
+              <Select name="paymentMethod" required value={paymentMethod} onValueChange={setPaymentMethod}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Seleccionar..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {paymentMethods.map((pm: any) => (
+                    <SelectItem key={pm.id} value={pm.name}>{pm.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
           </div>
         </div>
 
         <div className="border rounded-lg p-4">
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="font-medium">Productos</h3>
-            <div className="relative w-2/3">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                value={productSearch}
-                onChange={(e) => {
-                  setProductSearch(e.target.value)
-                  setShowProductDropdown(true)
-                }}
-                onFocus={() => setShowProductDropdown(true)}
-                placeholder="Agregar producto..."
-                className="pl-9"
-              />
-              {showProductDropdown && productSearch && (
-                <div className="absolute z-10 w-full p-1 mt-1 bg-background border rounded-lg shadow-lg max-h-40 overflow-y-auto">
-                  {filteredProducts.map(product => (
-                    <Button
-                      key={product.id}
-                      type="button"
-                      className="w-full px-3 py-2 text-left hover:bg-primary hover:text-white flex justify-between items-center group"
-                      onClick={() => addItem(product)}
-                      variant="ghost"
-                    >
-                      <span>{product.name}</span>
-                      <span className="text-muted-foreground text-sm group-hover:text-white">
-                        Stock: {product.currentStock}
-                      </span>
-                    </Button>
-                  ))}
-                </div>
-              )}
+            <div className="mb-4">
+              <div className="w-full">
+                <Combobox
+                  options={productOptions}
+                  value=""
+                  onValueChange={(val) => {
+                    const product = products.find(p => p.id === val)
+                    if (product) addItem(product)
+                  }}
+                  placeholder="Buscar producto..."
+                  className="w-full"
+                />
+              </div>
             </div>
-          </div>
 
           {items.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
