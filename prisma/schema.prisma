@@ -74,10 +74,12 @@ model Supply {
   supplier   Supplier? @relation(fields: [supplierId], references: [id])
   category   Category? @relation(fields: [categoryId], references: [id])
 
-  purchaseItems   PurchaseItem[]
-  recipeItems     RecipeItem[]
-  productionItems ProductionItem[]
-  consumableUsages ConsumableUsage[]
+  purchaseItems        PurchaseItem[]
+  recipeItems          RecipeItem[]
+  productionItems      ProductionItem[]
+  consumableUsages     ConsumableUsage[]
+  preparationIngredients PreparationIngredient[]
+  prepProductionItems  PrepProductionItem[]
 
   @@map("supplies")
 }
@@ -103,12 +105,13 @@ model Product {
   isPublic   Boolean   @default(false)
 
   company      Company?       @relation(fields: [companyId], references: [id])
-  images       ProductImage[]
-  recipeItems  RecipeItem[]
-  saleItems    SaleItem[]
-  productionLogs ProductionLog[]
-  invoiceItems InvoiceItem[]
-  orderItems   OrderItem[]
+  images           ProductImage[]
+  recipeItems      RecipeItem[]
+  productRecipeItems ProductRecipeItem[]
+  saleItems        SaleItem[]
+  productionLogs   ProductionLog[]
+  invoiceItems     InvoiceItem[]
+  orderItems       OrderItem[]
 
   @@map("products")
 }
@@ -298,14 +301,103 @@ model ProductionLog {
 model ProductionItem {
   id               String  @id @default(uuid())
   productionLogId  String
-  supplyId         String
+  supplyId         String?
+  preparationId    String?
   quantityConsumed Decimal @db.Decimal(10, 2)
   unitCost         Decimal @db.Decimal(10, 2)
 
   productionLog ProductionLog @relation(fields: [productionLogId], references: [id], onDelete: Cascade)
-  supply        Supply        @relation(fields: [supplyId], references: [id])
+  supply        Supply?       @relation(fields: [supplyId], references: [id])
+  preparation   Preparation?  @relation(fields: [preparationId], references: [id], name: "productionItemPreparation")
 
   @@map("production_items")
+}
+
+model Preparation {
+  id            String    @id @default(uuid())
+  name          String
+  description   String?
+  unit          String
+  yield         Decimal   @default(1) @db.Decimal(10, 2)
+  currentStock  Decimal   @default(0) @db.Decimal(10, 2)
+  minStock      Decimal   @default(0) @db.Decimal(10, 2)
+  costPrice     Decimal   @default(0) @db.Decimal(10, 2)
+  notes         String?
+  companyId     String?
+  company       Company?  @relation(fields: [companyId], references: [id])
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  deletedAt     DateTime?
+
+  ingredients     PreparationIngredient[]  @relation("preparationIngredients")
+  productUsages       ProductRecipeItem[]
+  productionLogs      PrepProductionLog[]
+  consumedInProductLogs ProductionItem[]  @relation("productionItemPreparation")
+  consumedInLogs    PrepProductionItem[]   @relation("prepItemSubPreparation")
+  parentItems       PreparationIngredient[]  @relation("subPreparation")
+
+  @@map("preparations")
+}
+
+model PreparationIngredient {
+  id                String      @id @default(uuid())
+  preparationId     String
+  preparation       Preparation @relation(fields: [preparationId], references: [id], onDelete: Cascade, name: "preparationIngredients")
+  supplyId          String?
+  supply            Supply?     @relation(fields: [supplyId], references: [id])
+  subPreparationId  String?
+  subPreparation    Preparation? @relation(fields: [subPreparationId], references: [id], name: "subPreparation")
+  quantity          Decimal     @db.Decimal(10, 2)
+  unit              String
+
+  @@unique([preparationId, supplyId, subPreparationId])
+  @@map("preparation_ingredients")
+}
+
+model ProductRecipeItem {
+  id             String      @id @default(uuid())
+  productId      String
+  product        Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+  preparationId  String
+  preparation    Preparation @relation(fields: [preparationId], references: [id])
+  quantity       Decimal     @db.Decimal(10, 2)
+  unit           String
+  createdAt      DateTime    @default(now())
+  deletedAt      DateTime?
+
+  @@unique([productId, preparationId])
+  @@map("product_recipe_items")
+}
+
+model PrepProductionLog {
+  id            String    @id @default(uuid())
+  preparationId String
+  preparation   Preparation @relation(fields: [preparationId], references: [id])
+  quantity      Decimal   @db.Decimal(10, 2)
+  batches       Decimal   @default(1) @db.Decimal(10, 2)
+  notes         String?
+  producedAt    DateTime  @default(now())
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  deletedAt     DateTime?
+
+  items PrepProductionItem[]
+
+  @@map("prep_production_logs")
+}
+
+model PrepProductionItem {
+  id                String            @id @default(uuid())
+  logId             String
+  log               PrepProductionLog @relation(fields: [logId], references: [id], onDelete: Cascade)
+  supplyId          String?
+  supply            Supply?           @relation(fields: [supplyId], references: [id])
+  subPreparationId  String?
+  subPreparation    Preparation?      @relation(fields: [subPreparationId], references: [id], name: "prepItemSubPreparation")
+  quantityConsumed  Decimal           @db.Decimal(10, 2)
+  unitCost          Decimal           @db.Decimal(10, 2)
+
+  @@map("prep_production_items")
 }
 
 model AuditLog {
@@ -413,6 +505,7 @@ model Company {
 
   users          User[]
   products       Product[]
+  preparations  Preparation[]
   orders         Order[]
   paymentMethods PaymentMethod[]
 

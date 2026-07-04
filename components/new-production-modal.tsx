@@ -13,7 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Plus, AlertCircle, CheckCircle2, Loader2 } from 'lucide-react'
+import { Plus, AlertCircle, CheckCircle2, Loader2, FlaskConical } from 'lucide-react'
 import { prepareProduct } from '@/lib/actions/products'
 import { sileo as toast } from 'sileo'
 
@@ -29,6 +29,17 @@ interface Product {
       name: string
       currentStock: number
       unit: string
+    } | null
+  }[]
+  productRecipeItems: {
+    id: string
+    quantity: number
+    preparation: {
+      id: string
+      name: string
+      currentStock: number
+      unit: string
+      costPrice: number
     } | null
   }[]
 }
@@ -66,7 +77,6 @@ export function NewProductionModal({ products }: { products: Product[] }) {
       await prepareProduct(selectedProductId, batches, actualYield)
       toast.success({ title: 'Producción registrada correctamente' })
       setOpen(false)
-      // Reset form
       setSelectedProductId('')
       setBatches(1)
       setActualYield(0)
@@ -77,17 +87,29 @@ export function NewProductionModal({ products }: { products: Product[] }) {
     }
   }
 
-  // Verificar si hay suficientes insumos para los lotes seleccionados
-  const getInsuficientSupplies = () => {
-    if (!selectedProduct) return []
-    return selectedProduct.recipeItems.filter((item) => {
+  const getInsufficientItems = () => {
+    if (!selectedProduct) return { supplies: [] as any[], preparations: [] as any[] }
+
+    const badSupplies = selectedProduct.recipeItems.filter((item) => {
       if (!item.supply) return false
       return item.supply.currentStock < item.quantityRequired * batches
     })
+
+    const badPreps = selectedProduct.productRecipeItems.filter((item) => {
+      if (!item.preparation) return false
+      return item.preparation.currentStock < item.quantity * batches
+    })
+
+    return { supplies: badSupplies, preparations: badPreps }
   }
 
-  const insuficientes = getInsuficientSupplies()
-  const canProduce = selectedProductId && insuficientes.length === 0 && batches > 0
+  const insufficient = getInsufficientItems()
+  const totalItems = (selectedProduct?.recipeItems?.length ?? 0) + (selectedProduct?.productRecipeItems?.length ?? 0)
+  const canProduce = selectedProductId
+    && insufficient.supplies.length === 0
+    && insufficient.preparations.length === 0
+    && batches > 0
+    && totalItems > 0
 
   return (
     <>
@@ -154,45 +176,77 @@ export function NewProductionModal({ products }: { products: Product[] }) {
               </div>
             )}
 
-            {selectedProduct && selectedProduct.recipeItems.length > 0 && (
+            {selectedProduct && totalItems > 0 && (
               <div className="rounded-lg border border-border/50 bg-accent/5 overflow-hidden">
                 <div className="bg-accent/10 px-4 py-2 border-b border-border/50">
-                  <p className="text-[10px] font-bold uppercase tracking-widest">Insumos Requeridos</p>
+                  <p className="text-[10px] font-bold uppercase tracking-widest">Ingredientes Requeridos</p>
                 </div>
-                <div className="p-4 space-y-3">
-                  {selectedProduct.recipeItems.map((item) => {
-                    const required = item.quantityRequired * batches
-                    const isOk = item.supply && item.supply.currentStock >= required
-                    return (
-                      <div key={item.id} className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          {isOk ? (
-                            <CheckCircle2 size={14} className="text-emerald-500" />
-                          ) : (
-                            <AlertCircle size={14} className="text-rose-500" />
-                          )}
-                          <span className="text-sm font-medium">{item.supply?.name}</span>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-xs font-bold">
-                            {required} {item.supply?.unit}
-                          </p>
-                          <p className={`text-[10px] ${isOk ? 'text-muted-foreground' : 'text-rose-500 font-bold'}`}>
-                            Stock: {item.supply?.currentStock}
-                          </p>
-                        </div>
-                      </div>
-                    )
-                  })}
+                <div className="p-4 space-y-2">
+                  {selectedProduct.recipeItems.length > 0 && (
+                    <>
+                      <p className="text-[9px] uppercase tracking-widest text-muted-foreground font-bold mb-1">Insumos</p>
+                      {selectedProduct.recipeItems.map((item) => {
+                        const required = item.quantityRequired * batches
+                        const isOk = item.supply && item.supply.currentStock >= required
+                        return (
+                          <div key={item.id} className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              {isOk ? (
+                                <CheckCircle2 size={14} className="text-emerald-500" />
+                              ) : (
+                                <AlertCircle size={14} className="text-rose-500" />
+                              )}
+                              <span className="text-sm font-medium">{item.supply?.name}</span>
+                            </div>
+                            <div className="text-right">
+                              <p className="text-xs font-bold">{required} {item.supply?.unit}</p>
+                              <p className={`text-[10px] ${isOk ? 'text-muted-foreground' : 'text-rose-500 font-bold'}`}>
+                                Stock: {item.supply?.currentStock}
+                              </p>
+                            </div>
+                          </div>
+                        )
+                      })}
+                    </>
+                  )}
+                  {selectedProduct.productRecipeItems.length > 0 && (
+                    <>
+                      {selectedProduct.recipeItems.length > 0 && <div className="border-t border-border/30 my-2" />}
+                      <p className="text-[9px] uppercase tracking-widest text-muted-foreground font-bold mb-1">Preparaciones</p>
+                      {selectedProduct.productRecipeItems.map((item) => {
+                        const required = item.quantity * batches
+                        const isOk = item.preparation && item.preparation.currentStock >= required
+                        return (
+                          <div key={item.id} className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              {isOk ? (
+                                <CheckCircle2 size={14} className="text-emerald-500" />
+                              ) : (
+                                <AlertCircle size={14} className="text-rose-500" />
+                              )}
+                              <FlaskConical size={14} className="text-amber-500" />
+                              <span className="text-sm font-medium">{item.preparation?.name}</span>
+                            </div>
+                            <div className="text-right">
+                              <p className="text-xs font-bold">{required} {item.preparation?.unit}</p>
+                              <p className={`text-[10px] ${isOk ? 'text-muted-foreground' : 'text-rose-500 font-bold'}`}>
+                                Stock: {item.preparation?.currentStock}
+                              </p>
+                            </div>
+                          </div>
+                        )
+                      })}
+                    </>
+                  )}
                 </div>
               </div>
             )}
 
-            {selectedProduct && selectedProduct.recipeItems.length === 0 && (
+            {selectedProduct && totalItems === 0 && (
               <div className="p-4 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-start gap-3">
                 <AlertCircle className="text-amber-600 mt-0.5" size={18} />
                 <p className="text-xs text-amber-700 font-medium">
-                  Este producto no tiene una receta definida. Debes configurar los insumos en el catálogo antes de producir.
+                  Este producto no tiene ingredientes definidos. Debes configurar insumos o preparaciones en el catálogo antes de producir.
                 </p>
               </div>
             )}
@@ -201,7 +255,7 @@ export function NewProductionModal({ products }: { products: Product[] }) {
           <div className="pt-2">
             <Button
               type="submit"
-              disabled={!canProduce || loading || !selectedProductId || (selectedProduct?.recipeItems?.length ?? 0) === 0}
+              disabled={!canProduce || loading || !selectedProductId || totalItems === 0}
               className="w-full h-12 rounded-lg font-bold shadow-lg shadow-primary/20"
             >
               {loading ? (
@@ -210,9 +264,9 @@ export function NewProductionModal({ products }: { products: Product[] }) {
                 <>Confirmar Producción</>
               )}
             </Button>
-            {!canProduce && selectedProductId && (selectedProduct?.recipeItems?.length ?? 0) > 0 && (
+            {!canProduce && selectedProductId && totalItems > 0 && (
               <p className="text-center text-[10px] text-rose-500 font-bold mt-3 uppercase tracking-wider">
-                Insumos insuficientes para completar esta orden
+                Ingredientes insuficientes para completar esta orden
               </p>
             )}
           </div>

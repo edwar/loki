@@ -18,6 +18,14 @@ interface Supply {
   unitsPerPack: number
 }
 
+interface Preparation {
+  id: string
+  name: string
+  unit: string
+  costPrice: number
+  currentStock: number
+}
+
 interface ProductImage {
   id: string
   url: string
@@ -37,6 +45,17 @@ interface RecipeItem {
   } | null
 }
 
+interface ProductRecipeItem {
+  id: string
+  quantity: number
+  unit: string
+  preparation: {
+    name: string
+    currentStock: number
+    costPrice: number
+  } | null
+}
+
 interface Product {
   id: string
   name: string
@@ -47,6 +66,7 @@ interface Product {
   salePrice: number
   images: ProductImage[]
   recipeItems: RecipeItem[]
+  productRecipeItems: ProductRecipeItem[]
   maxPossibleBatches: number
   isPublic?: boolean
   preparation?: string | null
@@ -56,10 +76,11 @@ interface ProductosClientProps {
   products: Product[]
   categories: string[]
   allSupplies: Supply[]
+  allPreparations: Preparation[]
   company?: { id: string; name: string; slug: string }
 }
 
-export function ProductosClient({ products: initialProducts, categories, allSupplies, company }: ProductosClientProps) {
+export function ProductosClient({ products: initialProducts, categories, allSupplies, allPreparations, company }: ProductosClientProps) {
   const queryClient = useQueryClient()
   const [modalOpen, setModalOpen] = useState(false)
   const [cartModalOpen, setCartModalOpen] = useState(false)
@@ -107,13 +128,17 @@ export function ProductosClient({ products: initialProducts, categories, allSupp
       const price = Number(ri.supply?.purchasePrice) || 0
       return acc + (qty * price)
     }, 0)
+    const prepCost = product.productRecipeItems?.reduce((acc: number, pri: any) => {
+      const qty = Number(pri.quantity) || 0
+      const price = Number(pri.preparation?.costPrice) || 0
+      return acc + (qty * price)
+    }, 0) || 0
     const yieldAmount = product.yield || 1
-    return yieldAmount > 0 ? recipeCost / yieldAmount : 0
+    return yieldAmount > 0 ? (recipeCost + prepCost) / yieldAmount : 0
   }
 
   return (
     <div className="space-y-8 animate-fade-in">
-      {/* Header */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
           <h1 className="text-4xl font-extrabold tracking-tight font-display">Catálogo de Productos</h1>
@@ -143,7 +168,6 @@ export function ProductosClient({ products: initialProducts, categories, allSupp
         </div>
       </div>
 
-      {/* Product List */}
       <div className="grid gap-8">
         {(products ?? []).map((product, index) => (
           <ProductCard
@@ -151,6 +175,7 @@ export function ProductosClient({ products: initialProducts, categories, allSupp
             product={product}
             categories={categories}
             allSupplies={allSupplies}
+            allPreparations={allPreparations}
             index={index}
             onEdit={() => handleOpenEdit(product)}
           />
@@ -167,7 +192,6 @@ export function ProductosClient({ products: initialProducts, categories, allSupp
         )}
       </div>
 
-      {/* Modals */}
       <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)}>
         <div className="p-8">
           <ProductFormModal

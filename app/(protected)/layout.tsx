@@ -26,7 +26,8 @@ import {
   FileSignature,
   Tag,
   Percent,
-  Settings
+  Settings,
+  FlaskConical
 } from 'lucide-react'
 import { useState, ViewTransition } from 'react'
 import { useQuery } from '@tanstack/react-query'
@@ -65,6 +66,7 @@ const navigation: NavSection[] = [
     items: [
       { name: 'Inventario', href: '/inventario', icon: Package, roles: ['admin', 'manager'] },
       { name: 'Producción', href: '/produccion', icon: Factory },
+      { name: 'Preparaciones', href: '/preparaciones', icon: FlaskConical },
       { name: 'Productos', href: '/productos', icon: ShoppingBag },
       { name: 'Consumibles', href: '/consumibles', icon: Coffee },
     ]
@@ -166,12 +168,12 @@ function LayoutContent({
           {/* Logo */}
           <div className="p-8">
             <Link href="/dashboard" className="flex items-center gap-3 group">
-              <div className="w-14 h-14 rounded-lg bg-primary flex items-center justify-center shadow-lg shadow-primary/20 group-hover:scale-110 transition-transform duration-300">
-                <img src="/favicon.svg" alt="Loki" width={40} height={40} />
+              <div className="w-18 h-18  flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                <img src="/favicon.svg" alt="Loki" width={60} height={60} />
               </div>
               <div>
                 <h1 className="text-xl font-bold tracking-tight font-display">Loki</h1>
-                <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold opacity-70">Business Hub</p>
+                <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold opacity-70">Optimiza tu negocio</p>
               </div>
             </Link>
           </div>

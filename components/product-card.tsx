@@ -7,15 +7,17 @@ import { Button } from '@/components/ui/button'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { formatCurrency, cn } from '@/lib/utils'
 import { calculateUnitCost, calculateRentabilidad, getDisplayPrice, getDisplayMargin } from '@/lib/pricing'
-import { Trash2, ShoppingBag, Edit2, ChevronDown, Plus, Package, BookOpen, ShoppingCart } from 'lucide-react'
+import { Trash2, ShoppingBag, Edit2, ChevronDown, Plus, Package, BookOpen, ShoppingCart, FlaskConical, CheckCircle2, AlertCircle } from 'lucide-react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { UNIDADES_POR_TIPO } from '@/lib/constants'
 import { getUnitType } from '@/lib/conversions'
-import { deleteProduct, deleteRecipeItem, prepareProduct, updateRecipeItem, consumeProduct } from '@/lib/actions/products'
-import { RecipeForm } from './product-forms'
+import { deleteProduct, deleteRecipeItem, prepareProduct, updateRecipeItem, consumeProduct, addRecipeItem } from '@/lib/actions/products'
+import { addProductRecipeItem, removeProductRecipeItem, updateProductRecipeItem } from '@/lib/actions/preparations'
 import { NumericInput } from './ui/numeric-input'
 import { ConfirmationModal } from './ui/confirmation-modal'
 import { Modal } from '@/components/ui/modal'
+import { Dialog } from '@/components/ui/dialog'
+import { IngredientSelector } from '@/components/ingredient-selector'
 import { addToCart } from '@/lib/shopping-cart'
 import { flyToCart } from '@/lib/fly-to-cart'
 import { sileo as toast } from 'sileo'
@@ -24,12 +26,14 @@ export function ProductCard({
   product,
   categories,
   allSupplies,
+  allPreparations,
   index,
   onEdit
 }: {
   product: any
   categories: string[]
   allSupplies: any[]
+  allPreparations: any[]
   index: number
   onEdit: () => void
 }) {
@@ -40,11 +44,20 @@ export function ProductCard({
   const [lotInput, setLotInput] = useState(1)
   const [consumeQuantity, setConsumeQuantity] = useState(1)
   const [recipeItemToDelete, setRecipeItemToDelete] = useState<string | null>(null)
+  const [prepRecipeItemToDelete, setPrepRecipeItemToDelete] = useState<string | null>(null)
   const [productToDelete, setProductToDelete] = useState<string | null>(null)
   const [editingRecipeItem, setEditingRecipeItem] = useState<any | null>(null)
   const [editQuantity, setEditQuantity] = useState<number>(0)
   const [editUnit, setEditUnit] = useState<string>('')
+  const [editingPrepRecipeItem, setEditingPrepRecipeItem] = useState<any | null>(null)
+  const [editPrepQty, setEditPrepQty] = useState<number>(0)
+  const [editPrepUnit, setEditPrepUnit] = useState<string>('')
   const [actualYield, setActualYield] = useState<number>(0)
+  const [prepIngredientType, setPrepIngredientType] = useState<'supply' | 'preparation'>('supply')
+  const [productSupplyId, setProductSupplyId] = useState('')
+  const [selectedPrepRecipeId, setSelectedPrepRecipeId] = useState('')
+  const [prepRecipeQty, setPrepRecipeQty] = useState(0)
+  const [prepRecipeUnit, setPrepRecipeUnit] = useState('')
   const queryClient = useQueryClient()
   const [isPending, startTransition] = useTransition()
 
@@ -52,12 +65,52 @@ export function ProductCard({
     queryClient.invalidateQueries({ queryKey: ['products'] })
   }
 
-  const recipeCost = product.recipeItems.reduce((acc: number, item: any) => {
+  const handleAddProductIngredient = () => {
+    if (prepIngredientType === 'supply') {
+      if (!productSupplyId || prepRecipeQty <= 0 || !prepRecipeUnit) return
+      const formData = new FormData()
+      formData.set('productId', product.id)
+      formData.set('supplyId', productSupplyId)
+      formData.set('quantityRequired', String(prepRecipeQty))
+      formData.set('unit', prepRecipeUnit)
+      startTransition(async () => {
+        await addRecipeItem(formData)
+        setProductSupplyId('')
+        setPrepRecipeQty(0)
+        toast.success({ title: 'Insumo agregado a la receta' })
+        invalidateProducts()
+      })
+    } else {
+      if (!selectedPrepRecipeId || prepRecipeQty <= 0 || !prepRecipeUnit) return
+      const formData = new FormData()
+      formData.set('productId', product.id)
+      formData.set('preparationId', selectedPrepRecipeId)
+      formData.set('quantity', String(prepRecipeQty))
+      formData.set('unit', prepRecipeUnit)
+      startTransition(async () => {
+        await addProductRecipeItem(formData)
+        setSelectedPrepRecipeId('')
+        setPrepRecipeQty(0)
+        setPrepRecipeUnit('')
+        toast.success({ title: 'Preparación agregada a la receta' })
+        invalidateProducts()
+      })
+    }
+  }
+
+  const supplyCost = product.recipeItems.reduce((acc: number, item: any) => {
     const qty = Number(item.quantityRequired) || 0
     const price = Number(item.supply?.purchasePrice) || 0
     return acc + (qty * price)
   }, 0)
 
+  const prepCost = (product.productRecipeItems || []).reduce((acc: number, item: any) => {
+    const qty = Number(item.quantity) || 0
+    const price = Number(item.preparation?.costPrice) || 0
+    return acc + (qty * price)
+  }, 0)
+
+  const recipeCost = supplyCost + prepCost
   const unitCost = calculateUnitCost(recipeCost, product.yield || 1)
   const profitMarginPct = product.profitMargin ?? 30
   const salePrice = Number(product.salePrice) || 0
@@ -66,19 +119,27 @@ export function ProductCard({
   const rentabilidad = calculateRentabilidad(displayPrice, unitCost)
 
   const handleOpenProduce = () => {
-    if (product.maxPossibleBatches <= 0) return
     setActualYield(product.yield || 1)
     setIsProducing(true)
   }
 
   const handleConfirmProduce = () => {
-    if (product.maxPossibleBatches <= 0) return
     startTransition(async () => {
-      await prepareProduct(product.id, 1, actualYield)
-      setIsProducing(false)
-      invalidateProducts()
+      try {
+        await prepareProduct(product.id, 1, actualYield)
+        setIsProducing(false)
+        invalidateProducts()
+      } catch (e: any) {
+        toast.error({ title: e.message || 'Error al producir' })
+      }
     })
   }
+
+  const totalRecipeIngredients = (product.recipeItems?.length || 0) + ((product.productRecipeItems || []).length || 0)
+  const hasInsufficientStock =
+    product.maxPossibleBatches !== undefined && product.maxPossibleBatches !== null
+      ? product.maxPossibleBatches <= 0 && totalRecipeIngredients > 0
+      : false
 
   const handleConfirmConsume = () => {
     if (consumeQuantity <= 0 || Number(product.currentStock) < consumeQuantity) return
@@ -139,12 +200,11 @@ export function ProductCard({
             </div>
           </div>
           <div className="flex items-center gap-1.5 md:gap-2 shrink-0" onClick={(e) => e.stopPropagation()}>
-            {product.recipeItems.length > 0 && (
+            {totalRecipeIngredients > 0 && (
               <Button
                 onClick={handleOpenProduce}
-                disabled={product.maxPossibleBatches <= 0}
                 size="sm"
-                className="h-8 text-xs font-bold rounded-lg bg-amber-500 hover:bg-amber-600 text-white shadow-lg shadow-amber-500/20 disabled:bg-muted-foreground/20 disabled:text-muted-foreground disabled:shadow-none sm:px-3 px-0 sm:w-auto w-8"
+                className="h-8 text-xs font-bold rounded-lg bg-amber-500 hover:bg-amber-600 text-white shadow-lg shadow-amber-500/20 sm:px-3 px-0 sm:w-auto w-8"
               >
                 <Plus size={14} className="sm:mr-1" />
                 <span className="hidden sm:inline">Producir</span>
@@ -307,20 +367,45 @@ export function ProductCard({
                 </div>
               )}
 
-              {allSupplies.length > 0 && (
-                <RecipeForm productId={product.id} supplies={allSupplies} onSuccess={invalidateProducts} />
-              )}
+              <IngredientSelector
+                type={prepIngredientType}
+                onTypeChange={setPrepIngredientType}
+                supplyOptions={allSupplies.map((s: any) => ({
+                  value: s.id,
+                  label: `${s.name} (${s.unit})`,
+                }))}
+                preparationOptions={(allPreparations ?? []).map((p: any) => ({
+                  value: p.id,
+                  label: `${p.name} (${p.unit} - $${Number(p.costPrice).toFixed(2)}/${p.unit})`,
+                }))}
+                selectedSupplyId={productSupplyId}
+                onSupplyChange={setProductSupplyId}
+                selectedPrepId={selectedPrepRecipeId}
+                onPrepChange={setSelectedPrepRecipeId}
+                quantity={prepRecipeQty}
+                onQuantityChange={setPrepRecipeQty}
+                unit={prepRecipeUnit}
+                onUnitChange={setPrepRecipeUnit}
+                onSubmit={handleAddProductIngredient}
+                canSubmit={
+                  prepIngredientType === 'supply'
+                    ? !!productSupplyId && prepRecipeQty > 0 && !!prepRecipeUnit
+                    : !!selectedPrepRecipeId && prepRecipeQty > 0 && !!prepRecipeUnit
+                }
+                submitIcon={prepIngredientType === 'supply' ? <Plus size={16} strokeWidth={3} /> : <FlaskConical size={16} strokeWidth={3} />}
+              />
 
-              {product.recipeItems.length === 0 ? (
+              {product.recipeItems.length === 0 && (!product.productRecipeItems || product.productRecipeItems.length === 0) ? (
                 <div className="py-6 text-center rounded-lg bg-accent/10 border border-dashed border-border/40">
-                  <p className="text-sm text-muted-foreground font-medium">No has definido insumos para este producto aún.</p>
+                  <p className="text-sm text-muted-foreground font-medium">No has definido ingredientes para este producto aún.</p>
                 </div>
               ) : (
                 <div className="overflow-hidden rounded-lg border border-border/30 bg-card shadow-sm">
                   <Table>
                     <TableHeader>
                       <TableRow className="bg-accent/5 hover:bg-accent/5">
-                        <TableHead className="h-9 text-[10px] uppercase tracking-widest font-bold">Insumo</TableHead>
+                        <TableHead className="h-9 text-[10px] uppercase tracking-widest font-bold">Ingrediente</TableHead>
+                        <TableHead className="h-9 text-[10px] uppercase tracking-widest font-bold">Tipo</TableHead>
                         <TableHead className="h-9 text-[10px] uppercase tracking-widest font-bold">Consumo por Receta</TableHead>
                         <TableHead className="h-9 text-[10px] uppercase tracking-widest font-bold text-right">Costo Est.</TableHead>
                         <TableHead className="h-9 text-[10px] uppercase tracking-widest font-bold text-right">Acción</TableHead>
@@ -334,12 +419,36 @@ export function ProductCard({
                             key={item.id}
                             item={item}
                             cost={cost}
+                            type="supply"
                             onEdit={(item) => {
                               setEditQuantity(Number(item.quantityRequired))
                               setEditUnit(item.unit)
                               setEditingRecipeItem(item)
                             }}
                             onDelete={(id) => setRecipeItemToDelete(id)}
+                          />
+                        )
+                      })}
+                      {(product.productRecipeItems || []).map((item: any) => {
+                        const cost = (Number(item.quantity) || 0) * (Number(item.preparation?.costPrice) || 0)
+                        return (
+                          <RecipeItemRow
+                            key={item.id}
+                            item={{
+                              id: item.id,
+                              name: item.preparation?.name || 'Desconocido',
+                              quantityRequired: Number(item.quantity),
+                              unit: item.unit,
+                              supply: null,
+                            }}
+                            cost={cost}
+                            type="preparation"
+                            onEdit={() => {
+                              setEditingPrepRecipeItem(item)
+                              setEditPrepQty(Number(item.quantity))
+                              setEditPrepUnit(item.unit)
+                            }}
+                            onDelete={(id) => setPrepRecipeItemToDelete(id)}
                           />
                         )
                       })}
@@ -353,41 +462,108 @@ export function ProductCard({
       </Card>
 
       {/* Production Modal */}
-      <ConfirmationModal
+      <Dialog
         isOpen={isProducing}
         onClose={() => setIsProducing(false)}
-        onConfirm={handleConfirmProduce}
         title={`Producir ${product.name}`}
-        description=""
-        confirmText="Confirmar Producción"
-        variant="warning"
       >
-        <div className="space-y-4 pt-2">
-          <div className="p-4 bg-muted/30 rounded-lg space-y-2">
-            <p className="text-sm text-muted-foreground">
-              Se consumirán los materiales necesarios para producir <strong>1 lote</strong> de la receta.
-            </p>
-            <div className="flex justify-between items-center py-1.5 border-t border-border/30">
-              <span className="text-sm font-medium text-foreground">Rendimiento Esperado:</span>
-              <span className="text-sm font-black text-amber-500">{product.yield || 1} unidades</span>
+        <div className="space-y-6">
+          <div className="space-y-4">
+            <div className="p-4 bg-muted/30 rounded-lg space-y-2">
+              <p className="text-sm text-muted-foreground">
+                Se consumirán los materiales necesarios para producir <strong>1 lote</strong> de la receta.
+              </p>
+              <div className="flex justify-between items-center py-1.5 border-t border-border/30">
+                <span className="text-sm font-medium text-foreground">Rendimiento Esperado:</span>
+                <span className="text-sm font-black text-amber-500">{product.yield || 1} unidades</span>
+              </div>
             </div>
+
+            <div className="space-y-3">
+              <label className="text-xs font-bold uppercase tracking-widest text-foreground">
+                Unidades Reales Obtenidas
+              </label>
+              <p className="text-xs text-foreground/60 mb-2">
+                Ajusta si salieron más o menos de lo esperado.
+              </p>
+              <NumericInput
+                value={actualYield}
+                onChange={setActualYield}
+                className="h-14 text-lg font-black text-center border-amber-500/30 focus-visible:ring-amber-500/20"
+              />
+            </div>
+
+            {(product.recipeItems?.length > 0 || product.productRecipeItems?.length > 0) && (
+              <div className="rounded-lg border border-border/50 bg-accent/5 overflow-hidden">
+                <div className="bg-accent/10 px-4 py-2 border-b border-border/50">
+                  <p className="text-[10px] font-bold uppercase tracking-widest">Ingredientes Requeridos</p>
+                </div>
+                <div className="p-4 space-y-2">
+                  {product.recipeItems?.map((item: any) => {
+                    const required = Number(item.quantityRequired)
+                    const isOk = item.supply && item.supply.currentStock >= required
+                    return (
+                      <div key={item.id} className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          {isOk ? (
+                            <CheckCircle2 size={14} className="text-emerald-500" />
+                          ) : (
+                            <AlertCircle size={14} className="text-rose-500" />
+                          )}
+                          <span className="text-sm font-medium">{item.supply?.name || 'Insumo'}</span>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-xs font-bold">{required} {item.unit}</p>
+                          <p className={`text-[10px] ${isOk ? 'text-muted-foreground' : 'text-rose-500 font-bold'}`}>
+                            Stock: {item.supply?.currentStock || 0}
+                          </p>
+                        </div>
+                      </div>
+                    )
+                  })}
+                  {product.productRecipeItems?.map((item: any) => {
+                    const required = Number(item.quantity)
+                    const isOk = item.preparation && item.preparation.currentStock >= required
+                    return (
+                      <div key={item.id} className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          {isOk ? (
+                            <CheckCircle2 size={14} className="text-emerald-500" />
+                          ) : (
+                            <AlertCircle size={14} className="text-rose-500" />
+                          )}
+                          <FlaskConical size={14} className="text-amber-500" />
+                          <span className="text-sm font-medium">{item.preparation?.name || 'Preparación'}</span>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-xs font-bold">{required} {item.unit}</p>
+                          <p className={`text-[10px] ${isOk ? 'text-muted-foreground' : 'text-rose-500 font-bold'}`}>
+                            Stock: {item.preparation?.currentStock || 0}
+                          </p>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
           </div>
 
-          <div className="space-y-3">
-            <label className="text-xs font-bold uppercase tracking-widest text-foreground">
-              Unidades Reales Obtenidas
-            </label>
-            <p className="text-xs text-foreground/60 mb-2">
-              Ajusta si salieron más o menos de lo esperado. Este valor actualizará el rendimiento del producto.
-            </p>
-            <NumericInput
-              value={actualYield}
-              onChange={setActualYield}
-              className="h-14 text-lg font-black text-center border-amber-500/30 focus-visible:ring-amber-500/20"
-            />
+          <div className="flex gap-3 pt-2">
+            <Button type="button" onClick={() => setIsProducing(false)} variant="ghost" className="flex-1 h-12 rounded-lg">
+              Cancelar
+            </Button>
+            <Button
+              type="button"
+              onClick={handleConfirmProduce}
+              disabled={hasInsufficientStock || totalRecipeIngredients === 0}
+              className="flex-1 h-12 rounded-lg font-bold shadow-lg shadow-amber-500/20 bg-amber-500 hover:bg-amber-600 text-white disabled:bg-muted-foreground/20 disabled:text-muted-foreground disabled:shadow-none"
+            >
+              Confirmar Producción
+            </Button>
           </div>
         </div>
-      </ConfirmationModal>
+      </Dialog>
 
       {/* Consumption Modal */}
       <ConfirmationModal
@@ -459,6 +635,25 @@ export function ProductCard({
       />
 
       <ConfirmationModal
+        isOpen={prepRecipeItemToDelete !== null}
+        onClose={() => setPrepRecipeItemToDelete(null)}
+        onConfirm={() => {
+          if (!prepRecipeItemToDelete) return
+          const id = prepRecipeItemToDelete
+          setPrepRecipeItemToDelete(null)
+          startTransition(async () => {
+            await removeProductRecipeItem(id)
+            toast.warning({ title: 'Preparación quitada de la receta' })
+            invalidateProducts()
+          })
+        }}
+        title="¿Quitar preparación de la receta?"
+        description="Esta preparación será removida de la receta del producto. Esta acción no se puede deshacer."
+        confirmText="Quitar Preparación"
+        variant="danger"
+      />
+
+      <ConfirmationModal
         isOpen={editingRecipeItem !== null}
         onClose={() => setEditingRecipeItem(null)}
         onConfirm={() => {
@@ -518,6 +713,51 @@ export function ProductCard({
         </div>
       </ConfirmationModal>
 
+      <ConfirmationModal
+        isOpen={editingPrepRecipeItem !== null}
+        onClose={() => setEditingPrepRecipeItem(null)}
+        onConfirm={() => {
+          if (!editingPrepRecipeItem) return
+          startTransition(async () => {
+            await updateProductRecipeItem(editingPrepRecipeItem.id, editPrepQty, editPrepUnit)
+            setEditingPrepRecipeItem(null)
+            invalidateProducts()
+          })
+        }}
+        title="Editar Preparación en Receta"
+        description=""
+        confirmText="Guardar Cambios"
+        variant="primary"
+      >
+        <div className="space-y-4 pt-2">
+          <div className="p-4 bg-muted/30 rounded-lg">
+            <p className="text-sm font-bold text-foreground mb-1">{editingPrepRecipeItem?.preparation?.name}</p>
+            <p className="text-xs text-muted-foreground">
+              {formatCurrency(Number(editingPrepRecipeItem?.preparation?.costPrice) || 0)} / {editingPrepRecipeItem?.preparation?.unit}
+            </p>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <label className="text-xs font-bold uppercase tracking-widest text-foreground">Cantidad</label>
+              <NumericInput value={editPrepQty} onChange={setEditPrepQty} className="h-12" />
+            </div>
+            <div className="space-y-2">
+              <label className="text-xs font-bold uppercase tracking-widest text-foreground">Unidad</label>
+              <Select value={editPrepUnit} onValueChange={setEditPrepUnit}>
+                <SelectTrigger className="h-12">
+                  <SelectValue placeholder="Seleccionar" />
+                </SelectTrigger>
+                <SelectContent>
+                  {['kg', 'g', 'L', 'mL', 'ud', 'pza', 'paq'].map((u: string) => (
+                    <SelectItem key={u} value={u}>{u}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </div>
+      </ConfirmationModal>
+
       {/* Recipe Modal */}
       <Modal isOpen={isRecipeOpen} onClose={() => setIsRecipeOpen(false)} title={`Receta: ${product.name}`}>
         <div className="p-6">
@@ -534,23 +774,35 @@ export function ProductCard({
   )
 }
 
-function RecipeItemRow({ item, cost, onEdit, onDelete }: {
+function RecipeItemRow({ item, cost, type, onEdit, onDelete }: {
   item: any
   cost: number
+  type: 'supply' | 'preparation'
   onEdit: (item: any) => void
   onDelete: (id: string) => void
 }) {
   return (
     <TableRow className="group/row hover:bg-accent/5">
       <TableCell className="py-2.5 font-semibold text-sm">
-        {item.supply.name}
+        {item.name || item.supply?.name || 'Desconocido'}
         <span className="block text-[10px] text-muted-foreground font-normal">
-          {formatCurrency(Number(item.supply?.purchasePrice) || 0)} / {item.supply?.unit}
+          {item.supply
+            ? `${formatCurrency(Number(item.supply?.purchasePrice) || 0)} / ${item.supply?.unit}`
+            : item.supply === undefined
+              ? ''
+              : `${formatCurrency(Number(item.preparation?.costPrice) || 0)} / ${item.preparation?.unit || 'ud'}`}
+        </span>
+      </TableCell>
+      <TableCell className="py-2.5">
+        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${
+          type === 'supply' ? 'bg-blue-500/10 text-blue-600' : 'bg-amber-500/10 text-amber-600'
+        }`}>
+          {type === 'supply' ? 'Insumo' : 'Preparación'}
         </span>
       </TableCell>
       <TableCell className="py-2.5">
         <span className="text-[10px] font-bold px-2 py-0.5 bg-accent/50 text-muted-foreground rounded-md">
-          {Number(item.quantityRequired)} {item.unit}
+          {Number(item.quantityRequired || item.quantity)} {item.unit}
         </span>
       </TableCell>
       <TableCell className="py-2.5 text-right font-medium text-xs">
@@ -558,15 +810,17 @@ function RecipeItemRow({ item, cost, onEdit, onDelete }: {
       </TableCell>
       <TableCell className="py-2.5 text-right">
         <div className="flex items-center justify-end gap-1">
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={() => onEdit(item)}
-            className="h-6 w-6 p-0 rounded-lg hover:bg-primary/10 hover:text-primary transition-colors group"
-          >
-            <Edit2 className='w-4 h-4 group-hover:text-primary' />
-          </Button>
+          {type === 'preparation' || type === 'supply' ? (
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => onEdit(item)}
+              className="h-6 w-6 p-0 rounded-lg hover:bg-primary/10 hover:text-primary transition-colors group"
+            >
+              <Edit2 className='w-4 h-4 group-hover:text-primary' />
+            </Button>
+          ) : null}
           <Button
             type="button"
             variant="ghost"

@@ -12,21 +12,26 @@ export async function deleteProductionLog(id: string) {
   if (!log) throw new Error('Log no encontrado')
 
   await prisma.$transaction(async (tx) => {
-    // 1. Restaurar insumos
     for (const item of log.items) {
-      await tx.supply.update({
-        where: { id: item.supplyId },
-        data: { currentStock: { increment: item.quantityConsumed } }
-      })
+      if (item.supplyId) {
+        await tx.supply.update({
+          where: { id: item.supplyId },
+          data: { currentStock: { increment: item.quantityConsumed } }
+        })
+      }
+      if (item.preparationId) {
+        await tx.preparation.update({
+          where: { id: item.preparationId },
+          data: { currentStock: { increment: item.quantityConsumed } }
+        })
+      }
     }
 
-    // 2. Descontar producto final
     await tx.product.update({
       where: { id: log.productId },
       data: { currentStock: { decrement: log.actualYield } }
     })
 
-    // 3. Eliminar log (y sus items por Cascade)
     await tx.productionLog.delete({ where: { id } })
   })
 
