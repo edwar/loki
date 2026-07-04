@@ -16,7 +16,8 @@ export default async function ProductionPage() {
         product: true,
         items: {
           include: {
-            supply: true
+            supply: true,
+            preparation: true,
           }
         }
       }
@@ -37,12 +38,17 @@ export default async function ProductionPage() {
       ...item,
       quantityConsumed: Number(item.quantityConsumed),
       unitCost: Number(item.unitCost),
-      supply: {
+      supply: item.supply ? {
         ...item.supply,
         currentStock: Number(item.supply.currentStock),
         minStock: Number(item.supply.minStock),
         purchasePrice: Number(item.supply.purchasePrice)
-      }
+      } : null,
+      preparation: item.preparation ? {
+        ...item.preparation,
+        currentStock: Number(item.preparation.currentStock),
+        costPrice: Number(item.preparation.costPrice),
+      } : null,
     }))
   }))
 
@@ -50,7 +56,7 @@ export default async function ProductionPage() {
     id: p.id,
     name: p.name,
     yield: Number(p.yield) || 1,
-    recipeItems: p.recipeItems.map(ri => ({
+    recipeItems: p.recipeItems.map((ri: any) => ({
       id: ri.id,
       quantityRequired: Number(ri.quantityRequired),
       supply: ri.supply ? {
@@ -59,7 +65,18 @@ export default async function ProductionPage() {
         currentStock: Number(ri.supply.currentStock),
         unit: ri.supply.unit
       } : null
-    }))
+    })),
+    productRecipeItems: p.productRecipeItems?.map((pri: any) => ({
+      id: pri.id,
+      quantity: Number(pri.quantity),
+      preparation: pri.preparation ? {
+        id: pri.preparation.id,
+        name: pri.preparation.name,
+        currentStock: Number(pri.preparation.currentStock),
+        unit: pri.preparation.unit,
+        costPrice: Number(pri.preparation.costPrice),
+      } : null,
+    })) || [],
   }))
 
   const exportData = serializedLogs.map(log => ({
@@ -69,7 +86,7 @@ export default async function ProductionPage() {
     'Lotes Fabricados': log.batches,
     'Unidades Producidas': log.actualYield,
     'Costo Insumos ($)': log.items.reduce((acc, item) => acc + (item.quantityConsumed * item.unitCost), 0),
-    'Detalle Insumos': log.items.map(item => `${item.quantityConsumed} ${item.supply.unit} de ${item.supply.name}`).join(' | ')
+    'Detalle Insumos': log.items.map(item => `${item.quantityConsumed} ${item.supply?.unit || 'ud'} de ${item.supply?.name || item.preparation?.name || 'Desconocido'}`).join(' | ')
   }))
 
   return (

@@ -12,7 +12,7 @@ export async function getProducts() {
     ? await prisma.user.findUnique({ where: { id: session.user.id }, select: { companyId: true } })
     : null
 
-  return prisma.product.findMany({
+  const products = await prisma.product.findMany({
     where: {
       deletedAt: null,
       ...(user?.companyId ? { companyId: user.companyId } : {}),
@@ -28,9 +28,88 @@ export async function getProducts() {
         include: { supply: true },
         orderBy: { createdAt: 'desc' },
       },
+      productRecipeItems: {
+        where: { deletedAt: null },
+        include: { preparation: true },
+        orderBy: { createdAt: 'desc' },
+      },
     },
     orderBy: { createdAt: 'desc' },
   })
+
+  const prepIds = products.flatMap((p) =>
+    p.productRecipeItems.map((pri) => pri.preparationId)
+  )
+
+  if (prepIds.length > 0) {
+    const prepsWithIngredients = await prisma.preparation.findMany({
+      where: { id: { in: prepIds } },
+      include: {
+        ingredients: {
+          include: { supply: true, subPreparation: true },
+        },
+      },
+    })
+
+    const costMap = new Map<string, number>()
+
+    function resolveCost(prepId: string, visited: Set<string>): number {
+      const cached = costMap.get(prepId)
+      if (cached !== undefined) return cached
+      if (visited.has(prepId)) return 0
+      visited.add(prepId)
+
+      const prep = prepsWithIngredients.find((p) => p.id === prepId)
+      if (!prep) return 0
+
+      const yieldAmount = Number(prep.yield) || 1
+      const total = prep.ingredients.reduce((acc, ing) => {
+        const qty = Number(ing.quantity) || 0
+        if (ing.supply) return acc + qty * (Number(ing.supply.purchasePrice) || 0)
+        if (ing.subPreparation) return acc + qty * resolveCost(ing.subPreparation.id, visited)
+        return acc
+      }, 0)
+      const cost = yieldAmount > 0 ? total / yieldAmount : 0
+      costMap.set(prepId, cost)
+      return cost
+    }
+
+    for (const prep of prepsWithIngredients) {
+      resolveCost(prep.id, new Set())
+    }
+
+    for (const product of products) {
+      for (const pri of product.productRecipeItems) {
+        const computed = costMap.get(pri.preparationId)
+        if (computed !== undefined) {
+          ;(pri.preparation as any).costPrice = computed
+        }
+      }
+    }
+  }
+
+  return (products as any[]).map((p) => ({
+    ...p,
+    currentStock: Number(p.currentStock),
+    yield: Number(p.yield),
+    profitMargin: Number(p.profitMargin),
+    salePrice: Number(p.salePrice),
+    recipeItems: (p.recipeItems || []).map((ri: any) => ({
+      ...ri,
+      quantityRequired: Number(ri.quantityRequired),
+      supply: ri.supply
+        ? { ...ri.supply, currentStock: Number(ri.supply.currentStock), minStock: Number(ri.supply.minStock), purchasePrice: Number(ri.supply.purchasePrice) }
+        : null,
+    })),
+    productRecipeItems: (p.productRecipeItems || []).map((pri: any) => ({
+      ...pri,
+      quantity: Number(pri.quantity),
+      preparation: pri.preparation
+        ? { ...pri.preparation, yield: Number(pri.preparation.yield), currentStock: Number(pri.preparation.currentStock), minStock: Number(pri.preparation.minStock), costPrice: Number(pri.preparation.costPrice) }
+        : null,
+    })),
+    images: (p.images || []).map((i: any) => ({ ...i })),
+  }))
 }
 
 export async function createProduct(formData: FormData) {
@@ -168,60 +247,72 @@ export async function deleteProduct(id: string) {
 export async function prepareProduct(productId: string, batches: number, actualYield: number) {
   const product = await prisma.product.findUnique({
     where: { id: productId },
-    include: { recipeItems: { where: { deletedAt: null } } }
+    include: {
+      recipeItems: { where: { deletedAt: null } },
+      productRecipeItems: { where: { deletedAt: null }, include: { preparation: true } },
+    }
   })
 
   if (!product) throw new Error('Producto no encontrado')
 
-  // 1. Verificar disponibilidad y preparar deducciones
   const supplyUpdates: { id: string; quantity: number; unitCost: number }[] = []
+  const prepUpdates: { id: string; quantity: number; unitCost: number }[] = []
+
   for (const item of product.recipeItems) {
     const supply = await prisma.supply.findUnique({ where: { id: item.supplyId } })
-    
     let totalRequired = Number(item.quantityRequired) * batches
-    
-    // Convertir si las unidades son diferentes
     if (supply && item.unit && supply.unit !== item.unit) {
       const converted = convertUnits(totalRequired, item.unit, supply.unit)
-      if (converted !== null) {
-        totalRequired = converted
-      }
+      if (converted !== null) totalRequired = converted
     }
-    
     if (!supply || Number(supply.currentStock) < totalRequired) {
       throw new Error(`Insumo insuficiente: ${supply?.name || 'Desconocido'}`)
     }
-
     supplyUpdates.push({
       id: item.supplyId,
       quantity: totalRequired,
-      unitCost: Number(supply.purchasePrice) // We store the current cost for historical accuracy
+      unitCost: Number(supply.purchasePrice),
     })
   }
 
-  // 2. Ejecutar transacciones
+  for (const item of product.productRecipeItems) {
+    const prep = item.preparation
+    const totalRequired = Number(item.quantity) * batches
+    if (Number(prep.currentStock) < totalRequired) {
+      throw new Error(`Preparación insuficiente: ${prep.name}`)
+    }
+    prepUpdates.push({
+      id: prep.id,
+      quantity: totalRequired,
+      unitCost: Number(prep.costPrice),
+    })
+  }
+
   await prisma.$transaction(async (tx) => {
-    // Deducir insumos
     for (const update of supplyUpdates) {
       await tx.supply.update({
         where: { id: update.id },
-        data: { currentStock: { decrement: update.quantity } }
+        data: { currentStock: { decrement: update.quantity } },
       })
     }
 
-    // Aumentar stock de producto con el rendimiento real obtenido
+    for (const update of prepUpdates) {
+      await tx.preparation.update({
+        where: { id: update.id },
+        data: { currentStock: { decrement: update.quantity } },
+      })
+    }
+
     await tx.product.update({
       where: { id: productId },
-      data: { currentStock: { increment: actualYield } }
+      data: { currentStock: { increment: actualYield } },
     })
 
-    // Actualizar rendimiento esperado del producto con el real obtenido
     await tx.product.update({
       where: { id: productId },
-      data: { yield: actualYield }
+      data: { yield: actualYield },
     })
 
-    // Registrar el log de producción
     await tx.productionLog.create({
       data: {
         productId,
@@ -229,19 +320,27 @@ export async function prepareProduct(productId: string, batches: number, actualY
         actualYield,
         batches,
         items: {
-          create: supplyUpdates.map(update => ({
-            supplyId: update.id,
-            quantityConsumed: update.quantity,
-            unitCost: update.unitCost
-          }))
-        }
-      }
+          create: [
+            ...supplyUpdates.map(update => ({
+              supplyId: update.id,
+              quantityConsumed: update.quantity,
+              unitCost: update.unitCost,
+            })),
+            ...prepUpdates.map(update => ({
+              preparationId: update.id,
+              quantityConsumed: update.quantity,
+              unitCost: update.unitCost,
+            })),
+          ],
+        },
+      },
     })
   })
 
   revalidatePath('/produccion')
   revalidatePath('/productos')
   revalidatePath('/insumos')
+  revalidatePath('/preparaciones')
   revalidatePath('/ventas')
   revalidatePath('/')
 }
