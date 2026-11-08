@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Button } from '@/components/ui/button'
-import { formatCurrency, cn } from '@/lib/utils'
+import { formatCurrency, formatUnitPrice, cn } from '@/lib/utils'
 import { Trash2, Edit2, Package } from 'lucide-react'
 import { Modal } from '@/components/ui/modal'
 import { SupplyForm } from './supply-forms'
@@ -83,7 +83,7 @@ export function SupplyTable({
                     </div>
                   </TableCell>
                   <TableCell className="font-medium text-muted-foreground">
-                    {formatCurrency(Number(supply.purchasePrice))}
+                    {formatUnitPrice(Number(supply.purchasePrice))}
                   </TableCell>
                   <TableCell className="font-bold text-primary">
                     {formatCurrency(Number(supply.currentStock) * Number(supply.purchasePrice))}

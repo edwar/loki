@@ -88,7 +88,7 @@ export function CustomerFormModal({ customer, onSuccess, onClose }: CustomerForm
             <PhoneInput
               name="phone"
               value={phone}
-              onChange={setPhone}
+              onValueChange={setPhone}
               placeholder="300 000 0000"
               className="h-12"
             />

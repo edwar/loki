@@ -77,7 +77,7 @@ export function SupplierFormModal({ supplier, onSuccess, onClose }: SupplierForm
             <PhoneInput
               name="phone"
               value={phone}
-              onChange={setPhone}
+              onValueChange={setPhone}
               placeholder="300 000 0000"
               className="h-12"
             />

@@ -15,13 +15,13 @@ export const PhoneInput = React.forwardRef<HTMLInputElement, PhoneInputProps>(
 
     React.useEffect(() => {
       if (propValue !== undefined) {
-        setValue(formatPhoneNumber(propValue as string))
+        setValue(formatPhoneNumber(String(propValue ?? '')))
       }
     }, [propValue])
 
     function formatPhoneNumber(val: string) {
       // Remove all non-numeric characters
-      const cleaned = val.replace(/\D/g, '')
+      const cleaned = String(val ?? '').replace(/\D/g, '')
 
       // Limit to 10 digits (common for mobile)
       const limited = cleaned.slice(0, 10)
