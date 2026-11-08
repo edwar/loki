@@ -17,26 +17,42 @@ import { X, Package } from 'lucide-react'
 import { UNIDADES } from '@/lib/constants'
 import { getUnitType, convertUnits } from '@/lib/conversions'
 
+const NEW_CATEGORY = '__new__'
+
 interface Category {
   id: string
   name: string
   type: string
 }
 
+export interface SupplyDraft {
+  name: string
+  categoryId: string
+  displayUnit: string
+  minStock: number
+  unitsPerPack: number
+  purchasePrice: number
+  conversionFactor: string
+  isConsumable: boolean
+}
+
 interface SupplyFormProps {
   onSuccess?: () => void
   onClose?: () => void
+  initialDraft?: SupplyDraft | null
+  onRequestNewCategory?: (draft: SupplyDraft) => void
 }
 
-export function SupplyForm({ onSuccess, onClose }: SupplyFormProps) {
+export function SupplyForm({ onSuccess, onClose, initialDraft, onRequestNewCategory }: SupplyFormProps) {
   const [loading, setLoading] = useState(false)
-  const [name, setName] = useState('')
-  const [categoryId, setCategoryId] = useState('')
-  const [displayUnit, setDisplayUnit] = useState('unidad')
-  const [minStock, setMinStock] = useState(1)
-  const [unitsPerPack, setUnitsPerPack] = useState(1)
-  const [purchasePrice, setPurchasePrice] = useState(0)
-  const [conversionFactor, setConversionFactor] = useState('')
+  const [name, setName] = useState(initialDraft?.name ?? '')
+  const [categoryId, setCategoryId] = useState(initialDraft?.categoryId ?? '')
+  const [displayUnit, setDisplayUnit] = useState(initialDraft?.displayUnit ?? 'unidad')
+  const [minStock, setMinStock] = useState(initialDraft?.minStock ?? 1)
+  const [unitsPerPack, setUnitsPerPack] = useState(initialDraft?.unitsPerPack ?? 1)
+  const [purchasePrice, setPurchasePrice] = useState(initialDraft?.purchasePrice ?? 0)
+  const [conversionFactor, setConversionFactor] = useState(initialDraft?.conversionFactor ?? '')
+  const [isConsumable, setIsConsumable] = useState(initialDraft?.isConsumable ?? false)
   const { data: categories = [] } = useQuery<Category[]>({
     queryKey: ['categories', 'supply'],
     queryFn: async () => {
@@ -85,7 +101,8 @@ export function SupplyForm({ onSuccess, onClose }: SupplyFormProps) {
           unitsPerPack: finalUnitsPerPack,
           minStock,
           purchasePrice: basePrice,
-          conversionFactor: showConversionFactor ? conversionFactor : null
+          conversionFactor: showConversionFactor ? conversionFactor : null,
+          isConsumable
         })
       })
 
@@ -130,7 +147,16 @@ export function SupplyForm({ onSuccess, onClose }: SupplyFormProps) {
 
         <div className="space-y-2">
           <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Categoría</label>
-          <Select value={categoryId} onValueChange={setCategoryId}>
+          <Select
+            value={categoryId}
+            onValueChange={(value) => {
+              if (value === NEW_CATEGORY) {
+                onRequestNewCategory?.({ name, categoryId: '', displayUnit, minStock, unitsPerPack, purchasePrice, conversionFactor, isConsumable })
+                return
+              }
+              setCategoryId(value)
+            }}
+          >
             <SelectTrigger className="h-11">
               <SelectValue placeholder="Seleccionar categoría..." />
             </SelectTrigger>
@@ -138,6 +164,22 @@ export function SupplyForm({ onSuccess, onClose }: SupplyFormProps) {
               {categories.map(cat => (
                 <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
               ))}
+              <SelectItem value={NEW_CATEGORY} className="text-primary font-medium">
+                + Nueva categoría
+              </SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="space-y-2">
+          <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Uso</label>
+          <Select value={isConsumable ? 'consumable' : 'ingredient'} onValueChange={(v) => setIsConsumable(v === 'consumable')}>
+            <SelectTrigger className="h-11">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="ingredient">Solo ingrediente de recetas</SelectItem>
+              <SelectItem value="consumable">También consumible (se descuenta en Consumibles)</SelectItem>
             </SelectContent>
           </Select>
         </div>

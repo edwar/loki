@@ -48,6 +48,7 @@ export async function GET() {
         minStock: Number(p.minStock),
         costPrice,
         notes: p.notes,
+        isConsumable: p.isConsumable,
         ingredients,
         createdAt: p.createdAt,
       }

@@ -286,14 +286,6 @@ body {
 }
 
 /* View Transitions */
-::view-transition-old(page-content) {
-  animation: 0.2s ease-out both fade-out;
-}
-
-::view-transition-new(page-content) {
-  animation: 0.3s ease-out 0.05s both fade-in;
-}
-
 @keyframes fade-out {
   to { opacity: 0; }
 }
@@ -318,3 +310,12 @@ input[type="number"]::-webkit-outer-spin-button {
 input[type="number"] {
   -moz-appearance: textfield;
 }
+/* Modal enter/exit animations */
+@keyframes modal-backdrop-in { from { opacity: 0 } to { opacity: 1 } }
+@keyframes modal-backdrop-out { from { opacity: 1 } to { opacity: 0 } }
+@keyframes modal-panel-in { from { opacity: 0; transform: scale(0.95) translateY(8px) } to { opacity: 1; transform: none } }
+@keyframes modal-panel-out { from { opacity: 1; transform: none } to { opacity: 0; transform: scale(0.95) translateY(8px) } }
+.modal-backdrop-in { animation: modal-backdrop-in 200ms ease-out both }
+.modal-backdrop-out { animation: modal-backdrop-out 200ms ease-in both }
+.modal-panel-in { animation: modal-panel-in 200ms ease-out both }
+.modal-panel-out { animation: modal-panel-out 200ms ease-in both }

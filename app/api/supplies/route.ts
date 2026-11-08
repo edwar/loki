@@ -9,6 +9,9 @@ export async function GET() {
     const supplies = suppliesRaw.map((s: any) => ({
       id: s.id,
       name: s.name,
+      categoryId: s.categoryId,
+      isConsumable: s.isConsumable,
+      unitsPerPack: s.unitsPerPack ?? 1,
       category: s.category?.name || null,
       unit: s.unit,
       currentStock: Number(s.currentStock),
@@ -28,7 +31,7 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const body = await request.json()
-    const { name, categoryId, unit, unitsPerPack, minStock, purchasePrice, conversionFactor } = body
+    const { name, categoryId, unit, unitsPerPack, minStock, purchasePrice, conversionFactor, isConsumable } = body
 
     const supply = await prisma.supply.create({
       data: {
@@ -40,6 +43,7 @@ export async function POST(request: Request) {
         currentStock: 0,
         purchasePrice: purchasePrice || 0,
         conversionFactor: conversionFactor ? parseFloat(conversionFactor) : null,
+        isConsumable: !!isConsumable,
       },
     })
 

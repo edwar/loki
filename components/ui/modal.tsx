@@ -5,6 +5,8 @@ import { createPortal } from 'react-dom'
 import { X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
+export const MODAL_EXIT_MS = 200
+
 interface ModalProps {
   isOpen: boolean
   onClose: () => void
@@ -20,6 +22,17 @@ export function Modal({ isOpen, onClose, title, children, className }: ModalProp
     setMounted(true)
   }, [])
 
+  // Mantiene el modal montado durante la animación de salida
+  const [render, setRender] = useState(isOpen)
+  useEffect(() => {
+    if (isOpen) {
+      setRender(true)
+      return
+    }
+    const t = setTimeout(() => setRender(false), MODAL_EXIT_MS)
+    return () => clearTimeout(t)
+  }, [isOpen])
+
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden'
@@ -31,20 +44,25 @@ export function Modal({ isOpen, onClose, title, children, className }: ModalProp
     }
   }, [isOpen])
 
-  if (!mounted || !isOpen) return null
+  if (!mounted || !render) return null
+  const closing = !isOpen
 
   return createPortal(
-    <div className="fixed inset-0 z-9999 flex items-center justify-center">
+    <div className={cn('fixed inset-0 z-9999 flex items-center justify-center', closing && 'pointer-events-none')}>
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300"
+        className={cn(
+          'absolute inset-0 bg-black/60 backdrop-blur-sm',
+          closing ? 'modal-backdrop-out' : 'modal-backdrop-in'
+        )}
         onClick={onClose}
       />
 
       {/* Modal Content */}
       <div
         className={cn(
-          'relative w-full max-w-3xl mx-4 max-h-[90vh] bg-card rounded-xl shadow-2xl animate-in zoom-in-95 fade-in duration-300 flex flex-col',
+          'relative w-full max-w-3xl mx-4 max-h-[90vh] bg-card rounded-xl shadow-2xl flex flex-col',
+          closing ? 'modal-panel-out' : 'modal-panel-in',
           className
         )}
       >

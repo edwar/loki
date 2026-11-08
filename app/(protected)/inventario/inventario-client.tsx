@@ -7,9 +7,10 @@ import { Package, TrendingUp, AlertCircle, Plus, ChevronLeft, ChevronRight } fro
 import { SupplyTable } from '@/components/supply-table'
 import { ExportButton } from '@/components/ui/export-button'
 import { formatDate } from '@/lib/utils'
-import { Modal } from '@/components/ui/modal'
+import { Modal, MODAL_EXIT_MS } from '@/components/ui/modal'
 import { PurchaseForm } from '@/components/purchase-form'
-import { SupplyForm } from '@/components/supply-form'
+import { SupplyForm, type SupplyDraft } from '@/components/supply-form'
+import { CategoryQuickForm } from '@/components/category-quick-form'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
@@ -41,6 +42,8 @@ export function InventarioClient({ supplies: initialSupplies, suppliers }: Inven
   const queryClient = useQueryClient()
   const [modalOpen, setModalOpen] = useState(false)
   const [supplyModalOpen, setSupplyModalOpen] = useState(false)
+  const [categoryModalOpen, setCategoryModalOpen] = useState(false)
+  const [supplyDraft, setSupplyDraft] = useState<SupplyDraft | null>(null)
   const [currentPage, setCurrentPage] = useState(1)
   const [itemsPerPage, setItemsPerPage] = useState(5)
 
@@ -102,6 +105,22 @@ export function InventarioClient({ supplies: initialSupplies, suppliers }: Inven
     'Proveedor': supply.supplier?.name || 'N/A',
     'Última Actualización': formatDate(supply.updatedAt)
   }))
+
+  // Insumo -> Categoría: cierra el modal actual y, tras la animación de salida, abre el siguiente
+  const openCategoryModal = (draft: SupplyDraft) => {
+    setSupplyDraft(draft)
+    setSupplyModalOpen(false)
+    setTimeout(() => setCategoryModalOpen(true), MODAL_EXIT_MS)
+  }
+
+  // Categoría -> Insumo: al crear o cancelar, se vuelve al insumo conservando lo ya escrito
+  const closeCategoryModal = (createdCategoryId?: string) => {
+    if (createdCategoryId) {
+      setSupplyDraft((d) => (d ? { ...d, categoryId: createdCategoryId } : d))
+    }
+    setCategoryModalOpen(false)
+    setTimeout(() => setSupplyModalOpen(true), MODAL_EXIT_MS)
+  }
 
   const handleSuccess = () => {
     queryClient.invalidateQueries({ queryKey: ['supplies'] })
@@ -211,6 +230,7 @@ export function InventarioClient({ supplies: initialSupplies, suppliers }: Inven
             suppliers={suppliers}
             onDelete={deleteMutation.mutate}
             isDeleting={deleteMutation.isPending}
+            onEdited={handleSuccess}
           />
         </CardContent>
 
@@ -282,12 +302,33 @@ export function InventarioClient({ supplies: initialSupplies, suppliers }: Inven
       </Modal>
 
       {/* Modal Crear Insumo */}
-      <Modal isOpen={supplyModalOpen} onClose={() => setSupplyModalOpen(false)}>
+      <Modal
+        isOpen={supplyModalOpen}
+        onClose={() => {
+          setSupplyModalOpen(false)
+          setSupplyDraft(null)
+        }}
+      >
         <div className="p-8">
           <SupplyForm
-            onSuccess={handleSuccess}
-            onClose={() => setSupplyModalOpen(false)}
+            initialDraft={supplyDraft}
+            onRequestNewCategory={openCategoryModal}
+            onSuccess={() => {
+              setSupplyDraft(null)
+              handleSuccess()
+            }}
+            onClose={() => {
+              setSupplyModalOpen(false)
+              setSupplyDraft(null)
+            }}
           />
+        </div>
+      </Modal>
+
+      {/* Modal Nueva Categoría (desde Nuevo Insumo) */}
+      <Modal isOpen={categoryModalOpen} onClose={() => closeCategoryModal()} className="max-w-md">
+        <div className="p-8">
+          <CategoryQuickForm onCreated={(id) => closeCategoryModal(id)} onClose={() => closeCategoryModal()} />
         </div>
       </Modal>
     </div>

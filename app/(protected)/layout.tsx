@@ -29,7 +29,7 @@ import {
   Settings,
   FlaskConical
 } from 'lucide-react'
-import { useState, ViewTransition } from 'react'
+import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { QueryProvider } from '@/lib/providers/query-provider'
 import { ThemeToggle } from '@/components/theme-toggle'
@@ -300,9 +300,7 @@ function LayoutContent({
       {/* Main Content */}
       <main className="lg:ml-72 min-h-screen relative">
         <div className="max-w-7xl mx-auto p-4 md:p-10 pb-20">
-          <ViewTransition name="page-content">
-            {children}
-          </ViewTransition>
+          {children}
         </div>
       </main>
 

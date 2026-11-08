@@ -49,6 +49,7 @@ interface Preparation {
   minStock: number
   costPrice: number
   notes: string | null
+  isConsumable?: boolean
   ingredients: Ingredient[]
 }
 
