@@ -14,6 +14,8 @@ export default async function InventarioPage() {
     id: s.id,
     name: s.name,
     categoryId: s.categoryId,
+    isConsumable: s.isConsumable,
+    unitsPerPack: s.unitsPerPack ?? 1,
     category: s.category?.name || null,
     unit: s.unit,
     currentStock: Number(s.currentStock),

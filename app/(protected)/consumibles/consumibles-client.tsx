@@ -12,17 +12,21 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { EmptyState } from '@/components/ui/empty-state'
 
 interface Supply {
+  key: string
+  kind: 'supply' | 'preparation'
   id: string
   name: string
   currentStock: number
   unit: string
-  purchasePrice: number
+  unitCost: number
 }
 
 interface HistoryItem {
   id: string
   supplyName: string
+  unit: string
   quantity: number
+  cost: number
   reason: string
   notes: string | null
   createdAt: string
@@ -63,12 +67,13 @@ export function ConsumiblesClient({ supplies: initialSupplies, history: initialH
     initialData: initialHistory,
   })
 
-  const selectedSupply = (supplies ?? []).find((s: Supply) => s.id === selectedSupplyId)
+  const selectedSupply = (supplies ?? []).find((s: Supply) => s.key === selectedSupplyId)
 
   const registerMutation = useMutation({
     mutationFn: async () => {
       const formData = new FormData()
-      formData.set('supplyId', selectedSupplyId)
+      formData.set('kind', selectedSupply?.kind ?? 'supply')
+      formData.set('itemId', selectedSupply?.id ?? '')
       formData.set('quantity', quantity.toString())
       formData.set('reason', reason)
       if (notes) formData.set('notes', notes)
@@ -112,7 +117,7 @@ export function ConsumiblesClient({ supplies: initialSupplies, history: initialH
         <div>
           <h1 className="text-4xl font-extrabold tracking-tight font-display">Consumibles</h1>
           <p className="text-muted-foreground font-medium mt-1">
-            Registra el uso de vasos, servilletas, bolsas y otros.
+            Registra el uso de vasos, servilletas, bolsas, salsas y aderezos que no se cobran al cliente.
           </p>
         </div>
       </div>
@@ -135,13 +140,13 @@ export function ConsumiblesClient({ supplies: initialSupplies, history: initialH
                     {supplies.length === 0 ? (
                       <div className="p-4 text-center text-muted-foreground text-sm">
                         No hay consumibles registrados.<br />
-                        Crea uno en Insumos con categoría "Consumibles".
+                        Marca un insumo o una preparación como consumible en su campo "Uso".
                       </div>
                     ) : (
                       supplies.map(s => (
-                        <SelectItem key={s.id} value={s.id}>
+                        <SelectItem key={s.key} value={s.key}>
                           <div className="flex justify-between items-center w-full">
-                            <span>{s.name}</span>
+                            <span>{s.name}{s.kind === 'preparation' ? ' · preparación' : ''}</span>
                             <span className="text-xs text-muted-foreground ml-2">({s.currentStock} {s.unit})</span>
                           </div>
                         </SelectItem>
@@ -156,7 +161,7 @@ export function ConsumiblesClient({ supplies: initialSupplies, history: initialH
                 <NumericInput
                   value={quantity}
                   onChange={setQuantity}
-                  min={1}
+                  min={0}
                   max={selectedSupply?.currentStock || 999}
                   className="h-12"
                 />
@@ -205,7 +210,7 @@ export function ConsumiblesClient({ supplies: initialSupplies, history: initialH
 
             <Button
               type="submit"
-              disabled={registerMutation.isPending || !selectedSupplyId || quantity < 1}
+              disabled={registerMutation.isPending || !selectedSupplyId || !(quantity > 0)}
               className="w-full h-12 font-bold rounded-lg"
             >
               <Plus size={20} className="mr-2" />
@@ -244,7 +249,7 @@ export function ConsumiblesClient({ supplies: initialSupplies, history: initialH
                     <div>
                       <p className="text-sm font-bold">{item.supplyName}</p>
                       <p className="text-xs text-muted-foreground">
-                        {item.quantity} unidades • {getReasonLabel(item.reason)}
+                        {item.quantity} {item.unit} • {getReasonLabel(item.reason)}{item.cost > 0 && ` • ${formatCurrency(item.cost)}`}
                         {item.notes && ` • ${item.notes}`}
                       </p>
                     </div>

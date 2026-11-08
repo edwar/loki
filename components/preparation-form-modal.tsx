@@ -25,6 +25,7 @@ interface PreparationData {
   unit: string
   yield: number
   notes: string | null
+  isConsumable?: boolean
 }
 
 interface PreparationFormModalProps {
@@ -41,6 +42,7 @@ export function PreparationFormModal({ preparation, onSuccess, onClose }: Prepar
   const [unit, setUnit] = useState(preparation?.unit ?? 'kg')
   const [yieldAmount, setYieldAmount] = useState(preparation?.yield ?? 1)
   const [notes, setNotes] = useState(preparation?.notes ?? '')
+  const [isConsumable, setIsConsumable] = useState(preparation?.isConsumable ?? false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -54,6 +56,7 @@ export function PreparationFormModal({ preparation, onSuccess, onClose }: Prepar
       formData.set('unit', unit)
       formData.set('yield', String(yieldAmount))
       formData.set('notes', notes)
+      formData.set('isConsumable', String(isConsumable))
 
       if (preparation) {
         await updatePreparation(preparation.id, formData)
@@ -137,6 +140,22 @@ export function PreparationFormModal({ preparation, onSuccess, onClose }: Prepar
             />
             <p className="text-[10px] text-muted-foreground">Cantidad que se obtiene por lote</p>
           </div>
+        </div>
+
+        <div className="space-y-2">
+          <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Uso</label>
+          <Select value={isConsumable ? 'consumable' : 'product'} onValueChange={(v) => setIsConsumable(v === 'consumable')}>
+            <SelectTrigger className="h-11">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="product">Ingrediente de productos</SelectItem>
+              <SelectItem value="consumable">Consumible (no se cobra, ej: salsas y aderezos)</SelectItem>
+            </SelectContent>
+          </Select>
+          {isConsumable && (
+            <p className="text-[10px] text-muted-foreground">Aparecerá en Consumibles para descontarla del stock sin cobrarla al cliente.</p>
+          )}
         </div>
 
         <div className="space-y-2">

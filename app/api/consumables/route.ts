@@ -1,4 +1,4 @@
-import { getAllSuppliesForConsumables, getConsumableUsageHistory } from '@/lib/actions/consumables'
+import { getAllSuppliesForConsumables, getConsumableUsageHistory, formatConsumableHistory } from '@/lib/actions/consumables'
 import { NextResponse } from 'next/server'
 
 export async function GET() {
@@ -7,14 +7,7 @@ export async function GET() {
       getAllSuppliesForConsumables(),
       getConsumableUsageHistory()
     ])
-    const history = historyRaw.map((h: any) => ({
-      id: h.id,
-      supplyName: h.supply?.name || 'Unknown',
-      quantity: h.quantity,
-      reason: h.reason,
-      notes: h.notes,
-      createdAt: h.createdAt.toISOString()
-    }))
+    const history = await formatConsumableHistory(historyRaw)
     return NextResponse.json({ supplies, history })
   } catch (error) {
     console.error('Error fetching consumables:', error)

@@ -66,6 +66,7 @@ model Supply {
   minStock      Decimal   @default(0) @db.Decimal(10, 2)
   purchasePrice  Decimal   @default(0) @db.Decimal(10, 2)
   conversionFactor Decimal? @db.Decimal(10, 4) // ej: 1.3 (g/ml) para convertir ml→g en compras
+  isConsumable  Boolean   @default(false) // true = también se descuenta directamente desde /consumibles
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   deletedAt     DateTime?
@@ -323,12 +324,14 @@ model Preparation {
   minStock      Decimal   @default(0) @db.Decimal(10, 2)
   costPrice     Decimal   @default(0) @db.Decimal(10, 2)
   notes         String?
+  isConsumable  Boolean   @default(false) // true = consumible (salsas, aderezos): no se cobra, se descuenta desde /consumibles
   companyId     String?
   company       Company?  @relation(fields: [companyId], references: [id])
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   deletedAt     DateTime?
 
+  consumableUsages ConsumableUsage[]
   ingredients     PreparationIngredient[]  @relation("preparationIngredients")
   productUsages       ProductRecipeItem[]
   productionLogs      PrepProductionLog[]
@@ -477,14 +480,17 @@ model InvoiceItem {
 
 model ConsumableUsage {
   id        String   @id @default(uuid())
-  supplyId  String
-  quantity  Int
+  supplyId  String?
+  preparationId String?
+  quantity  Decimal  @db.Decimal(10, 2)
+  unitCost  Decimal  @default(0) @db.Decimal(10, 2) // costo unitario al momento del consumo
   reason    String   @default("sale") // sale, damage, loss
   notes     String?
   createdAt DateTime @default(now())
   deletedAt DateTime?
 
-  supply Supply @relation(fields: [supplyId], references: [id])
+  supply      Supply?      @relation(fields: [supplyId], references: [id])
+  preparation Preparation? @relation(fields: [preparationId], references: [id])
 
   @@map("consumable_usages")
 }

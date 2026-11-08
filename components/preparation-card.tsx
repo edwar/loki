@@ -6,8 +6,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { formatCurrency, cn } from '@/lib/utils'
-import { Trash2, Edit2, ChevronDown, Plus, BookOpen, FlaskConical } from 'lucide-react'
+import { Trash2, Edit2, ChevronDown, Plus, BookOpen, FlaskConical, X } from 'lucide-react'
 import { NumericInput } from '@/components/ui/numeric-input'
+import { Modal } from '@/components/ui/modal'
 import { ConfirmationModal } from '@/components/ui/confirmation-modal'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { IngredientSelector } from '@/components/ingredient-selector'
@@ -68,6 +69,7 @@ export function PreparationCard({
   onProduce: () => void
 }) {
   const [isExpanded, setIsExpanded] = useState(false)
+  const [notesOpen, setNotesOpen] = useState(false)
   const [ingredientType, setIngredientType] = useState<'supply' | 'preparation'>('supply')
   const [selectedSupplyId, setSelectedSupplyId] = useState('')
   const [selectedPrepId, setSelectedPrepId] = useState('')
@@ -172,8 +174,10 @@ export function PreparationCard({
             )}
             {preparation.notes && (
               <Button
+                type="button"
                 variant="outline"
                 size="sm"
+                onClick={() => setNotesOpen(true)}
                 className="h-8 text-xs font-bold rounded-lg sm:px-3 px-0 sm:w-auto w-8"
               >
                 <BookOpen size={14} className="sm:mr-1" />
@@ -414,6 +418,26 @@ export function PreparationCard({
           </div>
         </div>
       </ConfirmationModal>
+
+      <Modal isOpen={notesOpen} onClose={() => setNotesOpen(false)} className="max-w-lg">
+        <div className="p-8 flex flex-col">
+          <div className="flex items-center justify-between pb-6 border-b border-border">
+            <div>
+              <h2 className="text-xl font-bold">Notas de Preparación</h2>
+              <p className="text-sm text-muted-foreground mt-1">{preparation.name}</p>
+            </div>
+            <Button type="button" variant="ghost" onClick={() => setNotesOpen(false)} className="w-10 h-10 p-0">
+              <X size={20} />
+            </Button>
+          </div>
+          <div className="py-6 text-sm whitespace-pre-wrap leading-relaxed">{preparation.notes}</div>
+          <div className="flex justify-end pt-4 border-t border-border">
+            <Button type="button" variant="ghost" onClick={() => setNotesOpen(false)}>
+              Cerrar
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </>
   )
 }

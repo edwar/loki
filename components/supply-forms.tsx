@@ -28,6 +28,7 @@ export function SupplyForm({
   const [displayUnit, setDisplayUnit] = useState(supply?.unit ?? 'unidad')
   const [unitsPerPack, setUnitsPerPack] = useState(supply?.unitsPerPack ?? 1)
   const [categoryId, setCategoryId] = useState<string>(supply?.categoryId || '')
+  const [isConsumable, setIsConsumable] = useState<boolean>(supply?.isConsumable ?? false)
   const [conversionFactor, setConversionFactor] = useState(supply?.conversionFactor?.toString() || '')
   const { data: categories = [] } = useQuery<Category[]>({
     queryKey: ['categories', 'supply'],
@@ -50,6 +51,7 @@ export function SupplyForm({
     formData.set('unitsPerPack', showUnitsPerPack ? unitsPerPack.toString() : '1')
     formData.set('categoryId', categoryId || '')
     formData.set('conversionFactor', conversionFactor || '')
+    formData.set('isConsumable', String(isConsumable))
 
     // Convertir precio a la unidad base (ej: precio por litro → precio por ml)
     if (displayUnit !== normalizedUnit) {
@@ -83,6 +85,18 @@ export function SupplyForm({
               {categories.map(cat => (
                 <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
               ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="space-y-2">
+          <label className="text-xs font-bold uppercase tracking-widest text-foreground/60">Uso</label>
+          <Select value={isConsumable ? 'consumable' : 'ingredient'} onValueChange={(v) => setIsConsumable(v === 'consumable')}>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="ingredient">Solo ingrediente de recetas</SelectItem>
+              <SelectItem value="consumable">También consumible (se descuenta en Consumibles)</SelectItem>
             </SelectContent>
           </Select>
         </div>

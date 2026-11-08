@@ -114,6 +114,7 @@ export async function getPreparationsSimple() {
     unit: p.unit,
     costPrice: costMap.get(p.id) || 0,
     currentStock: Number(p.currentStock),
+    isConsumable: p.isConsumable,
   }))
 }
 
@@ -124,6 +125,7 @@ export async function createPreparation(formData: FormData) {
   const unit = formData.get('unit') as string
   const yieldAmount = parseFloat(formData.get('yield') as string) || 1
   const notes = formData.get('notes') as string
+  const isConsumable = formData.get('isConsumable') === 'true'
 
   await prisma.preparation.create({
     data: {
@@ -133,6 +135,7 @@ export async function createPreparation(formData: FormData) {
       yield: yieldAmount,
       companyId,
       notes: notes || null,
+      isConsumable,
     },
   })
 
@@ -145,6 +148,7 @@ export async function updatePreparation(id: string, formData: FormData) {
   const unit = formData.get('unit') as string
   const yieldAmount = parseFloat(formData.get('yield') as string) || 1
   const notes = formData.get('notes') as string
+  const isConsumable = formData.get('isConsumable') === 'true'
 
   await prisma.preparation.update({
     where: { id },
@@ -154,6 +158,7 @@ export async function updatePreparation(id: string, formData: FormData) {
       unit,
       yield: yieldAmount,
       notes: notes || null,
+      isConsumable,
     },
   })
 

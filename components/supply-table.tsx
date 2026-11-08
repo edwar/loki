@@ -14,11 +14,13 @@ export function SupplyTable({
   suppliers,
   onDelete,
   isDeleting,
+  onEdited,
 }: {
   supplies: any[]
   suppliers: any[]
   onDelete?: (id: string) => void
   isDeleting?: boolean
+  onEdited?: () => void
 }) {
   const [editingSupply, setEditingSupply] = useState<any>(null)
   const [deletingSupply, setDeletingSupply] = useState<any>(null)
@@ -122,7 +124,10 @@ export function SupplyTable({
         <div className="p-8">
           <SupplyForm
             supply={editingSupply}
-            onSuccess={() => setEditingSupply(null)}
+            onSuccess={() => {
+              setEditingSupply(null)
+              onEdited?.()
+            }}
           />
         </div>
       </Modal>

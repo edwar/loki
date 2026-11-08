@@ -39,7 +39,7 @@ export function ExpensesChart({ data }: ExpensesChartProps) {
         </CardTitle>
       </CardHeader>
       <CardContent className="px-2 pt-4">
-        <div className="h-[300px] w-full">
+        <div className="h-[300px] w-full min-w-0">
           {!hasData ? (
             <EmptyState
               icon={Receipt}
@@ -53,7 +53,7 @@ export function ExpensesChart({ data }: ExpensesChartProps) {
               compact
             />
           ) : (
-            <ResponsiveContainer width="100%" height="100%">
+            <ResponsiveContainer width="100%" height="100%" minWidth={0} initialDimension={{ width: 320, height: 300 }}>
               <PieChart>
                 <Pie
                   data={data}

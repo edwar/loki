@@ -20,6 +20,8 @@ export async function createSupply(formData: FormData) {
   const minStock = parseFloat(formData.get('minStock') as string) || 0
   const purchasePrice = parseFloat(formData.get('purchasePrice') as string) || 0
   const conversionFactor = formData.get('conversionFactor') as string | null
+  const isConsumable = formData.get('isConsumable') === 'true'
+  const unitsPerPack = parseInt(formData.get('unitsPerPack') as string) || 1
 
   await prisma.supply.create({
     data: {
@@ -31,6 +33,8 @@ export async function createSupply(formData: FormData) {
       minStock,
       purchasePrice,
       conversionFactor: conversionFactor ? parseFloat(conversionFactor) : null,
+      isConsumable,
+      unitsPerPack,
     },
   })
 
@@ -42,10 +46,11 @@ export async function updateSupply(id: string, formData: FormData) {
   const sku = formData.get('sku') as string | null
   const categoryId = formData.get('categoryId') as string | null
   const unit = formData.get('unit') as string
-  const currentStock = parseFloat(formData.get('currentStock') as string) || 0
   const minStock = parseFloat(formData.get('minStock') as string) || 0
   const purchasePrice = parseFloat(formData.get('purchasePrice') as string) || 0
   const conversionFactor = formData.get('conversionFactor') as string | null
+  const isConsumable = formData.get('isConsumable') === 'true'
+  const unitsPerPack = parseInt(formData.get('unitsPerPack') as string) || 1
 
   await prisma.supply.update({
     where: { id },
@@ -54,10 +59,11 @@ export async function updateSupply(id: string, formData: FormData) {
       sku,
       categoryId: categoryId || null,
       unit,
-      currentStock,
       minStock,
       purchasePrice,
       conversionFactor: conversionFactor ? parseFloat(conversionFactor) : null,
+      isConsumable,
+      unitsPerPack,
     },
   })
 
