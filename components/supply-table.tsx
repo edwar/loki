@@ -4,7 +4,8 @@ import { useState } from 'react'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Button } from '@/components/ui/button'
 import { formatCurrency, formatUnitPrice, cn } from '@/lib/utils'
-import { Trash2, Edit2, Package } from 'lucide-react'
+import { Trash2, Edit2, Package, Scale } from 'lucide-react'
+import { SupplyPriceComparison } from './supply-price-comparison'
 import { Modal } from '@/components/ui/modal'
 import { SupplyForm } from './supply-forms'
 import { ConfirmationModal } from './ui/confirmation-modal'
@@ -24,6 +25,7 @@ export function SupplyTable({
 }) {
   const [editingSupply, setEditingSupply] = useState<any>(null)
   const [deletingSupply, setDeletingSupply] = useState<any>(null)
+  const [comparingSupply, setComparingSupply] = useState<any>(null)
 
   return (
     <>
@@ -35,7 +37,7 @@ export function SupplyTable({
             <TableHead className="font-semibold uppercase text-[10px] tracking-widest text-muted-foreground">Stock</TableHead>
             <TableHead className="font-semibold uppercase text-[10px] tracking-widest text-muted-foreground">Precio</TableHead>
             <TableHead className="font-semibold uppercase text-[10px] tracking-widest text-muted-foreground">Valor Total</TableHead>
-            <TableHead className="font-semibold uppercase text-[10px] tracking-widest text-muted-foreground text-right sticky right-0 bg-card z-20 shadow-[-8px_0_8px_-8px_rgba(0,0,0,0.1)] border-l border-border/10 w-28 pr-4">Acciones</TableHead>
+            <TableHead className="font-semibold uppercase text-[10px] tracking-widest text-muted-foreground text-right sticky right-0 bg-card z-20 shadow-[-8px_0_8px_-8px_rgba(0,0,0,0.1)] border-l border-border/10 w-40 pr-4">Acciones</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -88,8 +90,18 @@ export function SupplyTable({
                   <TableCell className="font-bold text-primary">
                     {formatCurrency(Number(supply.currentStock) * Number(supply.purchasePrice))}
                   </TableCell>
-                  <TableCell className="sticky right-0 bg-card z-10 shadow-[-8px_0_8px_-8px_rgba(0,0,0,0.1)] border-l border-border/10 w-28 pr-4">
+                  <TableCell className="sticky right-0 bg-card z-10 shadow-[-8px_0_8px_-8px_rgba(0,0,0,0.1)] border-l border-border/10 w-40 pr-4">
                     <div className="flex justify-end gap-2">
+                      <Button
+                        onClick={() => setComparingSupply(supply)}
+                        variant="ghost"
+                        size="sm"
+                        title="Comparar precios por proveedor"
+                        className="h-10 w-10 p-0 rounded-lg hover:bg-primary/10 hover:text-primary transition-colors group"
+                      >
+                        <Scale className='w-4 h-4 group-hover:text-primary' />
+                      </Button>
+
                       <Button
                         onClick={() => setEditingSupply(supply)}
                         variant="ghost"
@@ -129,6 +141,17 @@ export function SupplyTable({
               onEdited?.()
             }}
           />
+        </div>
+      </Modal>
+      <Modal isOpen={!!comparingSupply} onClose={() => setComparingSupply(null)} className="max-w-3xl">
+        <div className="p-8">
+          {comparingSupply && (
+            <SupplyPriceComparison
+              supplyId={comparingSupply.id}
+              supplyName={comparingSupply.name}
+              onClose={() => setComparingSupply(null)}
+            />
+          )}
         </div>
       </Modal>
       {/* Delete Confirmation Modal */}

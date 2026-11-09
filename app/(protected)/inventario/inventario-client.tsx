@@ -3,7 +3,8 @@
 import { useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { formatCurrency, cn } from '@/lib/utils'
-import { Package, TrendingUp, AlertCircle, Plus, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Package, TrendingUp, AlertCircle, Plus, ChevronLeft, ChevronRight, Search, X } from 'lucide-react'
+import { Input } from '@/components/ui/input'
 import { SupplyTable } from '@/components/supply-table'
 import { ExportButton } from '@/components/ui/export-button'
 import { formatDate } from '@/lib/utils'
@@ -45,6 +46,7 @@ export function InventarioClient({ supplies: initialSupplies, suppliers }: Inven
   const [categoryModalOpen, setCategoryModalOpen] = useState(false)
   const [supplyDraft, setSupplyDraft] = useState<SupplyDraft | null>(null)
   const [currentPage, setCurrentPage] = useState(1)
+  const [search, setSearch] = useState('')
   const [itemsPerPage, setItemsPerPage] = useState(5)
 
   const { data: supplies } = useQuery({
@@ -81,9 +83,16 @@ export function InventarioClient({ supplies: initialSupplies, suppliers }: Inven
   const totalValue = safeSupplies.reduce((sum: number, s: any) => sum + s.currentStock * s.purchasePrice, 0)
   const lowStockCount = safeSupplies.filter((s: any) => s.currentStock < s.minStock).length
 
-  const totalPages = Math.ceil(safeSupplies.length / itemsPerPage)
+  // Búsqueda sin distinguir mayúsculas ni tildes, por nombre o categoría
+  const normalize = (v: string) => v.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim()
+  const query = normalize(search)
+  const filteredSupplies = query
+    ? safeSupplies.filter((s: any) => normalize(`${s.name} ${s.category ?? ''}`).includes(query))
+    : safeSupplies
+
+  const totalPages = Math.ceil(filteredSupplies.length / itemsPerPage)
   const startIndex = (currentPage - 1) * itemsPerPage
-  const paginatedSupplies = safeSupplies.slice(startIndex, startIndex + itemsPerPage)
+  const paginatedSupplies = filteredSupplies.slice(startIndex, startIndex + itemsPerPage)
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page)
@@ -222,7 +231,36 @@ export function InventarioClient({ supplies: initialSupplies, suppliers }: Inven
       {/* Table */}
       <Card className="rounded-lg border-border/40 bg-card/30 backdrop-blur-md overflow-hidden p-0">
         <CardHeader className="px-8 py-6 border-b border-border/30 bg-primary/5">
-          <CardTitle className="text-xl">Detalle de Existencias</CardTitle>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <CardTitle className="text-xl">Detalle de Existencias</CardTitle>
+            <div className="relative w-full sm:w-72">
+              <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+              <Input
+                value={search}
+                onChange={(e) => {
+                  setSearch(e.target.value)
+                  setCurrentPage(1)
+                }}
+                placeholder="Buscar insumo..."
+                className="h-10 pl-9 pr-10"
+              />
+              {search && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  aria-label="Limpiar búsqueda"
+                  onClick={() => {
+                    setSearch('')
+                    setCurrentPage(1)
+                  }}
+                  className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 p-0"
+                >
+                  <X size={16} />
+                </Button>
+              )}
+            </div>
+          </div>
         </CardHeader>
         <CardContent className="p-0 [&>div]:border-0 [&>div]:shadow-none [&>div]:rounded-none [&>div]:bg-transparent">
           <SupplyTable
@@ -249,7 +287,7 @@ export function InventarioClient({ supplies: initialSupplies, suppliers }: Inven
               </SelectContent>
             </Select>
             <span className="text-muted-foreground font-medium ml-2">
-              de {safeSupplies.length} insumos
+              de {filteredSupplies.length} insumos
             </span>
           </div>
 
