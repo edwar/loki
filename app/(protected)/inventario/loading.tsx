@@ -27,8 +27,9 @@ export default function Loading() {
       </div>
 
       <div className="rounded-xl border border-border/50 bg-card/30 backdrop-blur-sm shadow-sm overflow-hidden">
-        <div className="px-8 py-6 border-b border-border/30">
+        <div className="px-8 py-6 border-b border-border/30 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <Skeleton className="h-6 w-48" />
+          <Skeleton className="h-10 w-full sm:w-72" />
         </div>
         <div className="overflow-x-auto">
           <table className="w-full border-separate border-spacing-0 text-sm">
